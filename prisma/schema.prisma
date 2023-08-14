@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  username        String           @unique
+  email           String           @unique
+  password        String
+  role            Role             @default(ADMIN)
+  profile_info    String?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  Enrollments     Enrollment[]
+  Submissions     Submission[]
+  QuizAttempts    QuizAttempt[]
+  DiscussionPosts DiscussionPost[]
+}
+
+model Course {
+  id            Int            @id @default(autoincrement())
+  title         String         @unique
+  description   String?
+  instructor_id Int
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  CourseModules CourseModule[]
+  Enrollments   Enrollment[]
+  Assignments   Assignment[]
+  Quizzes       Quiz[]
+  Discussions   Discussion[]
+}
+
+model CourseModule {
+  id        Int     @id @default(autoincrement())
+  title     String  @unique
+  content   String?
+  order     Int
+  course    Course  @relation(fields: [course_id], references: [id])
+  course_id Int
+}
+
+model Enrollment {
+  id          Int      @id @default(autoincrement())
+  enrolled_at DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id])
+  course      Course   @relation(fields: [course_id], references: [id])
+  user_id     Int
+  course_id   Int
+}
+
+model Assignment {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  due_date    DateTime
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  course      Course       @relation(fields: [course_id], references: [id])
+  course_id   Int
+  Submissions Submission[]
+}
+
+model Submission {
+  id            Int        @id @default(autoincrement())
+  submission    String?
+  submitted_at  DateTime
+  created_at    DateTime   @updatedAt
+  updated_at    DateTime   @default(now())
+  assignment    Assignment @relation(fields: [assignment_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id])
+  assignment_id Int
+  user_id       Int
+}
+
+model Quiz {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String?
+  due_date      DateTime
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  course        Course         @relation(fields: [course_id], references: [id])
+  course_id     Int
+  QuizQuestions QuizQuestion[]
+  QuizAttempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id            Int          @id @default(autoincrement())
+  question_text String
+  question_type QuestionType @default(CHECKBOXES)
+  quiz          Quiz         @relation(fields: [quiz_id], references: [id])
+  quiz_id       Int
+  QuizOptions   QuizOption[]
+}
+
+model QuizOption {
+  id          Int          @id @default(autoincrement())
+  option_text String
+  is_correct  Boolean
+  question    QuizQuestion @relation(fields: [question_id], references: [id])
+  question_id Int
+}
+
+model QuizAttempt {
+  id              Int      @id @default(autoincrement())
+  submission_time DateTime
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  score           Float
+  quiz            Quiz     @relation(fields: [quiz_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id])
+  quiz_id         Int
+  user_id         Int
+}
+
+model Discussion {
+  id              Int              @id @default(autoincrement())
+  title           String
+  description     String?
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  course          Course           @relation(fields: [course_id], references: [id])
+  course_id       Int
+  DiscussionPosts DiscussionPost[]
+}
+
+model DiscussionPost {
+  id            Int        @id @default(autoincrement())
+  post_text     String
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  discussion    Discussion @relation(fields: [discussion_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id])
+  discussion_id Int
+  user_id       Int
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum QuestionType {
+  CHECKBOXES
+  RADIO
+}
