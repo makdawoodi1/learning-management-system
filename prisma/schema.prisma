@@ -11,32 +11,32 @@ datasource db {
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  username        String           @unique
-  email           String           @unique
-  password        String
-  role            Role             @default(ADMIN)
-  profile_info    String?
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
-  Enrollments     Enrollment[]
-  Submissions     Submission[]
-  QuizAttempts    QuizAttempt[]
-  DiscussionPosts DiscussionPost[]
+  id               Int              @id @default(autoincrement())
+  username         String           @unique
+  email            String           @unique
+  password         String
+  role             Role             @default(ADMIN)
+  profile_info     String?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  enrollments      Enrollment[]
+  submissions      Submission[]
+  quiz_attempts    QuizAttempt[]
+  discussion_posts DiscussionPost[]
 }
 
 model Course {
-  id            Int            @id @default(autoincrement())
-  title         String         @unique
-  description   String?
-  instructor_id Int
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  CourseModules CourseModule[]
-  Enrollments   Enrollment[]
-  Assignments   Assignment[]
-  Quizzes       Quiz[]
-  Discussions   Discussion[]
+  id             Int            @id @default(autoincrement())
+  title          String         @unique
+  description    String?
+  instructor_id  Int
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  course_modules CourseModule[]
+  enrollments    Enrollment[]
+  assignments    Assignment[]
+  quizzes        Quiz[]
+  discussions    Discussion[]
 }
 
 model CourseModule {
@@ -66,7 +66,7 @@ model Assignment {
   updated_at  DateTime     @updatedAt
   course      Course       @relation(fields: [course_id], references: [id])
   course_id   Int
-  Submissions Submission[]
+  submissions Submission[]
 }
 
 model Submission {
@@ -82,16 +82,16 @@ model Submission {
 }
 
 model Quiz {
-  id            Int            @id @default(autoincrement())
-  title         String
-  description   String?
-  due_date      DateTime
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  course        Course         @relation(fields: [course_id], references: [id])
-  course_id     Int
-  QuizQuestions QuizQuestion[]
-  QuizAttempts  QuizAttempt[]
+  id             Int            @id @default(autoincrement())
+  title          String
+  description    String?
+  due_date       DateTime
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  course         Course         @relation(fields: [course_id], references: [id])
+  course_id      Int
+  quiz_questions QuizQuestion[]
+  quiz_attempts  QuizAttempt[]
 }
 
 model QuizQuestion {
@@ -100,7 +100,7 @@ model QuizQuestion {
   question_type QuestionType @default(CHECKBOXES)
   quiz          Quiz         @relation(fields: [quiz_id], references: [id])
   quiz_id       Int
-  QuizOptions   QuizOption[]
+  quiz_options  QuizOption[]
 }
 
 model QuizOption {
@@ -124,14 +124,14 @@ model QuizAttempt {
 }
 
 model Discussion {
-  id              Int              @id @default(autoincrement())
-  title           String
-  description     String?
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
-  course          Course           @relation(fields: [course_id], references: [id])
-  course_id       Int
-  DiscussionPosts DiscussionPost[]
+  id               Int              @id @default(autoincrement())
+  title            String
+  description      String?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  course           Course           @relation(fields: [course_id], references: [id])
+  course_id        Int
+  discussion_posts DiscussionPost[]
 }
 
 model DiscussionPost {

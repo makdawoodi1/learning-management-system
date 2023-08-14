@@ -6,15 +6,13 @@ import bodyParser from "body-parser";
 import "./passport.js";
 
 // Routes
-import {
-  authRoutes,
-  assignmentRoutes,
-  courseRoutes,
-  discussionRoutes,
-  enrollmentRoutes,
-  quizRoutes,
-  submissionRoutes,
-} from "./routes/index.js";
+import authRoutes from "./routes/authRoutes.js";
+import assignmentRoutes from "./routes/assignmentRoutes.js";
+import courseRoutes from "./routes/courseRoutes.js";
+import discussionRoutes from "./routes/discussionRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
+import submissionRoutes from "./routes/submissionRoutes.js";
 
 dotenv.config();
 
@@ -33,16 +31,18 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use("/api/auth/", authRoutes);
-app.use("/api/courses/", courseRoutes);
-app.use("/api/assignments/", assignmentRoutes);
-app.use("/api/enrollments/", enrollmentRoutes);
-app.use("/api/quizzes/", quizRoutes);
-app.use("/api/discussions/", discussionRoutes);
-app.use("/api/submissions/", submissionRoutes);
-
+app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.listen(port, () => console.log(`Server listening to port ${port}`));
+app.use("/api/auth", authRoutes);
+app.use("/api/courses", courseRoutes);
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
+app.use("/api/quizzes", quizRoutes);
+app.use("/api/discussions", discussionRoutes);
+app.use("/api/submissions", submissionRoutes);
+
+
+app.listen(port, () => console.log(`Server listening to port ${process.env.APP_URL_SERVER}:${port}`));
