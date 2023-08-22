@@ -6,6 +6,7 @@ import {
   updateRouteHandler,
   resetPasswordRouteHandler,
 } from "../controllers/authController.js";
+import { verifyToken } from "../controllers/utils/jwt-config.js";
 
 export const router = express.Router();
 
@@ -28,14 +29,15 @@ router.post("/update-user", async (req, res) => {
   await updateRouteHandler(req, res, username, email, password, role);
 });
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", verifyToken, async (req, res, next) => {
   const { email } = req.body.data.attributes;
   await forgotPasswordRouteHandler(req, res, email);
 });
 
 router.post("/reset-password", async (req, res) => {
   const { email, password, confirm_password } = req.body.data.attributes;
-  await resetPasswordRouteHandler(req, res, email, password, confirm_password);
+  const { token } = req.params
+  await resetPasswordRouteHandler(req, res, token, email, password, confirm_password);
 });
 
 export default router;

@@ -8,6 +8,9 @@ import {
   resetPassordMail,
   registerUserMail,
 } from "../mail/mail.js";
+import Stripe from "stripe";
+import { createStripeCustomer } from "./utils/stripe.js";
+import { createSignToken } from "./utils/jwt-config.js";
 
 dotenv.config();
 
@@ -29,19 +32,18 @@ export const loginRouteHandler = async (req, res, email, password) => {
     //Check If User Exists
     if (user === null) {
       return res.status(400).json({
-        errors: [{ detail: "Credentials don't match any existing users" }],
+        error: "Credentials don't match any existing users",
       });
     } else {
       const validPassword = await bcrypt.compare(password, user.password);
       if (validPassword) {
         // Generate JWT token
-        const token = jwt.sign({ id: user.id, email: user.email }, "token", {
-          expiresIn: "24h",
-        });
+        const token = createSignToken(req, res, user);
 
         return res.json({
+          success: true,
           token_type: "Bearer",
-          expires_in: "24h",
+          expires_in: process.env.SIGN_EXPIRY,
           access_token: token,
           user: {
             id: user.id,
@@ -53,7 +55,7 @@ export const loginRouteHandler = async (req, res, email, password) => {
         });
       } else {
         return res.status(400).json({
-          errors: [{ detail: "Invalid password" }],
+          error: "Invalid Credentials",
         });
       }
     }
@@ -78,7 +80,9 @@ export const registerRouteHandler = async (
 ) => {
   try {
     const prisma = new PrismaClient();
-    let newUser = null;
+    let newUser = null,
+      customer = null;
+
     let user = await prisma.user.findFirst({
       where: {
         OR: [{ email: email }, { username: username }],
@@ -96,7 +100,9 @@ export const registerRouteHandler = async (
     if (!password || password.length < 8) {
       return res
         .status(400)
-        .json({ message: "Password must be at least 8 characters long." });
+        .json({
+          error: { message: "Password must be at least 8 characters long." },
+        });
     }
 
     // hash password to save in db
@@ -124,10 +130,27 @@ export const registerRouteHandler = async (
       });
     }
 
+    // // Creating Stripe Account
+    // const stripe = new Stripe(process.env.STRIPE_KEY);
+
+    // if (user.stripe_customer_id) {
+    //   customer = await stripe.customers.retrieve(user.stripe_customer_id, {
+    //     apiKey: process.env.STRIPE_KEY,
+    //   });
+    // } else
+    //   customer = await createStripeCustomer(
+    //     res,
+    //     firstname,
+    //     lastname,
+    //     email,
+    //     payment_method_id,
+    //     link_token,
+    //     prisma,
+    //     stripe
+    //   );
+
     // Generate JWT token
-    const token = jwt.sign({ id: newUser.id, email: newUser.email }, "token", {
-      expiresIn: "24h",
-    });
+    const token = createSignToken(req, res, newUser);
 
     // send mail with defined transport object
     await registerUserMail(email, newUser.username);
@@ -151,7 +174,6 @@ export const registerRouteHandler = async (
 
 export const updateRouteHandler = async (req, res) => {
   try {
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -165,6 +187,19 @@ export const updateRouteHandler = async (req, res) => {
 
 export const forgotPasswordRouteHandler = async (req, res, email) => {
   try {
+    if (req.token) {
+      jwt.verify(req.token, 'token', (error, authData) => {
+        if (error) {
+          res.status(403).json({
+            success: false,
+            message: "Error Authenticating User",
+            error: error.message,
+          });
+          console.log(error)
+        }
+      })
+    }
+
     const prisma = new PrismaClient();
     let user = await prisma.user.findUnique({
       where: {
@@ -175,23 +210,20 @@ export const forgotPasswordRouteHandler = async (req, res, email) => {
     // check if user does not exist
     if (user === null) {
       return res.status(400).json({
-        errors: { email: ["The email does not match any existing user."] },
+        error: "The email does not match any existing user.",
       });
     } else {
-      const token = crypto
-        .createHash("md5")
-        .update(new Date().toISOString())
-        .digest("hex");
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user.id, email }, "token", { expiresIn: "1h" }
+      );
 
       // send mail with defined transport object
       await forgotPasswordMail(email, user.username, token, email);
 
       return res.status(200).json({
-        data: "forgot-password",
-        attributes: {
-          redirect_url: `${process.env.APP_URL_CLIENT}/auth/reset-password`,
-          email: email,
-        },
+        success: true,
+        message: "An email has been sent to you!",
       });
     }
   } catch (error) {
@@ -208,6 +240,7 @@ export const forgotPasswordRouteHandler = async (req, res, email) => {
 export const resetPasswordRouteHandler = async (
   req,
   res,
+  token,
   email,
   password,
   confirm_password
@@ -222,23 +255,19 @@ export const resetPasswordRouteHandler = async (
 
     if (user === null) {
       return res.status(400).json({
-        errors: { email: ["The email does not match any existing user."] },
+        error: "The email does not match any existing user.",
       });
     } else {
       // validate password
       if (password.length < 8) {
         return res.status(400).json({
-          errors: {
-            password: ["The password should have at lest 8 characters."],
-          },
+          error: "The password should have at lest 8 characters.",
         });
       }
 
       if (password !== confirm_password) {
         return res.status(400).json({
-          errors: {
-            password: ["The password and password confirmation must match."],
-          },
+          error: "The password and password confirmation must match.",
         });
       }
       const salt = await bcrypt.genSalt(10);
@@ -257,11 +286,8 @@ export const resetPasswordRouteHandler = async (
       await resetPassordMail(email);
 
       return res.status(200).json({
-        data: "reset-password",
-        attributes: {
-          redirect_url: `${process.env.APP_URL_CLIENT}/auth/login`,
-          email: email,
-        },
+        success: true,
+        message: "Password is succesfully reset",
       });
     }
   } catch (error) {
