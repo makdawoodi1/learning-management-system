@@ -1,12 +1,25 @@
-import { createReducer } from "@reduxjs/toolkit";
-import types from "./types";
-const { LOGIN_ACTION } = types;
+import { createSlice } from "@reduxjs/toolkit";
+import { loginThunk } from "./Thunk/user";
 
-const rootReducer = createReducer([], (builder) => {
-  builder
-    .addCase(LOGIN_ACTION, (state, action) => {
-      const rootState = state[action.payload.index];
-      rootState.token = action.payload.token
-      rootState.user = action.payload.user
+const userSlice = createSlice({
+  name: 'userSlice',
+  initialState: {
+    loading: false,
+    user: null,
+    token: null
+  },
+  reducers: {
+    processing(state) {
+      if (!state.loading) state.loading = true
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(loginThunk.fulfilled, (state, { payload }) => {
+      state.user = payload.user;
+      state.token = payload.token;
     })
-});
+  }
+})
+
+export const { processing, login } = userSlice.actions;
+export default userSlice.reducer;
