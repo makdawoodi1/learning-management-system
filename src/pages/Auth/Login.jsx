@@ -1,18 +1,45 @@
+// React, Redux & Router imports
 import React, { useState, useEffect } from "react";
-
-import { Button, Checkbox, Form, Input, Alert } from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { useRootDispatch, useRootSelector } from "../../context/store";
+import { authApi } from "../../api/auth/api";
 import { API_URL } from "../../config/config";
+import { authSlice } from "../../features/auth/slice";
+
+// Ant Design & Toaster imports
+import { Button, Checkbox, Form, Input, Alert } from "antd";
 import toast, { Toaster } from 'react-hot-toast';
 
 // Icons
 import { GoogleCircleFilled, GoogleOutlined } from "@ant-design/icons"
 
 const Login = () => {
-  // Hooks
+  // Form State
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [formState, setFormState] = useState({
+    hasValues: false,
+    email: null,
+    password: null,
+    rememberMe: true
+  });
+
+  // Access Token
+  const dispatch = useRootDispatch();
+  const loginResult = authApi.endpoints.login.useQuery(JSON.stringify({ 
+    data: {
+      attributes: { ...values }
+    }
+   }), {
+    skip: !formState.hasValues
+  });
+  const { accss_token: accessToken } = loginResult
+  
+  useEffect(() => {
+    if (!loginResult?.accessToken) return;
+
+    dispatch(authSlice.actions.updateAccessToken(accessToken));
+  }, [dispatch, accessToken]);
 
   // Functions
   const handleSubmit = (values) => {

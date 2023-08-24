@@ -13,6 +13,8 @@
     "@ant-design/icons": "^5.2.5",
     "@reduxjs/toolkit": "^1.9.5",
     "antd": "^5.8.3",
+    "axios": "^1.4.0",
+    "parse-link-header": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
@@ -20,7 +22,8 @@
     "react-router-dom": "^6.15.0",
     "reactstrap": "^9.2.0",
     "redux": "^4.2.1",
-    "redux-thunk": "^2.4.2"
+    "redux-thunk": "^2.4.2",
+    "use-query-params": "^2.2.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
