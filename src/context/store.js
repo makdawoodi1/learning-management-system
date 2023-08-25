@@ -1,7 +1,6 @@
 // Redux Imports
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
-import { combineReducers } from "redux";
 import {
   FLUSH,
   PAUSE,
@@ -16,7 +15,6 @@ import monitorReducersEnhancer from "../enhancers/monitorReducer";
 import loggerMiddleware from "../middlewares/logger";
 
 // Reducers & Slices imports
-import rootReducer from "./reducer";
 import { RESET_STATE_ACTION_TYPE } from "./actions/resetState";
 import { authReducer, authSlice } from "../features/auth/slice";
 
