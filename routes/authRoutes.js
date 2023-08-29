@@ -2,6 +2,8 @@ import express from "express";
 import {
   forgotPasswordRouteHandler,
   loginRouteHandler,
+  logoutRouteHandler,
+  refreshTokenHandler,
   registerRouteHandler,
   updateRouteHandler,
   resetPasswordRouteHandler,
@@ -10,18 +12,32 @@ import { verifyToken } from "../controllers/utils/jwt-config.js";
 
 export const router = express.Router();
 
+router.get("/refresh", async (req, res, next) => {
+  await refreshTokenHandler(req, res);
+});
+
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body.data.attributes;
   await loginRouteHandler(req, res, email, password);
 });
 
-router.post("/logout", (req, res) => {
-  return res.sendStatus(204);
+router.post("/logout", async (req, res) => {
+  await logoutRouteHandler(req, res);
 });
 
 router.post("/register", async (req, res) => {
-  const { username, email, password, role } = req.body.data.attributes;
-  await registerRouteHandler(req, res, username, email, password, role);
+  const { username, email, password, role, firstname, lastname } =
+    req.body.data.attributes;
+  await registerRouteHandler(
+    req,
+    res,
+    username,
+    email,
+    password,
+    role,
+    firstname,
+    lastname
+  );
 });
 
 router.post("/update-user", async (req, res) => {
@@ -36,8 +52,15 @@ router.post("/forgot-password", verifyToken, async (req, res, next) => {
 
 router.post("/reset-password", async (req, res) => {
   const { email, password, confirm_password } = req.body.data.attributes;
-  const { token } = req.params
-  await resetPasswordRouteHandler(req, res, token, email, password, confirm_password);
+  const { token } = req.params;
+  await resetPasswordRouteHandler(
+    req,
+    res,
+    token,
+    email,
+    password,
+    confirm_password
+  );
 });
 
 export default router;
