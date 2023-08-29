@@ -1,86 +1,94 @@
 // React, Redux & Router imports
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useRootDispatch, useRootSelector } from "../../context/store";
-import { authApi } from "../../api/auth/api";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+// import { useRootDispatch, useRootSelector } from "../../context/store";
+// import { authApi } from "../../api/auth/api";
 import { API_URL } from "../../config/config";
-import { authSlice } from "../../features/auth/slice";
+// import { authSlice } from "../../features/auth/slice";
+import useAuth from "@/hooks/useAuth";
+import useToggle from "@/hooks/useToggle";
+import axios from "@/services/axios";
 
 // Ant Design & Toaster imports
-import { Button, Checkbox, Form, Input, Alert } from "antd";
-import toast, { Toaster } from 'react-hot-toast';
+import { Button, Checkbox, Form, Input } from "antd";
+import toast, { Toaster } from "react-hot-toast";
 
 // Icons
-import { GoogleCircleFilled, GoogleOutlined } from "@ant-design/icons"
+import { GoogleCircleFilled, GoogleOutlined } from "@ant-design/icons";
 
 const Login = () => {
   // Form State
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [check, toggleCheck] = useToggle('persist', false);
   const [submitting, setSubmitting] = useState(false);
-  const [formState, setFormState] = useState({
-    hasValues: false,
-    email: null,
-    password: null,
-    rememberMe: true
-  });
-
-  // Access Token
-  const dispatch = useRootDispatch();
-  const loginResult = authApi.endpoints.login.useQuery(JSON.stringify({ 
-    data: {
-      attributes: { ...values }
-    }
-   }), {
-    skip: !formState.hasValues
-  });
-  const { accss_token: accessToken } = loginResult
   
-  useEffect(() => {
-    if (!loginResult?.accessToken) return;
+  const from = location.state?.from?.pathname || "/";
+  
+  // TODO RTK Query
+  // Access Token
+  // const dispatch = useRootDispatch();
+  // const loginResult = authApi.endpoints.login.useQuery(
+  //   JSON.stringify({
+  //     data: {
+  //       attributes: { ...values },
+  //     },
+  //   }),
+  //   {
+  //     skip: !formState.hasValues,
+  //   }
+  // );
+  // const { accss_token: accessToken } = loginResult;
 
-    dispatch(authSlice.actions.updateAccessToken(accessToken));
-  }, [dispatch, accessToken]);
+  // useEffect(() => {
+  //   if (!loginResult?.accessToken) return;
+
+  //   dispatch(authSlice.actions.updateAccessToken(accessToken));
+  // }, [dispatch, accessToken]);
 
   // Functions
   const handleSubmit = (values) => {
     setSubmitting(true);
 
     try {
-      fetch(`${API_URL}/auth/login`, {
-        mode: 'cors',
-        method: "POST",
-        headers: {
-          Authentication: 'Bearer Token',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          data: {
-            attributes: { ...values }
+      axios
+        .post(
+          `${API_URL}/auth/login`,
+          JSON.stringify({
+            data: {
+              attributes: { ...values },
+            },
+          }),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true
           }
-         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            console.log(data);
+        )
+        .then((response) => {
+          if (response.data?.success) {
+            console.log(response.data);
             setSubmitting(false);
-            toast.success('Login Successful');
-            navigate("/dashboard");
+            const accessToken = response.data?.access_token;
+            const role = response.data?.user.role;
+            setAuth({ username: response.data.user.username, role, accessToken });
+            toast.success("Login Successful");
+            navigate(from, { replace: true });
           } else {
             setSubmitting(false);
-            toast.error(data.error);
+            toast.error(response?.data.error);
           }
         })
         .catch((error) => {
           console.error("Error logging in!:", error);
-          toast.error('Error Logging in!')
+          toast.error("Error Logging in!");
         })
         .finally(() => {
           setSubmitting(false);
         });
     } catch (error) {
       console.error(error);
-      toast.error('Unexpected error occured!')
+      toast.error("Unexpected error occured!");
     }
   };
 
@@ -88,27 +96,27 @@ const Login = () => {
     <>
       <div className="container-fluid">
         <Toaster
-            position="top-center"
-            reverseOrder={false}
-            gutter={8}
-            containerClassName="toaster-container"
-            containerStyle={{}}
-            toastOptions={{
-              className: 'text-sm',
-              duration: 5000,
-              style: {
-                background: '#fff',
-                color: '#363636',
+          position="top-center"
+          reverseOrder={false}
+          gutter={8}
+          containerClassName="toaster-container"
+          containerStyle={{}}
+          toastOptions={{
+            className: "text-sm",
+            duration: 5000,
+            style: {
+              background: "#fff",
+              color: "#363636",
+            },
+            success: {
+              duration: 3000,
+              theme: {
+                primary: "green",
+                secondary: "black",
               },
-              success: {
-                duration: 3000,
-                theme: {
-                  primary: 'green',
-                  secondary: 'black',
-                },
-              },
-            }}
-          />
+            },
+          }}
+        />
         <div className="h-screen md:overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-12 ">
             <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
@@ -133,7 +141,7 @@ const Login = () => {
                       onFinish={handleSubmit}
                       className="mt-4 pt-2"
                       initialValues={{
-                        rememberMe: true,
+                        rememberMe: check ? true : false,
                       }}
                     >
                       <div className="my-4">
@@ -178,7 +186,10 @@ const Login = () => {
 
                       <div className="mb-6">
                         <Form.Item name="rememberMe" valuePropName="checked">
-                          <Checkbox className="bg-white checked:bg-violet-300 checked:border-bg-violet-300 focus:outline-none transition duration-200 mt-1 align-top ltr:float-left rtl:float-right ltr:mr-2 rtl:ml-2 cursor-pointer focus:ring-offset-0">
+                          <Checkbox className="bg-white checked:bg-violet-300 checked:border-bg-violet-300 focus:outline-none transition duration-200 mt-1 align-top ltr:float-left rtl:float-right ltr:mr-2 rtl:ml-2 cursor-pointer focus:ring-offset-0"
+                            onChange={toggleCheck}
+                            checked={check}
+                          >
                             Remmber Me
                           </Checkbox>
                         </Form.Item>
@@ -187,10 +198,12 @@ const Login = () => {
                       <div className="mb-3">
                         <Form.Item>
                           <Button
-                            className={`btn border-transparent ${
-                              submitting ? "bg-violet-300" : "bg-violet-500"
-                            } w-full text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                            className={`btn border-transparent bg-violet-500 w-full py-0 text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                            style={{
+                              backgroundColor: 'rgb(139 92 246 / 1)'
+                            }}
                             htmlType="submit"
+                            disabled={submitting}
                           >
                             {submitting ? "Processing..." : "Login"}
                           </Button>
@@ -225,6 +238,9 @@ const Login = () => {
                         <Link
                           to="/register"
                           className="text-violet-500 font-semibold underline cursor-pointer"
+                          style={{
+                            color: 'rgb(139 92 246 / 1)'
+                          }}
                         >
                           Register
                         </Link>
@@ -233,6 +249,9 @@ const Login = () => {
                         <Link
                           to="/forgot-password"
                           className="text-violet-500 font-semibold underline cursor-pointer"
+                          style={{
+                            color: 'rgb(139 92 246 / 1)'
+                          }}
                         >
                           Forgot Password?
                         </Link>

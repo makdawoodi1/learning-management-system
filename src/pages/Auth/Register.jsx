@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, Alert } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
+import axios from "@/services/axios";
 
 // Icons
 import { GoogleOutlined } from "@ant-design/icons";
+import { API_URL } from "../../config/config";
 
 const Register = () => {
   // Hooks
@@ -17,37 +19,33 @@ const Register = () => {
     setSubmitting(true);
 
     try {
-      fetch(`${API_URL}/auth/register`, {
-        mode: "cors",
-        method: "POST",
-        headers: {
-          Authentication: "Bearer Token",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      axios.post(
+      `${API_URL}/auth/register`,
+        JSON.stringify({
           data: {
             attributes: { ...values },
           },
         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            console.log(data);
-            setSubmitting(false);
-            navigate("/dashboard");
-          } else {
-            setSubmitting(false);
-            toast.error(data.error);
-          }
-        })
-        .catch((error) => {
-          console.error("Error logging in!:", error);
-          toast.error("Error Registering user!");
-        })
-        .finally(() => {
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true          
+        }
+      ).then((data) => {
+        if (data.success) {
+          console.log(data);
           setSubmitting(false);
-        });
+          navigate("/dashboard");
+        } else {
+          setSubmitting(false);
+          toast.error(data.error);
+        }
+      }).catch((error) => {
+        console.error("Error logging in!:", error);
+        toast.error("Error Registering user!");
+      })
+      .finally(() => {
+        setSubmitting(false);
+      });
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
@@ -102,11 +100,41 @@ const Register = () => {
                       name="register-form"
                       onFinish={handleSubmit}
                       className="mt-4 pt-2"
-                      initialValues={{
-                        role:
-                          location.pathname === "/register" ? "STUDENT" : null,
-                      }}
                     >
+                      <div className="my-4">
+                        <Form.Item
+                          name="firstname"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please input your Firstname!",
+                            },
+                          ]}
+                        >
+                          <Input
+                            size="large"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            placeholder="Enter Firstname"
+                          />
+                        </Form.Item>
+                      </div>
+                      <div className="my-4">
+                        <Form.Item
+                          name="lastname"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please input your Lastname!",
+                            },
+                          ]}
+                        >
+                          <Input
+                            size="large"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            placeholder="Enter Lastname"
+                          />
+                        </Form.Item>
+                      </div>
                       <div className="my-4">
                         <Form.Item
                           name="username"
@@ -157,7 +185,7 @@ const Register = () => {
                         >
                           <Input.Password
                             size="large"
-                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
                             placeholder="Enter Password"
                           />
                         </Form.Item>
@@ -189,7 +217,7 @@ const Register = () => {
                         >
                           <Input.Password
                             size="large"
-                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
                             placeholder="Confirm Password"
                           />
                         </Form.Item>
@@ -198,7 +226,7 @@ const Register = () => {
                         <div>
                           <p className="text-gray-600 dark:text-zinc-100/60">
                             By registering you agree to the
-                            <a href="#" className="text-violet-500">
+                            <a href="#" className="text-violet-500" style={{ color: 'rgb(139 92 246 / 1)' }}>
                               &nbsp;Terms of Use
                             </a>
                           </p>
@@ -206,10 +234,12 @@ const Register = () => {
                       </div>
                       <div className="mb-3">
                         <Button
-                          className={`btn border-transparent ${
-                            submitting ? "bg-violet-300" : "bg-violet-500"
-                          } w-full text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                          className={`btn border-transparent bg-violet-500 w-full text-white hover:text-white w-100 waves-effect py-0 waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                          style={{
+                            backgroundColor: 'rgb(139 92 246 / 1)'
+                          }}
                           htmlType="submit"
+                          disabled={submitting}
                         >
                           {submitting ? "Processing..." : "Register"}
                         </Button>
@@ -243,6 +273,9 @@ const Register = () => {
                         <Link
                           to="/login"
                           className="text-violet-500 font-semibold underline cursor-pointer"
+                          style={{
+                            color: 'rgb(139 92 246 / 1)'
+                          }}
                         >
                           Login
                         </Link>

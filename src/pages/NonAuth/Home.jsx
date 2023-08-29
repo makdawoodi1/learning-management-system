@@ -9,7 +9,6 @@ import About from '@/containers/section/about.jsx'
 import Achievement from '@/containers/section/achievement.jsx'
 import Banner from '@/containers/section/banner.jsx'
 import Blog from '@/containers/section/blog.jsx'
-import Blog from '@/containers/section/blog.jsx'
 import Category from '@/containers/section/category.jsx'
 import Course from '@/containers/section/course.jsx'
 import Instructor from '@/containers/section/instructor.jsx'
@@ -21,7 +20,7 @@ const Home = () => {
     <div>
       <Header />
       <Banner />
-      <Sponsor />
+      {/* <Sponsor /> */}
       <Category />
       <Course />
       <About />

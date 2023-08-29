@@ -1,51 +1,44 @@
 import React from "react";
-import { Routes, BrowserRouter as Router, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
-// Import Routes
-import { authProtectedRoutes, publicRoutes } from "./routes/";
+// Laupit and Pages
+import Layout from "@/layouts/layout";
+import { pages } from "@/routes";
+import Page404 from "@/pages/Others/Page404";
 
-// layouts
-// import VerticalLayout from "./components/VerticalLayout/";
-// import HorizontalLayout from "./components/HorizontalLayout/";
-import NonAuthLayout from "@/layouts/NonAuth";
+// Services
+import RequireAuth from "@/services/RequireAuth";
+import PersistLogin from "@/services/PersistLogin";
 
-// Import scss
-
-const App = ({ layout }) => {
-  // const getLayout = () => {
-  //   let layoutType = VerticalLayout;
-
-  //   switch (layout.layoutType) {
-  //     case "horizontal":
-  //       layoutType = HorizontalLayout;
-  //       break;
-  //     default:
-  //       layoutType = VerticalLayout;
-  //       break;
-  //   }
-  //   return layoutType;
-  // };
-
-  // const Layout = getLayout();
-
+const App = () => {
   return (
-    <>
-      <Router>
-        <Routes>
-          {publicRoutes.map((route, index) => (
-            <Route
-              key={index}
-              path={route.path}
-              element={
-                <NonAuthLayout location={route.path} children={route.component} >
-                  <route.component />
-                </NonAuthLayout>
-              }
-            />
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        {pages.PublicRoutes.map((page, index) => (
+          <Route
+            key={index}
+            path={page.path}
+            element={page.element}
+            exact={page.exact}
+          />
+        ))}
+
+        <Route element={<PersistLogin />}>
+          {pages.ProtectedRoutes.map((page, index) => (
+            <Route element={<RequireAuth allowedRoles={page.allowedRoles} />}>
+              <Route
+                key={index}
+                path={page.path}
+                element={page.element}
+                exact={page.exact}
+              />
+            </Route>
           ))}
-        </Routes>
-      </Router>
-    </>
+        </Route>
+
+        <Route path="*" element={<Page404 />} />
+      </Route>
+    </Routes>
   );
 };
 
