@@ -1,51 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
+import { Container, Row, Col, Card, CardBody } from "reactstrap";
+
+//Import Breadcrumb
+import Breadcrumbs from "@/components/Common/Breadcrumbs";
+
+//Import Components
+import CurrentMonth from "@/pages/Auth/Widgets/CurrentMonth";
+import Earnings from "@/pages/Auth/Widgets/Earnings";
+import StudentMonth from "@/pages/Auth/Widgets/StudentMonth";
+import TopCourses from "@/pages/Auth/Widgets/TopCourses";
+import TotalLifetime from "@/pages/Auth/Widgets/TotalLifetime";
+import EarningReport from "@/pages/Auth/Widgets/EarningReport";
 
 const Dashboard = () => {
-  return (
-    <div class="main-content ">
-      <div class="page-content dark:bg-zinc-700">
-        <div class="container-fluid px-[0.625rem]"> 
-          {/* Page-Title */}
+  const [breadcrumbItems] = useState([
+    { title: "Home", link: "/" },
+    { title: "Dashboard", link: "/auth/dashboard" },
+  ]);
 
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-            <div class="card dark:bg-zinc-800 dark:border-zinc-600">
-              <div class="card-body">
-                <div>
-                  <div class="grid grid-cols-12 gap-5 items-center">
-                    <div class="col-span-6">
-                      <span class="text-gray-700 dark:text-zinc-100">
-                        My Wallet
-                      </span>
-                      <h4 class="my-4 text-xl text-gray-800 dark:text-gray-100 ">
-                        $
-                        <span class="counter-value" data-target="865.2">
-                          865.2
-                        </span>
-                        k
-                      </h4>
-                    </div>
-                    <div class="col-span-6">
-                      <div
-                        id="mini-chart1"
-                        data-colors='["#5156be"]'
-                        class="apex-charts mb-2"
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-center">
-                  <span class="text-xs py-[1px] px-1 bg-green-50/60 text-green-500 rounded font-medium dark:bg-green-500/30">
-                    + $20.9k
-                  </span>
-                  <span class="ltr:ml-1.5 rtl:mr-1.5 text-gray-700 text-13 dark:text-zinc-100">
-                    Since last week
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  return (
+    <div className="page-content">
+      <Container fluid>
+        <Breadcrumbs title="Dashboard" breadcrumbItems={breadcrumbItems} />
+        <Row>
+          <Col xl={8}>
+            <Row>
+              <Col md={4}>
+                <CurrentMonth />
+              </Col>
+              <Col md={4}>
+                <TotalLifetime />
+              </Col>
+              <Col md={4}>
+                <StudentMonth />
+              </Col>
+            </Row>
+            {/* revenue Analytics */}
+            <Earnings />
+          </Col>
+
+          <Col xl={4}>
+            {/* sales Analytics */}
+            <TopCourses />
+            {/* earning reports */}
+            <EarningReport />
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };

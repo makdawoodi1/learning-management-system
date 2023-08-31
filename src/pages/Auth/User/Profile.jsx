@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useState } from "react";
+
+//Import Breadcrumb
+import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import { Container } from "reactstrap";
 
 const Profile = () => {
-  return (
-    <div>Profile</div>
-  )
-}
+  const [breadcrumbItems] = useState([
+    { title: "Home", link: "/" },
+    { title: "Profile", link: "/auth/profile" },
+  ]);
 
-export default Profile
+  return (
+    <div className="page-content">
+      <Container fluid>
+        <Breadcrumbs title="Profile" breadcrumbItems={breadcrumbItems} />
+      </Container>
+    </div>
+  );
+};
+
+export default Profile;

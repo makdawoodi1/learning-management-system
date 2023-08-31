@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useState } from "react";
+
+//Import Breadcrumb
+import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import { Container } from "reactstrap";
 
 const AccountSettings = () => {
-  return (
-    <div>AccountSettings</div>
-  )
-}
+  const [breadcrumbItems] = useState([
+    { title: "Home", link: "/" },
+    { title: "Settings", link: "/auth/settings" },
+  ]);
 
-export default AccountSettings
+  return (
+    <div className="page-content">
+      <Container fluid>
+        <Breadcrumbs title="Settings" breadcrumbItems={breadcrumbItems} />
+      </Container>
+    </div>
+  );
+};
+
+export default AccountSettings;

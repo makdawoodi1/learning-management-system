@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useState } from "react";
+
+//Import Breadcrumb
+import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import { Container } from "reactstrap";
 
 const InstructorCourses = () => {
-  return (
-    <div>InstructorCourses</div>
-  )
-}
+  const [breadcrumbItems] = useState([
+    { title: "Home", link: "/" },
+    { title: "My Courses", link: "/auth/my-courses" },
+  ]);
 
-export default InstructorCourses
+  return (
+    <div className="page-content">
+      <Container fluid>
+        <Breadcrumbs title="My Courses" breadcrumbItems={breadcrumbItems} />
+      </Container>
+    </div>
+  );
+};
+
+export default InstructorCourses;
