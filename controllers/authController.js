@@ -225,15 +225,17 @@ export const registerRouteHandler = async (
 
     // check if user already exists
     if (user) {
-      return res
-        .status(400)
-        .json({ message: "Email or Username is already in use" });
+      return res.status(400).json({
+        success: false,
+        message: "Email or Username is already in use"
+      });
     }
 
     // check password to exist and be at least 8 characters long
     if (!password || password.length < 8) {
-      return res.status(400).json({
-        error: { message: "Password must be at least 8 characters long." },
+      return res.status(500).json({
+        success: false,
+        message: "Password must be at least 8 characters long."
       });
     }
 
@@ -317,13 +319,13 @@ export const registerRouteHandler = async (
       },
     });
   } catch (error) {
-    res.status(500).json({
+    console.log(error);
+
+    return res.status(500).json({
       success: false,
       message: "Error registering user",
       error: error.message,
     });
-
-    console.log(error);
   }
 };
 
