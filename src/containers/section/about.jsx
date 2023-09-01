@@ -1,7 +1,7 @@
 import React from "react";
 
-const subTitle = "About Our Edukon";
-const title = "Good Qualification Services And Better Skills";
+const subTitle = "How do we work?";
+const title = "Diverse. Inclusive. Inspiring";
 const desc =
   "Distinctively provide acces mutfuncto users whereas transparent proceses somes ncentivize eficient functionalities rather than extensible archtectur communicate leveraged services and cross-platform.";
 
@@ -9,19 +9,19 @@ const aboutList = [
   {
     imgUrl: "/assets/images/about/icon/01.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
-    title: "Skilled Instructors",
+    title: "What is included in my parent coaching?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
   },
   {
     imgUrl: "/assets/images/about/icon/02.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
-    title: "Get Certificate",
+    title: "How to help kids be more self sufficient?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
   },
   {
     imgUrl: "/assets/images/about/icon/03.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
-    title: "Online Classes",
+    title: "How do I sign up?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
   },
 ];
@@ -34,9 +34,11 @@ const About = () => {
           <div className="col">
             <div className="about-right padding-tb">
               <div className="section-header">
-                <span className="subtitle">{subTitle}</span>
-                <h2 className="title">{title}</h2>
-                <p>{desc}</p>
+                <div className="badge-container">
+                  <span className="header-text-md" style={{ fontSize: "1.5rem" }}>{subTitle}</span>
+                </div>
+                <h2 className="header-text" style={{ fontSize: "4rem" }}>{title}</h2>
+                {/* <p>{desc}</p> */}
               </div>
               <div className="section-wrapper">
                 <ul className="lab-ul">

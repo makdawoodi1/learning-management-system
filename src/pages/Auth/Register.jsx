@@ -10,6 +10,7 @@ import { API_URL } from "../../config/config";
 
 const Register = () => {
   // Hooks
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
@@ -30,16 +31,17 @@ const Register = () => {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true          
         }
-      ).then((data) => {
-        if (data.success) {
-          console.log(data);
-          setSubmitting(false);
-          navigate("/dashboard");
+      ).then((response) => {
+        if (response.data?.success) {
+          console.log(response.data);
+          navigate("/auth/dashboard");
         } else {
-          setSubmitting(false);
-          toast.error(data.error);
+          toast.error(response.data?.error);
         }
       }).catch((error) => {
+        if (error.response?.data) {
+          return toast.error(error.response.data?.message)
+        }
         console.error("Error logging in!:", error);
         toast.error("Error Registering user!");
       })
@@ -97,9 +99,11 @@ const Register = () => {
                     </div>
 
                     <Form
+                      form={form}
                       name="register-form"
                       onFinish={handleSubmit}
                       className="mt-4 pt-2"
+                      autoComplete="off"
                     >
                       <div className="my-4">
                         <Form.Item
@@ -239,7 +243,10 @@ const Register = () => {
                             backgroundColor: 'rgb(139 92 246 / 1)'
                           }}
                           htmlType="submit"
-                          disabled={submitting}
+                          disabled={
+                            submitting || 
+                            !form.isFieldsTouched(true) || 
+                            form.getFieldsError().some(({ errors }) => errors.length)}
                         >
                           {submitting ? "Processing..." : "Register"}
                         </Button>

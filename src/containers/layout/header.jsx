@@ -46,7 +46,7 @@ const header = () => {
     >
       <div className={`header-top ${socialToggle ? "open" : ""}`}>
         <div className="container">
-          <div className="header-top-area">
+          {/* <div className="header-top-area">
             <ul className="lab-ul left">
               <li>
                 <i className="icofont-ui-call"></i> <span>{phoneNumber}</span>
@@ -67,7 +67,7 @@ const header = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="header-bottom">
@@ -75,7 +75,7 @@ const header = () => {
           <div className="header-wrapper">
             <div className="logo">
               <Link to="/">
-                <img src="/assets/images/logo/01.png" alt="logo" />
+                <img src="/assets/website-assets/images/logo.png" alt="logo" style={{ height: "120px" }} />
               </Link>
             </div>
             <div className="menu-area">
@@ -151,7 +151,10 @@ const header = () => {
                     </a>
                     <ul className="lab-ul dropdown-menu">
                       <li>
-                        <NavLink to="/profile">Intructor Profile</NavLink>
+                        <NavLink to="/auth/profile">Intructor Profile</NavLink>
+                      </li>
+                      <li>
+                        <NavLink to="/auth/dashboard">Dashbaord</NavLink>
                       </li>
                       <li>
                         <NavLink to="/404">404</NavLink>

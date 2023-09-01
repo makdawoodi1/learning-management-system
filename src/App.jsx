@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 
 // Import scss
 import "/assets/dashboard-assets/scss/theme.scss";
+import "/assets/website-assets/scss/theme.scss";
 
 // Laupit and Pages
 import Layout from "@/layouts/layout";

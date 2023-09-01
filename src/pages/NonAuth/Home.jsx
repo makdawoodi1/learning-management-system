@@ -13,20 +13,21 @@ import Category from '@/containers/section/category.jsx'
 import Course from '@/containers/section/course.jsx'
 import Instructor from '@/containers/section/instructor.jsx'
 import Student from '@/containers/section/student.jsx'
-import Sponsor from '@/containers/section/sponsor.jsx'
+import Benefits from '@/containers/section/benefits.jsx';
 
 const Home = () => {
   return (
     <div>
       <Header />
       <Banner />
+      <Benefits />
       {/* <Sponsor /> */}
-      <Category />
+      {/* <Category /> */}
       <Course />
       <About />
-      <Instructor />
-      <Student />
-      <Blog />
+      {/* <Instructor /> */}
+      {/* <Student /> */}
+      {/* <Blog /> */}
       <Achievement />
       <Footer />
     </div>

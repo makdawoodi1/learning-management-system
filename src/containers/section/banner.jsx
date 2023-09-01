@@ -3,12 +3,11 @@ import React from "react";
 const subTitle = "Online education";
 const title = (
   <h2 className="title">
-    <span className="d-lg-block">Learn The</span> Skills You Need{" "}
-    <span className="d-lg-block">To Succeed</span>
+    <span className="d-lg-block header-text">It Is Easier To Build Strong Children Than To Repair Broken Adults.</span>
   </h2>
 );
 const desc =
-  "Free online courses from the world’s Leading experts. join 18+ million Learners today.";
+  "Edutcating parents with normal growth and development, dealing with behavioural changes and providing parental support.";
 
 const catagoryList = [
   {
@@ -65,9 +64,9 @@ const banner = () => {
           <div className="row align-items-center">
             <div className="col-xxl-5 col-xl-6 col-lg-10">
               <div className="banner-content">
-                <h6 className="subtitle text-uppercase fw-medium">
+                {/* <h6 className="subtitle text-uppercase fw-medium">
                   {subTitle}
-                </h6>
+                </h6> */}
                 {title}
                 <p className="desc">{desc}</p>
                 <form action="/courses">
@@ -77,16 +76,6 @@ const banner = () => {
                   <input type="text" placeholder="Keywords of your course" />
                   <button type="submit">Search Course</button>
                 </form>
-                <div className="banner-catagory d-flex flex-wrap">
-                  <p>Most Popular : </p>
-                  <ul className="lab-ul d-flex flex-wrap">
-                    {catagoryList.map((val, i) => (
-                      <li key={i}>
-                        <a href={val.link}>{val.name}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
               </div>
             </div>
             <div className="col-xxl-7 col-xl-6">

@@ -26,14 +26,6 @@ const achievementList = [
 
 const achieveList = [
   {
-    imgUrl: "/assets/images/achive/01.png",
-    imgAlt: "achive thumb rajibraj91 rajibraj",
-    title: "Start Teaching Today",
-    desc: "Seamlessly engage technically sound coaborative reintermed goal oriented content rather than ethica",
-    btnText: "Become A Instructor",
-    siteLink: "/register",
-  },
-  {
     imgUrl: "/assets/images/achive/02.png",
     imgAlt: "achive thumb rajibraj91 rajibraj",
     title: "If You Join Our Course",
@@ -74,7 +66,7 @@ const Achievement = () => {
             </div>
           </div>
           <div className="achieve-part">
-            <div className="row g-4 row-cols-1 row-cols-lg-2">
+            <div className="row g-4 row-cols-1 row-cols-lg-1">
               {achieveList.map((val, i) => (
                 <div className="col" key={i}>
                   <div className="achieve-item">
