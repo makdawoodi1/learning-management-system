@@ -28,7 +28,7 @@ const PageHeader = () => {
           <div className="col-lg-7 col-12">
             <div className="pageheader-thumb">
               <img
-                src="/assets/images/pageheader/02.jpg"
+                src="/pageheader/02.jpg"
                 alt="rajibraj91"
                 className="w-100"
               />
@@ -52,7 +52,7 @@ const PageHeader = () => {
               <h2 className="phs-title">{title}</h2>
               <p className="phs-desc">{desc}</p>
               <div className="phs-thumb">
-                <img src="/assets/images/pageheader/03.jpg" alt="rajibraj91" />
+                <img src="/pageheader/03.jpg" alt="rajibraj91" />
                 <span>{author}</span>
                 <div className="course-reiew">
                   <Rating />

@@ -80,7 +80,7 @@ const banner = () => {
             </div>
             <div className="col-xxl-7 col-xl-6">
               <div className="banner-thumb">
-                <img src="assets/images/banner/01.png" alt="img" />
+                <img src="/banner/01.png" alt="img" />
               </div>
             </div>
           </div>

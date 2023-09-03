@@ -7,19 +7,19 @@ const desc =
 
 const aboutList = [
   {
-    imgUrl: "/assets/images/about/icon/01.jpg",
+    imgUrl: "/about/icon/01.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
     title: "What is included in my parent coaching?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
   },
   {
-    imgUrl: "/assets/images/about/icon/02.jpg",
+    imgUrl: "/about/icon/02.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
     title: "How to help kids be more self sufficient?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
   },
   {
-    imgUrl: "/assets/images/about/icon/03.jpg",
+    imgUrl: "/about/icon/03.jpg",
     imgAlt: "about icon rajibraj91 rajibraj",
     title: "How do I sign up?",
     desc: "Distinctively provide acces mutfuncto users whereas communicate leveraged services",
@@ -60,7 +60,7 @@ const About = () => {
           <div className="col">
             <div className="about-left">
               <div className="about-thumb">
-                <img src="/assets/images/about/01.png" alt="about" />
+                <img src="/about/01.png" alt="about" />
               </div>
             </div>
           </div>

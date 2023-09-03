@@ -9,28 +9,28 @@ const btnText = "Browse All Categories";
 
 const categoryList = [
   {
-    imgUrl: "/assets/images/category/icon/01.jpg",
+    imgUrl: "/category/01.jpg",
     imgAlt: "category rajibraj91 rajibraj",
     title: "Connecting",
     desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
     count: "24 Course",
   },
   {
-    imgUrl: "/assets/images/category/icon/02.jpg",
+    imgUrl: "/category/02.jpg",
     imgAlt: "category rajibraj91 rajibraj",
     title: "Calrifying",
     desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
     count: "04 Course",
   },
   {
-    imgUrl: "/assets/images/category/icon/03.jpg",
+    imgUrl: "/category/03.jpg",
     imgAlt: "category rajibraj91 rajibraj",
     title: "Listening",
     desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
     count: "27 Course",
   },
   {
-    imgUrl: "/assets/images/category/icon/04.jpg",
+    imgUrl: "/category/04.jpg",
     imgAlt: "category rajibraj91 rajibraj",
     title: "Answering",
     desc: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",

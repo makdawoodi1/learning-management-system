@@ -26,7 +26,7 @@ const achievementList = [
 
 const achieveList = [
   {
-    imgUrl: "/assets/images/achive/02.png",
+    imgUrl: "/achive/02.png",
     imgAlt: "achive thumb rajibraj91 rajibraj",
     title: "If You Join Our Course",
     desc: "Seamlessly engage technically sound coaborative reintermed goal oriented content rather than ethica",

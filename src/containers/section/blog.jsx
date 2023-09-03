@@ -6,7 +6,7 @@ const title = "More Articles From Resource Library";
 
 const blogList = [
   {
-    imgUrl: "/assets/images/blog/01.jpg",
+    imgUrl: "/blog/01.jpg",
     imgAlt: "blog thumb rajibraj91 rajibraj",
     title: "Scottish Creatives To Receive Funded Business.",
     author: "Begrass Tyson",
@@ -16,7 +16,7 @@ const blogList = [
     commentCount: "3",
   },
   {
-    imgUrl: "/assets/images/blog/02.jpg",
+    imgUrl: "/blog/02.jpg",
     imgAlt: "blog thumb rajibraj91 rajibraj",
     title: "Scottish Creatives To Receive Funded Business.",
     author: "Begrass Tyson",
@@ -26,7 +26,7 @@ const blogList = [
     commentCount: "4",
   },
   {
-    imgUrl: "/assets/images/blog/03.jpg",
+    imgUrl: "/blog/03.jpg",
     imgAlt: "blog thumb rajibraj91 rajibraj",
     title: "Scottish Creatives To Receive Funded Business.",
     author: "Begrass Tyson",

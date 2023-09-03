@@ -60,7 +60,7 @@ const BlogSingle = () => {
                         <div className="post-inner">
                           <div className="post-thumb">
                             <img
-                              src="/assets/images/blog/single/01.jpg"
+                              src="/blog/single/01.jpg"
                               alt="blog thumb rajibraj91"
                               className="w-100"
                             />
@@ -132,7 +132,7 @@ const BlogSingle = () => {
                             </p>
 
                             <img
-                              src="/assets/images/blog/single/02.jpg"
+                              src="/blog/single/02.jpg"
                               alt="rajibraj91"
                             />
 
@@ -154,7 +154,7 @@ const BlogSingle = () => {
 
                             <div className="video-thumb">
                               <img
-                                src="/assets/images/blog/single/03.jpg"
+                                src="/blog/single/03.jpg"
                                 alt="video"
                               />
                               <a
@@ -242,9 +242,9 @@ const BlogSingle = () => {
                 <Search />
                 <PostCategory />
                 <PopularPost />
-                <Archive />
-                <Instagram />
-                <Tags />
+                {/* <Archive /> */}
+                {/* <Instagram /> */}
+                {/* <Tags /> */}
               </aside>
             </div>
           </div>

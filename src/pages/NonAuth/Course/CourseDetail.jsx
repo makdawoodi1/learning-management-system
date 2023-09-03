@@ -89,7 +89,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -186,7 +186,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -200,7 +200,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -214,7 +214,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -229,7 +229,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -243,7 +243,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >

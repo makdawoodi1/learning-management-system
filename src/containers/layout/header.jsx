@@ -75,7 +75,7 @@ const header = () => {
           <div className="header-wrapper">
             <div className="logo">
               <Link to="/">
-                <img src="/assets/website-assets/images/logo.png" alt="logo" style={{ height: "120px" }} />
+                <img src="/logo.png" alt="logo" style={{ height: "120px" }} />
               </Link>
             </div>
             <div className="menu-area">

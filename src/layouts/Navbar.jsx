@@ -23,7 +23,7 @@ import ProfileMenu from "@/components/common/ProfileMenu";
 // import logodark from "/assets/dashboard-assets/images/logo-dark.png";
 // import logosmlight from "/assets/dashboard-assets/images/logo-sm-light.png";
 // import logolight from "/assets/dashboard-assets/images/logo-light.png";
-import logo from "/assets/dashboard-assets/images/logo.png";
+import logo from "/logo.png";
 
 
 //Import Social Profile Images

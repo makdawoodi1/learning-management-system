@@ -11,7 +11,7 @@ const title = "Pick A Course To Get Started";
 
 const courseList = [
   {
-    imgUrl: "/assets/images/course/01.jpg",
+    imgUrl: "/course/01.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -19,13 +19,13 @@ const courseList = [
     title: "Centers for disease control & prevention",
     totalLeson: "30x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/01.jpg",
+    authorImgUrl: "/course/author/01.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
   },
   {
-    imgUrl: "/assets/images/course/02.jpg",
+    imgUrl: "/course/02.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -33,13 +33,13 @@ const courseList = [
     title: "HIGH-RISK NEWBORNS NEONATE (PART 1)",
     totalLeson: "25x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/02.jpg",
+    authorImgUrl: "/course/author/02.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
   },
   {
-    imgUrl: "/assets/images/course/03.jpg",
+    imgUrl: "/course/03.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -47,13 +47,13 @@ const courseList = [
     title: "Childhood Overweight & Obesity Part 2",
     totalLeson: "32x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/03.jpg",
+    authorImgUrl: "/course/author/03.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
   },
   {
-    imgUrl: "/assets/images/course/04.jpg",
+    imgUrl: "/course/04.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -61,13 +61,13 @@ const courseList = [
     title: "Childhood Overweight & Obesity Part 1",
     totalLeson: "16x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/04.jpg",
+    authorImgUrl: "/course/author/04.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
   },
   {
-    imgUrl: "/assets/images/course/05.jpg",
+    imgUrl: "/course/05.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -75,13 +75,13 @@ const courseList = [
     title: "HIGH-RISK NEWBORNS​ (PART 2)",
     totalLeson: "18x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/05.jpg",
+    authorImgUrl: "/course/author/05.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
   },
   {
-    imgUrl: "/assets/images/course/06.jpg",
+    imgUrl: "/course/06.jpg",
     imgAlt: "course rajibraj91 rajibraj",
     price: "$30",
     cate: "Pharmacy",
@@ -89,7 +89,7 @@ const courseList = [
     title: "Leading Health Indicators Healthy People 2030 Part 2",
     totalLeson: "10x Lesson",
     level: "Intermediate",
-    authorImgUrl: "/assets/images/course/author/06.jpg",
+    authorImgUrl: "/course/author/06.jpg",
     authorImgAlt: "course author rajibraj91 rajibraj",
     authorName: "Dr. Adrienne Platt",
     btnText: "Go to Course",
@@ -130,7 +130,7 @@ const Course = () => {
                             </span>
                           </div>
                         </div>
-                        <Link to="/course-single">
+                        <Link to="/course/1">
                           <h4>{val.title}</h4>
                         </Link>
                         <div className="course-details">

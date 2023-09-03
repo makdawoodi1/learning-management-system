@@ -35,7 +35,7 @@ const Author = () => {
   return (
     <div className="authors">
       <div className="author-thumb">
-        <img src="/assets/images/author/01.jpg" alt="rajibraj91" />
+        <img src="/author/01.jpg" alt="rajibraj91" />
       </div>
       <div className="author-content">
         <h5>{name}</h5>

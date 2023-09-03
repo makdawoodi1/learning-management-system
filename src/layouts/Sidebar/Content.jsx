@@ -26,6 +26,16 @@ const Content = () => {
 
         <li>
           <Link
+            to="/"
+            className="d-flex align-items-center gap-x-4 waves-effect"
+          >
+            <RiDashboardLine size={24} />
+            <span className="ms-1 nav-text">Home</span>
+          </Link>
+        </li>
+
+        <li>
+          <Link
             to="/auth/dashboard"
             className="d-flex align-items-center gap-x-4 waves-effect"
           >
@@ -117,15 +127,47 @@ const Content = () => {
 
         <li>
           <Link
-            to="#"
+            to="/login"
             className="d-flex align-items-center gap-x-4 waves-effect"
           >
             <RiPencilRuler2Line size={24} />
-            <button className="ms-1 nav-text" onClick={logout}>
-              Logout
+            <span className="ms-1 nav-text">Login</span>
+          </Link>
+        </li>
+
+        <li>
+          <Link
+            to="/register"
+            className="d-flex align-items-center gap-x-4 waves-effect"
+          >
+            <RiPencilRuler2Line size={24} />
+            <span className="ms-1 nav-text">Register</span>
+          </Link>
+        </li>
+
+        {/* <li>
+          <Link
+            to="/login"
+            className="d-flex align-items-center gap-x-4 waves-effect"
+          >
+            <RiPencilRuler2Line size={24} />
+            <button className="ms-1 nav-text">
+              Sign in
             </button>
           </Link>
         </li>
+
+        <li>
+          <Link
+            to="/register"
+            className="d-flex align-items-center gap-x-4 waves-effect"
+          >
+            <RiPencilRuler2Line size={24} />
+            <button className="ms-1 nav-text">
+              Register
+            </button>
+          </Link>
+        </li> */}
       </ul>
     </div>
   );

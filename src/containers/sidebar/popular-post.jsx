@@ -4,25 +4,25 @@ const title = "Most Popular Post";
 
 const postList = [
   {
-    imgUrl: "/assets/images/blog/01.jpg",
+    imgUrl: "/blog/01.jpg",
     imgAlt: "rajibraj91",
     title: "Poor People’s Campaign Our Resources",
     date: "Jun 05,2022",
   },
   {
-    imgUrl: "/assets/images/blog/02.jpg",
+    imgUrl: "/blog/02.jpg",
     imgAlt: "rajibraj91",
     title: "Poor People’s Campaign Our Resources",
     date: "Jun 05,2022",
   },
   {
-    imgUrl: "/assets/images/blog/03.jpg",
+    imgUrl: "/blog/03.jpg",
     imgAlt: "rajibraj91",
     title: "Poor People’s Campaign Our Resources",
     date: "Jun 05,2022",
   },
   {
-    imgUrl: "/assets/images/blog/04.jpg",
+    imgUrl: "/blog/04.jpg",
     imgAlt: "rajibraj91",
     title: "Poor People’s Campaign Our Resources",
     date: "Jun 05,2022",
