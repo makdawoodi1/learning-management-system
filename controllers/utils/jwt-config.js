@@ -142,6 +142,16 @@ export const createSignToken = (req, res, user) => {
   );
 };
 
+export const createResetPasswordToken = (req, res, user) => {
+  return jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.RESET_PASSWORD_TOKEN,
+    {
+      expiresIn: process.env.RESET_PASSWORD_EXPIRY,
+    }
+  );
+};
+
 export const createRefreshToken = (req, res, user) => {
   return jwt.sign(
     { id: user.id, email: user.email },

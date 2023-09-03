@@ -9,7 +9,13 @@ import {
 } from "../mail/mail.js";
 import Stripe from "stripe";
 import { createStripeCustomer } from "./utils/stripe.js";
-import { createSignToken, createRefreshToken, verifyRefreshToken, evaluateRefreshToken } from "./utils/jwt-config.js";
+import { 
+  createSignToken, 
+  createRefreshToken, 
+  verifyRefreshToken, 
+  evaluateRefreshToken,
+  createResetPasswordToken
+} from "./utils/jwt-config.js";
 
 dotenv.config();
 
@@ -67,7 +73,7 @@ export const loginRouteHandler = async (req, res, email, password) => {
     //Check If User Exists
     if (user === null) {
       return res.status(400).json({
-        error: "Credentials don't match any existing users",
+        message: "Credentials don't match any existing users",
       });
     } else {
       const validPassword = await bcrypt.compare(password, user.password);
@@ -140,7 +146,7 @@ export const loginRouteHandler = async (req, res, email, password) => {
         });
       } else {
         return res.status(400).json({
-          error: "Invalid Credentials",
+          message: "Invalid Credentials",
         });
       }
     }
@@ -161,7 +167,7 @@ export const logoutRouteHandler = async (req, res) => {
     const prisma = new PrismaClient();
 
     const cookies = req.cookies;
-    if (!cookies?.jwt) return res.sendStatus(204);
+    if (!cookies?.jwt ) return res.sendStatus(204);
     const refreshToken = cookies.jwt;
 
     // Is refreshToken in db?
@@ -190,11 +196,11 @@ export const logoutRouteHandler = async (req, res) => {
     });
 
     res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-    res.sendStatus(204);
+    return res.sendStatus(204);
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Unexpected error occured",
+      message: "Error logging out user",
       error: error.message,
     });
 
@@ -293,6 +299,19 @@ export const registerRouteHandler = async (
     const token = createSignToken(req, res, newUser);
     const newRefreshToken = createRefreshToken(req, res, newUser);
 
+    // Saving refreshToken with current user
+    await prisma.user.update({
+      where: { email: newUser.email },
+      data: { refreshToken: [newRefreshToken] },
+    });
+
+    // Clears Secure Cookie
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+    });
+
     // Creates Secure Cookie with refresh token
     res.cookie("jwt", newRefreshToken, {
       httpOnly: true,
@@ -344,19 +363,6 @@ export const updateRouteHandler = async (req, res) => {
 
 export const forgotPasswordRouteHandler = async (req, res, email) => {
   try {
-    if (req.token) {
-      jwt.verify(req.token, "token", (error, authData) => {
-        if (error) {
-          res.status(403).json({
-            success: false,
-            message: "Error Authenticating User",
-            error: error.message,
-          });
-          console.log(error);
-        }
-      });
-    }
-
     const prisma = new PrismaClient();
     let user = await prisma.user.findUnique({
       where: {
@@ -364,16 +370,14 @@ export const forgotPasswordRouteHandler = async (req, res, email) => {
       },
     });
 
-    // check if user does not exist
+    // check if user already exists
     if (user === null) {
       return res.status(400).json({
-        error: "The email does not match any existing user.",
+        message: "The email does not match any existing user.",
       });
     } else {
       // Generate JWT token
-      const token = jwt.sign({ id: user.id, email }, "token", {
-        expiresIn: "1h",
-      });
+      const token = createResetPasswordToken(req, res, user);
 
       // send mail with defined transport object
       await forgotPasswordMail(email, user.username, token, email);

@@ -34,6 +34,9 @@ const corsOptions = {
   credentials: true,
 };
 
+// Serve static files (images and CSS)
+app.use(express.static('public'));
+
 // Session and Passport
 app.use(session({
   store: new PGSession({

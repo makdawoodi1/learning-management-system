@@ -45,7 +45,7 @@ router.post("/update-user", async (req, res) => {
   await updateRouteHandler(req, res, username, email, password, role);
 });
 
-router.post("/forgot-password", verifyToken, async (req, res, next) => {
+router.post("/forgot-password", async (req, res, next) => {
   const { email } = req.body.data.attributes;
   await forgotPasswordRouteHandler(req, res, email);
 });
