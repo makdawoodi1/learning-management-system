@@ -4,8 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // import { Provider } from "react-redux";
 // import configureAppStore from "./context/store.js";
-import { PersistGate } from "redux-persist/integration/react";
-import { persistStore } from "redux-persist";
+// import { PersistGate } from "redux-persist/integration/react";
+// import { persistStore } from "redux-persist";
 import { AuthProvider } from "./context/context.jsx";
 
 import App from "./App.jsx";

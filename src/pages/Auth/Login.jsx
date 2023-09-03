@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 // import { useRootDispatch, useRootSelector } from "../../context/store";
 // import { authApi } from "../../api/auth/api";
-import { API_URL } from "../../config/config";
+import { API_URL } from "@/config/config";
 // import { authSlice } from "../../features/auth/slice";
 import useAuth from "@/hooks/useAuth";
 import useToggle from "@/hooks/useToggle";
@@ -14,18 +14,18 @@ import { Button, Checkbox, Form, Input } from "antd";
 import toast, { Toaster } from "react-hot-toast";
 
 // Icons
-import { GoogleCircleFilled, GoogleOutlined } from "@ant-design/icons";
+import { GithubOutlined, GoogleCircleFilled, GoogleOutlined, LinkedinOutlined } from "@ant-design/icons";
 
 const Login = () => {
   // Form State
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [check, toggleCheck] = useToggle('persist', false);
+  const [check, toggleCheck] = useToggle("persist", false);
   const [submitting, setSubmitting] = useState(false);
-  
+
   const from = location.state?.from?.pathname || "/";
-  
+
   // TODO RTK Query
   // Access Token
   // const dispatch = useRootDispatch();
@@ -61,27 +61,32 @@ const Login = () => {
             },
           }),
           {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
           }
         )
         .then((response) => {
           if (response.data?.success) {
             console.log(response.data);
-            setSubmitting(false);
             const accessToken = response.data?.access_token;
             const role = response.data?.user.role;
-            setAuth({ username: response.data.user.username, role, accessToken });
+            setAuth({
+              username: response.data.user.username,
+              role,
+              accessToken,
+            });
             toast.success("Login Successful");
             navigate(from, { replace: true });
           } else {
-            setSubmitting(false);
-            toast.error(response?.data.error);
+            toast.error(response?.data.message);
           }
         })
         .catch((error) => {
-          console.error("Error logging in!:", error);
-          toast.error("Error Logging in!");
+          if (error.response?.data?.message) {
+            return toast.error(error.response.data?.message);
+          }
+          console.error("Error logging in!:", error.message);
+          toast.error(error.message);
         })
         .finally(() => {
           setSubmitting(false);
@@ -120,7 +125,7 @@ const Login = () => {
         <div className="h-screen md:overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-12 ">
             <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
-              <div className="w-full bg-white xl:p-12 p-10 dark:bg-zinc-800">
+              <div className="w-full bg-white xl:p-12 p-10 ">
                 <div className="flex h-[90vh] flex-col">
                   <div className="mx-auto">
                     <a className=""></a>
@@ -128,12 +133,8 @@ const Login = () => {
 
                   <div className="my-auto">
                     <div className="text-center">
-                      <h3 className="text-2xl text-gray-600 dark:text-gray-100">
-                        Welcome Back!
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-100/60 mt-1">
-                        Sign in to continue.
-                      </p>
+                      <h3 className="text-2xl text-gray-600 ">Welcome Back!</h3>
+                      <p className="text-gray-500 ">Sign in to continue.</p>
                     </div>
 
                     <Form
@@ -160,7 +161,7 @@ const Login = () => {
                         >
                           <Input
                             size="large"
-                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Email"
                           />
                         </Form.Item>
@@ -178,29 +179,30 @@ const Login = () => {
                         >
                           <Input.Password
                             size="large"
-                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Password"
                           />
                         </Form.Item>
                       </div>
 
-                      <div className="mb-6">
+                      {/* <div className="mb-6">
                         <Form.Item name="rememberMe" valuePropName="checked">
-                          <Checkbox className="bg-white checked:bg-violet-300 checked:border-bg-violet-300 focus:outline-none transition duration-200 mt-1 align-top ltr:float-left rtl:float-right ltr:mr-2 rtl:ml-2 cursor-pointer focus:ring-offset-0"
+                          <Checkbox
+                            className="bg-white checked:bg-violet-300 checked:border-bg-violet-300 focus:outline-none transition duration-200 mt-1 align-top ltr:float-left rtl:float-right ltr:mr-2 rtl:ml-2 cursor-pointer focus:ring-offset-0"
                             onChange={toggleCheck}
                             checked={check}
                           >
                             Remmber Me
                           </Checkbox>
                         </Form.Item>
-                      </div>
+                      </div> */}
 
                       <div className="mb-3">
                         <Form.Item>
                           <Button
-                            className={`btn border-transparent bg-violet-500 w-full py-0 text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                            className={`btn border-transparent bg-violet-500 w-full py-0 text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 `}
                             style={{
-                              backgroundColor: 'rgb(139 92 246 / 1)'
+                              backgroundColor: "rgb(139 92 246 / 1)",
                             }}
                             htmlType="submit"
                             disabled={submitting}
@@ -214,7 +216,7 @@ const Login = () => {
                     <div className="mt-4 pt-2 text-center">
                       <div>
                         <hr />
-                        <h6 className="text-14 my-3 text-gray-500 dark:text-gray-100 font-medium">
+                        <h6 className="text-14 my-3 text-gray-500 font-medium">
                           Sign in with
                         </h6>
                       </div>
@@ -224,33 +226,33 @@ const Login = () => {
                           <GoogleOutlined className="text-white text-xl" />
                         </a>
                         <a className="h-9 w-9 py-0 bg-sky-500 rounded-full cursor-pointer flex justify-center">
-                          <GoogleOutlined className="text-white text-xl" />
+                          <LinkedinOutlined className="text-white text-xl" />
                         </a>
                         <a className="h-9 w-9 py-0 bg-red-400 rounded-full cursor-pointer flex justify-center">
-                          <GoogleOutlined className="text-white text-xl" />
+                          <GithubOutlined className="text-white text-xl" />
                         </a>
                       </div>
                     </div>
 
                     <div className="mt-12 text-center">
-                      <p className="text-gray-500 dark:text-gray-100">
+                      <p className="text-gray-500 ">
                         Don't have an account?&nbsp;
                         <Link
                           to="/register"
                           className="text-violet-500 font-semibold underline cursor-pointer"
                           style={{
-                            color: 'rgb(139 92 246 / 1)'
+                            color: "rgb(139 92 246 / 1)",
                           }}
                         >
                           Register
                         </Link>
                       </p>
-                      <p className="text-gray-500 dark:text-gray-100">
+                      <p className="text-gray-500 ">
                         <Link
                           to="/forgot-password"
                           className="text-violet-500 font-semibold underline cursor-pointer"
                           style={{
-                            color: 'rgb(139 92 246 / 1)'
+                            color: "rgb(139 92 246 / 1)",
                           }}
                         >
                           Forgot Password?

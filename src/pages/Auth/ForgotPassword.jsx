@@ -31,23 +31,24 @@ const ForgetPassword = () => {
           if (response.data?.success) {
             console.log(response.data);
             toast.success("An email has been sent to you!");
-            setSubmitting(false);
           } else {
-            setSubmitting(false);
-            console.error(response.data?.error);
-            toast.error(response.data?.error);
+            console.error(response.data?.message);
+            toast.error(response.data?.message);
           }
         })
         .catch((error) => {
-          console.error("Error logging in!:", error);
-          toast.error("Unexpected error occured");
+          if (error.response?.data?.message) {
+            return toast.error(error.response.data?.message)
+          }
+          console.error("Error sending request!:", error.message);
+          toast.error(error.message);
         })
         .finally(() => {
           setSubmitting(false);
         });
     } catch (error) {
-      toast.error("Unexpected error occured");
       console.error(error);
+      toast.error("Unexpected error occured");
     }
   };
 
@@ -78,11 +79,11 @@ const ForgetPassword = () => {
       <div className="h-screen md:overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-12 ">
           <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
-            <div className="w-full bg-white xl:p-12 p-10 dark:bg-zinc-800">
+            <div className="w-full bg-white xl:p-12 p-10 ">
               <div className="flex h-[90vh] flex-col">
                 <div className="my-auto">
                   <div className="text-center mb-8">
-                    <h3 className="text-2xl text-gray-600 dark:text-gray-100">
+                    <h3 className="text-2xl text-gray-600 ">
                       Forgot Password?
                     </h3>
                   </div>
@@ -114,7 +115,7 @@ const ForgetPassword = () => {
                       >
                         <Input
                           size="large"
-                          className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                          className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                           placeholder="Enter Email"
                         />
                       </Form.Item>
@@ -122,7 +123,7 @@ const ForgetPassword = () => {
 
                     <div className="mb-4">
                       <Button
-                        className={`btn border-transparent w-full text-white py-0 hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                        className={`btn border-transparent w-full text-white py-0 hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 `}
                         style={{
                           backgroundColor: "rgb(139 92 246 / 1)",
                         }}
@@ -134,7 +135,7 @@ const ForgetPassword = () => {
                     </div>
                   </Form>
                   <div className="mt-12 text-center">
-                    <p className="text-gray-500 dark:text-zinc-100">
+                    <p className="text-gray-500 ">
                       Remember It?&nbsp;
                       <Link
                         to="/login"

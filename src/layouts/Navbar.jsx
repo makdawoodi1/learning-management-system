@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Row,
   Col,
@@ -19,10 +19,12 @@ import NotificationDropdown from "@/components/common/NotificationDropdown";
 import ProfileMenu from "@/components/common/ProfileMenu";
 
 //Import logo Images
-import logosmdark from "/assets/dashboard-assets/images/logo-sm-dark.png";
-import logodark from "/assets/dashboard-assets/images/logo-dark.png";
-import logosmlight from "/assets/dashboard-assets/images/logo-sm-light.png";
-import logolight from "/assets/dashboard-assets/images/logo-light.png";
+// import logosmdark from "/assets/dashboard-assets/images/logo-sm-dark.png";
+// import logodark from "/assets/dashboard-assets/images/logo-dark.png";
+// import logosmlight from "/assets/dashboard-assets/images/logo-sm-light.png";
+// import logolight from "/assets/dashboard-assets/images/logo-light.png";
+import logo from "/assets/dashboard-assets/images/logo.png";
+
 
 //Import Social Profile Images
 import github from "/assets/dashboard-assets/images/brands/github.png";
@@ -36,6 +38,7 @@ import slack from "/assets/dashboard-assets/images/brands/slack.png";
 import { RiApps2Line, RiFullscreenLine, RiMenu2Line, RiSearchLine, RiSettings2Line } from 'react-icons/ri'
 
 const Navbar = () => {
+
   return (
     <header id="page-topbar">
       <div className="navbar-header">
@@ -43,19 +46,19 @@ const Navbar = () => {
           <div className="navbar-brand-box">
             <Link to="/auth/dashboard" className="logo logo-dark">
               <span className="logo-sm">
-                <img src={logosmdark} alt="" height="22" />
+                <img src={logo} alt="" height="18" style={{ height: "85px" }} />
               </span>
               <span className="logo-lg">
-                <img src={logodark} alt="" height="20" />
+                <img src={logo} alt="" height="16" style={{ height: "85px" }} />
               </span>
             </Link>
 
             <Link to="/auth/dashboard" className="logo logo-light">
               <span className="logo-sm">
-                <img src={logosmlight} alt="" height="22" />
+                <img src={logo} alt="" height="18" style={{ height: "85px" }} />
               </span>
               <span className="logo-lg">
-                <img src={logolight} alt="" height="20" />
+                <img src={logo} alt="" height="16" style={{ height: "85px" }} />
               </span>
             </Link>
           </div>

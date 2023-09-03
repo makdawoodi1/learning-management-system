@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 //Import Breadcrumb
-import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { Container } from "reactstrap";
 
 const StudentSubmissions = () => {

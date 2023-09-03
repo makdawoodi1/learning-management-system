@@ -3,51 +3,66 @@ import { Form, Input, Button, Alert } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "@/services/axios";
+import useAuth from "@/hooks/useAuth";
 
 // Icons
-import { GoogleOutlined } from "@ant-design/icons";
+import { GoogleOutlined, LinkedinOutlined, GithubOutlined } from "@ant-design/icons";
 import { API_URL } from "../../config/config";
 
 const Register = () => {
   // Hooks
   const [form] = Form.useForm();
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [submitting, setSubmitting] = useState(false);
+
+  const from = location.state?.from?.pathname || "/";
 
   // Functions
   const handleSubmit = (values) => {
     setSubmitting(true);
 
     try {
-      axios.post(
-      `${API_URL}/auth/register`,
-        JSON.stringify({
-          data: {
-            attributes: { ...values },
-          },
-        }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true          
-        }
-      ).then((response) => {
-        if (response.data?.success) {
-          console.log(response.data);
-          navigate("/auth/dashboard");
-        } else {
-          toast.error(response.data?.error);
-        }
-      }).catch((error) => {
-        if (error.response?.data) {
-          return toast.error(error.response.data?.message)
-        }
-        console.error("Error logging in!:", error);
-        toast.error("Error Registering user!");
-      })
-      .finally(() => {
-        setSubmitting(false);
-      });
+      axios
+        .post(
+          `${API_URL}/auth/register`,
+          JSON.stringify({
+            data: {
+              attributes: { ...values },
+            },
+          }),
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          if (response.data?.success) {
+            console.log(response.data);
+            const accessToken = response.data?.access_token;
+            const role = response.data?.user.role;
+            setAuth({
+              username: response.data.user.username,
+              role,
+              accessToken,
+            });
+            toast.success("Registered user successfully");
+            navigate(from, { replace: true });
+          } else {
+            toast.error(response?.data.message);
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            return toast.error(error.response.data?.message);
+          }
+          console.error("Error registering user!:", error);
+          toast.error(error.message);
+        })
+        .finally(() => {
+          setSubmitting(false);
+        });
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
@@ -82,18 +97,18 @@ const Register = () => {
         <div className="h-screen md:overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-12 ">
             <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
-              <div className="w-full bg-white xl:p-12 p-10 dark:bg-zinc-800">
+              <div className="w-full bg-white xl:p-12 p-10 ">
                 <div className="flex h-[90vh] flex-col">
                   <div className="mx-auto"></div>
 
                   <div className="my-auto">
                     <div className="text-center">
-                      <h3 className="text-2xl text-gray-600 dark:text-gray-100">
+                      <h3 className="text-2xl text-gray-600 ">
                         {location.pathname === "/register"
                           ? "Register Student Account"
                           : "Register Admin Account"}
                       </h3>
-                      <p className="text-gray-500 mt-1 dark:text-zinc-100/60">
+                      <p className="text-gray-500 mt-1 ">
                         Register your account now!
                       </p>
                     </div>
@@ -117,7 +132,7 @@ const Register = () => {
                         >
                           <Input
                             size="large"
-                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Firstname"
                           />
                         </Form.Item>
@@ -134,7 +149,7 @@ const Register = () => {
                         >
                           <Input
                             size="large"
-                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Lastname"
                           />
                         </Form.Item>
@@ -151,7 +166,7 @@ const Register = () => {
                         >
                           <Input
                             size="large"
-                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Username"
                           />
                         </Form.Item>
@@ -172,7 +187,7 @@ const Register = () => {
                         >
                           <Input
                             size="large"
-                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Email"
                           />
                         </Form.Item>
@@ -189,7 +204,7 @@ const Register = () => {
                         >
                           <Input.Password
                             size="large"
-                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Enter Password"
                           />
                         </Form.Item>
@@ -221,16 +236,20 @@ const Register = () => {
                         >
                           <Input.Password
                             size="large"
-                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 dark:bg-zinc-700/50 dark:border-zinc-600 dark:text-gray-100 dark:placeholder:text-zinc-100/60"
+                            className="w-full rounded ltr:rounded-r-none rtl:rounded-l-none [&>*]:placeholder:text-sm [&>*]:placeholder:text-gray-500 py-2 border-gray-500 "
                             placeholder="Confirm Password"
                           />
                         </Form.Item>
                       </div>
                       <div className="row mb-6">
                         <div>
-                          <p className="text-gray-600 dark:text-zinc-100/60">
+                          <p className="text-gray-600 ">
                             By registering you agree to the
-                            <a href="#" className="text-violet-500" style={{ color: 'rgb(139 92 246 / 1)' }}>
+                            <a
+                              href="#"
+                              className="text-violet-500"
+                              style={{ color: "rgb(139 92 246 / 1)" }}
+                            >
                               &nbsp;Terms of Use
                             </a>
                           </p>
@@ -238,15 +257,12 @@ const Register = () => {
                       </div>
                       <div className="mb-3">
                         <Button
-                          className={`btn border-transparent bg-violet-500 w-full text-white hover:text-white w-100 waves-effect py-0 waves-light shadow-md shadow-violet-200 dark:shadow-zinc-600 `}
+                          className={`btn border-transparent bg-violet-500 w-full text-white hover:text-white w-100 waves-effect py-0 waves-light shadow-md shadow-violet-200  `}
                           style={{
-                            backgroundColor: 'rgb(139 92 246 / 1)'
+                            backgroundColor: "rgb(139 92 246 / 1)",
                           }}
                           htmlType="submit"
-                          disabled={
-                            submitting || 
-                            !form.isFieldsTouched(true) || 
-                            form.getFieldsError().some(({ errors }) => errors.length)}
+                          disabled={submitting}
                         >
                           {submitting ? "Processing..." : "Register"}
                         </Button>
@@ -256,7 +272,7 @@ const Register = () => {
                     <div className="mt-4 pt-2 text-center">
                       <div>
                         <hr />
-                        <h6 className="text-14 my-3 text-gray-500 font-medium dark:text-zinc-100/60">
+                        <h6 className="text-14 my-3 text-gray-500 font-medium ">
                           Sign in with
                         </h6>
                       </div>
@@ -266,22 +282,22 @@ const Register = () => {
                           <GoogleOutlined className="text-white text-xl" />
                         </a>
                         <a className="h-9 w-9 py-0 bg-sky-500 rounded-full cursor-pointer flex justify-center">
-                          <GoogleOutlined className="text-white text-xl" />
+                          <LinkedinOutlined className="text-white text-xl" />
                         </a>
                         <a className="h-9 w-9 py-0 bg-red-400 rounded-full cursor-pointer flex justify-center">
-                          <GoogleOutlined className="text-white text-xl" />
+                          <GithubOutlined className="text-white text-xl" />
                         </a>
                       </div>
                     </div>
 
                     <div className="mt-12 text-center">
-                      <p className="text-gray-500 dark:text-zinc-100/60">
+                      <p className="text-gray-500 ">
                         Already have an account?&nbsp;
                         <Link
                           to="/login"
                           className="text-violet-500 font-semibold underline cursor-pointer"
                           style={{
-                            color: 'rgb(139 92 246 / 1)'
+                            color: "rgb(139 92 246 / 1)",
                           }}
                         >
                           Login

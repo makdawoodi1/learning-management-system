@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Container, Row, Col, Card, CardBody } from "reactstrap";
 
 //Import Breadcrumb
-import Breadcrumbs from "@/components/Common/Breadcrumbs";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
+
+console.log(Breadcrumbs)
 
 //Import Components
 import CurrentMonth from "@/pages/Auth/Widgets/CurrentMonth";

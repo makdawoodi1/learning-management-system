@@ -1,16 +1,16 @@
 import Rating from "@/containers/sidebar/rating";
 
-const title = "Advanced Adobe Photoshop For Everyone";
+const title = "Centers for disease control & prevention";
 const desc =
-  "The most impressive is collection of share me online college courses";
-const author = "Rajib Raj";
+  "This course will introduce students to the mission, history, and organization of the CDC. Topics will include disease surveillance, prevention, and control; public health emergencies; global health; and emerging infectious diseases. Students will also learn about the CDC's role in public health research and policy development.";
+const author = "Dr. Adrienne Platt";
 const reviewCount = "03 reviews";
 const videoLink = "https://www.youtube-nocookie.com/embed/jP649ZHA8Tg";
 
 const categoryList = [
   {
     link: "#",
-    text: "Adobe XD",
+    text: "Pharmacy",
     className: "course-cate",
   },
   {

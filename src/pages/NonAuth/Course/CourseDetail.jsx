@@ -23,53 +23,36 @@ const CourseSingle = () => {
                     <div className="course-content">
                       <h3>Course Overview</h3>
                       <p>
-                        In this course take you from the fundamentals and
-                        concepts of data modeling all the way through anumber of
-                        best practices and techniques that you’ll need to build
-                        data models in your organization. You’ll find many By
-                        the end of the course, you’ll be all set to not only put
-                        these principles to works but also to maike the key data
-                        modeling and design decisions required by the info data
-                        modeling that transcend the nuts-and-bolts that clearly
-                        the key covered the course and design patterns.
+                        This course will introduce students to the mission, history, and organization of the CDC. Topics will include disease surveillance, prevention, and control; public health emergencies; global health; and emerging infectious diseases. Students will also learn about the CDC's role in public health research and policy development.
                       </p>
                       <h4>What You'll Learn in This Course:</h4>
                       <ul className="lab-ul">
                         <li>
-                          <i className="icofont-tick-mark"></i>Ready to begin
-                          working on real-world data modeling projects
+                          <i className="icofont-tick-mark"></i>The history of the CDC
                         </li>
                         <li>
-                          <i className="icofont-tick-mark"></i>Expanded
-                          responsibilities as part of an existing role
+                          <i className="icofont-tick-mark"></i>The CDC's organizational structure
                         </li>
                         <li>
-                          <i className="icofont-tick-mark"></i>Be able to create
-                          Flyers, Brochures, Advertisements
+                          <i className="icofont-tick-mark"></i>The CDC's mission and goals
                         </li>
                         <li>
-                          <i className="icofont-tick-mark"></i>Find a new
-                          position involving data modeling.
+                          <i className="icofont-tick-mark"></i>Disease surveillance and prevention
                         </li>
                         <li>
-                          <i className="icofont-tick-mark"></i>Work with color
-                          and Gradients and Grids
+                          <i className="icofont-tick-mark"></i>Public health emergencies
                         </li>
                       </ul>
                       <p>
-                        In this course take you from the fundamentals and
-                        concepts of data modeling all the way through anumber of
-                        best practices and techniques that you’ll need to build
-                        data models in your organization. You’ll find many
-                        examples that clearly the key covered the course
+                        This course would be relevant for students interested in public health, epidemiology, biostatistics, and other related fields. It would also be a good course for students who want to learn more about the CDC and its work to protect the health of Americans.
                       </p>
-                      <p>
+                      {/* <p>
                         By the end of the course, you’ll be all set to not only
                         put these principles to works but also to maike the key
                         data modeling and design decisions required by the info
                         data modeling that transcend the nuts-and-bolts that
                         clearly the key covered the course and design patterns.
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>
@@ -121,7 +104,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -135,7 +118,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -149,7 +132,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >
@@ -163,7 +146,7 @@ const CourseSingle = () => {
                               </div>
                               <div className="video-item-icon">
                                 <a
-                                  href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
+                                  // href="https://www.youtube-nocookie.com/embed/jP649ZHA8Tg"
                                   className="popup"
                                   target="_blank"
                                 >

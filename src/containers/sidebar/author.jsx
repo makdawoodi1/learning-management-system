@@ -1,5 +1,5 @@
-const name = "Rajib Raj";
-const degi = "Assistant Teacher";
+const name = "Dr. Adrienne Platt";
+const degi = "Phd";
 const desc =
   "I'm an Afro-Latina digital artist originally from Long Island, NY. I love to paint design and photo manpulate in Adobe Photoshop while helping others learn too. Follow me on Instagram or tweet me";
 
