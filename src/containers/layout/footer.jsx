@@ -2,41 +2,29 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const newsTitle = "Want Us To Email You About Special Offers And Updates?";
-const siteTitle = "Site Map";
+const siteTitle = "Pages";
 const useTitle = "Useful Links";
 const socialTitle = "Social Contact";
 const supportTitle = "Our Support";
 
 const siteList = [
   {
-    text: "Documentation",
-    link: "#",
+    text: "Courses",
+    link: "/courses",
   },
   {
-    text: "Feedback",
-    link: "#",
+    text: "Articles",
+    link: "/articles",
   },
   {
-    text: "Plugins",
-    link: "#",
-  },
-  {
-    text: "Support Forums",
-    link: "#",
-  },
-  {
-    text: "Themes",
-    link: "#",
+    text: "Dashboard",
+    link: "/auth/dashboard",
   },
 ];
 
 const useList = [
   {
     text: "About Us",
-    link: "#",
-  },
-  {
-    text: "Help Link",
     link: "#",
   },
   {
@@ -65,38 +53,7 @@ const socialList = [
   {
     text: "Instagram",
     link: "#",
-  },
-  {
-    text: "YouTube",
-    link: "#",
-  },
-  {
-    text: "Github",
-    link: "#",
-  },
-];
-
-const supportList = [
-  {
-    text: "Help Center",
-    link: "#",
-  },
-  {
-    text: "Paid with Mollie",
-    link: "#",
-  },
-  {
-    text: "Status",
-    link: "#",
-  },
-  {
-    text: "Changelog",
-    link: "#",
-  },
-  {
-    text: "Contact Support",
-    link: "#",
-  },
+  }
 ];
 
 const Footer = () => {
@@ -144,7 +101,7 @@ const Footer = () => {
                         <ul className="lab-ul">
                           {siteList.map((val, i) => (
                             <li key={i}>
-                              <a href={val.link}>{val.text}</a>
+                              <Link to={val.link}>{val.text}</Link>
                             </li>
                           ))}
                         </ul>
@@ -183,26 +140,6 @@ const Footer = () => {
                       <div className="content">
                         <ul className="lab-ul">
                           {socialList.map((val, i) => (
-                            <li key={i}>
-                              <a href={val.link}>{val.text}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col">
-                <div className="footer-item">
-                  <div className="footer-inner">
-                    <div className="footer-content">
-                      <div className="title">
-                        <h4>{supportTitle}</h4>
-                      </div>
-                      <div className="content">
-                        <ul className="lab-ul">
-                          {supportList.map((val, i) => (
                             <li key={i}>
                               <a href={val.link}>{val.text}</a>
                             </li>
