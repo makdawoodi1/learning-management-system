@@ -10,7 +10,7 @@ import "/assets/website-assets/scss/theme.scss";
 import Layout from "@/layouts/layout";
 import { pages } from "@/routes";
 import Page404 from "@/pages/Others/Page404";
-import Unauthorized from '@/pages/Others/Unauthorized';
+import Unauthorized from "@/pages/Others/Unauthorized";
 
 // Services
 // import RequireAuth from "@/services/RequireAuth";
@@ -36,22 +36,21 @@ const App = () => {
 
         <Route path="auth" element={<AuthLayout />}>
           {/* <Route element={<PersistLogin />}> */}
-            {pages.ProtectedRoutes.map((page, index) => (
-              // <Route
-              //   key={index}
-              //   element={<RequireAuth allowedRoles={page.allowedRoles} />}
-              // >
-                <Route
-                  key={index}
-                  path={page.path}
-                  element={page.element}
-                  exact={page.exact}
-                />
-              // </Route>
-            ))}
+          {pages.ProtectedRoutes.map((page, index) => (
+            // <Route
+            //   key={index}
+            //   element={<RequireAuth allowedRoles={page.allowedRoles} />}
+            // >
+            <Route
+              key={index}
+              path={page.path}
+              element={page.element}
+              exact={page.exact}
+            />
+            // </Route>
+          ))}
           {/* </Route> */}
         </Route>
-
         <Route path="*" element={<Page404 />} />
       </Route>
     </Routes>

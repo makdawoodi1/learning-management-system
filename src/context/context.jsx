@@ -4,11 +4,23 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useState({});
-    const [shortToken, setShortToken] = useState({});
-    const [toggleMenu, setToggleMenu] = useState(false);
+    const [courseState, setCourseState] = useState({
+        courseTitle: null,
+        courseDescription: null,
+        price: 0,
+        introductoryVideo: null,
+        thumbnail: null,
+        archived: false,
+        published: false,
+        modules: []
+    })
 
     return (
-        <AuthContext.Provider value={{ auth, setAuth, shortToken, setShortToken, toggleMenu, setToggleMenu }}>
+        <AuthContext.Provider value={{
+            auth,
+            setAuth,
+            courseState,
+            setCourseState }}>
             {children}
         </AuthContext.Provider>
     )

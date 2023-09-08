@@ -4,9 +4,9 @@ import { Row, Col, Breadcrumb, BreadcrumbItem } from "reactstrap";
 
 const Breadcrumbs = ({ title, breadcrumbItems }) => {
   return (
-    <Row>
+    <Row className="my-6">
       <Col xs={12}>
-        <div className="page-title-box d-flex align-items-center justify-content-between">
+        <div className="page-title-box d-flex align-items-center justify-content-between pb-0">
           <h4 className="mb-0">{title}</h4>
 
           <div className="page-title-right">

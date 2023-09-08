@@ -41,12 +41,12 @@
     }
 
 
-    button[data-bs-toggle=collapse].collapsed::after {
-        content: '\F0415';
-    }
+    // button[data-bs-toggle=collapse].collapsed::after {
+    //     content: '\F0415';
+    // }
 
     button[data-bs-toggle=collapse]::after {
-        content: '\F0374';
+        // content: '\F0374';
         display: block;
         font-family: 'Material Design Icons';
         font-size: 16px;

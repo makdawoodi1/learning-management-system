@@ -117,11 +117,11 @@ const Content = () => {
 
         <li>
           <Link
-            to="/auth/settings"
+            to="/auth/account-settings"
             className="d-flex align-items-center gap-x-4 waves-effect"
           >
             <RiPencilRuler2Line size={24} />
-            <span className="ms-1 nav-text">Settings</span>
+            <span className="ms-1 nav-text">Account Settings</span>
           </Link>
         </li>
 

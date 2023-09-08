@@ -1,0 +1,130 @@
+import React, { useContext, useEffect } from "react";
+import AuthContext from "@/context/context";
+import { Row, Col } from "reactstrap";
+import { Input, Popconfirm } from "antd";
+import Dropzone from "@/components/Dropzone";
+import { QuestionCircleOutlined } from "@ant-design/icons";
+
+const CourseDetails = ({ Form, form, handleSubmit }) => {
+  return (
+    <>
+      <Row className="place-items-center">
+        <Col xs={12} lg={8}>
+          <Row>
+            <Col xs={12}>
+              <Form.Item
+                label="Course Title"
+                name="course-title"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input the course title!",
+                  },
+                ]}
+              >
+                <Input
+                  size="large"
+                  className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
+                  placeholder="Course Title"
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={12}>
+              <Form.Item
+                label="Course Description"
+                title="Description"
+                name="course-description"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input the course description!",
+                  },
+                ]}
+              >
+                <Input.TextArea
+                  size="large"
+                  rows={8}
+                  className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
+                  placeholder="Course Description"
+                />
+              </Form.Item>
+              <hr />
+              <h6 className="text-secondary font-weight-normal text-center">
+                Upload Introductory Video
+              </h6>
+              <Dropzone
+                name="introductory-video"
+                Form={Form}
+                buttonText="Upload"
+              />
+            </Col>
+          </Row>
+        </Col>
+        <Col xs={12} lg={4}>
+          <Form.Item
+            label="Price"
+            name="price"
+            rules={[
+              {
+                required: true,
+                message: "Please input the course price!",
+              },
+            ]}
+          >
+            <Input
+              type="number"
+              addonAfter="$"
+              onChange={(e) =>
+                form.setFieldValue('price', e.target.value)
+              }
+              size="large"
+              className="w-full rounded placeholder:text-sm placeholder:text-gray-500 border-gray-500 "
+              placeholder="Course Price"
+            />
+          </Form.Item>
+          <h6 className="text-secondary font-weight-normal mt-4 text-center">
+            Course Settings
+          </h6>
+          <Popconfirm
+            title="Archive Course"
+            description="Are you sure to archive this course?"
+            okButtonProps={{
+              danger: true,
+            }}
+            icon={<QuestionCircleOutlined className="text-danger" />}
+            onConfirm={() =>
+              setCourseState()
+            }
+          >
+            <button className="w-full btn btn-warning mt-2 mb-3">
+              Archive
+            </button>
+          </Popconfirm>
+          <Form.Item>
+            <Popconfirm
+              title="Publish Course"
+              description="Are you sure to publish this course?"
+              okButtonProps={{
+                danger: true,
+              }}
+              icon={<QuestionCircleOutlined className="text-danger" />}
+              onConfirm={handleSubmit}
+            >
+              <button type="submit" className="w-full btn btn-primary mb-4">
+                Publish
+              </button>
+            </Popconfirm>
+          </Form.Item>
+          <hr />
+          <h6 className="text-secondary font-weight-normal">
+            Upload Course Thumbnail
+          </h6>
+          <Dropzone name="course-thumbnail" Form={Form} buttonText="Upload" />
+        </Col>
+        <Col xs={12}></Col>
+      </Row>
+    </>
+  );
+};
+
+export default CourseDetails;

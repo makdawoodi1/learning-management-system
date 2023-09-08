@@ -17,7 +17,7 @@ const AuthLayout = ({ children }) => {
   };
 
   return (
-    <div id="layout-wrapper">
+    <div id="layout-wrapper" style={{ backgroundColor: "#f1f5f7", height: "100vh"}}>
       <Toaster
         position="top-center"
         reverseOrder={false}
@@ -42,9 +42,9 @@ const AuthLayout = ({ children }) => {
       />
       <Navbar toggleMenuCallback={toggleMenuCallback} />
       <Sidebar theme={theme} isMobile={isMobile} />
-      <div className="main-content">
+      <div className="main-content" style={{ backgroundColor: "#f1f5f7"}}>
         <Outlet />
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </div>
   );
