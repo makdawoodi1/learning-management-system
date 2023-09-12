@@ -56,6 +56,8 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
                 name="introductory-video"
                 Form={Form}
                 buttonText="Upload"
+                acceptedFileTypes={['video/mp4']} 
+                maxFileSize={100 * 1024 * 1024}
               />
             </Col>
           </Row>
@@ -119,7 +121,13 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           <h6 className="text-secondary font-weight-normal">
             Upload Course Thumbnail
           </h6>
-          <Dropzone name="course-thumbnail" Form={Form} buttonText="Upload" />
+          <Dropzone 
+            name="course-thumbnail" 
+            Form={Form} 
+            buttonText="Upload" 
+            acceptedFileTypes={['image/jpeg', 'image/png']} 
+            maxFileSize={100 * 1024 * 1024}
+          />
         </Col>
         <Col xs={12}></Col>
       </Row>

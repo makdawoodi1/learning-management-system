@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Row, Col, Card } from "reactstrap";
 import { Button } from "antd";
 import Dropzone from "react-dropzone";
@@ -11,31 +11,88 @@ import {
 } from "react-icons/ri";
 import { FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import UploadError from "./UploadError";
+import FileUploadWithProgress from "./FileUploadWithProgress";
 
-const DropItemZone = ({ name, Form, buttonText, title, fn }) => {
+const DropItemZone = ({
+  name,
+  Form,
+  buttonText,
+  title,
+  fn,
+  acceptedFileTypes,
+  maxFileSize,
+}) => {
+  console.log("acceptedFileTypes", acceptedFileTypes);
   // Hooks
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Functions
-  //   Handles Accepted Files
-  const handleAcceptedFiles = (files) => {
-    files.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
+  // File Type Validator
+  const typeValidator = (file) => {
+    if (!acceptedFileTypes.includes(file.type)) {
+      return {
+        code: "invalid-file-type",
+        message: "Invalid file type",
+      };
+    }
 
-    setSelectedFiles(files);
+    if (file.type.startsWith("video/  ")) {
+      if (file.size > maxFileSize) {
+        return {
+          code: "size-too-large",
+          message: "Video file is larger than 100MB",
+        };
+      }
+    } else if (file.type.startsWith("image/")) {
+      if (file.size > maxFileSize) {
+        // 3MB limit
+        return {
+          code: "size-too-large",
+          message: "Image file is larger than 3MB",
+        };
+      }
+    }
+    return null;
   };
 
   //   Removes Files
-  const removeFile = (index) => {
-    const updatedFiles = selectedFiles.filter(
-      (_, fileIndex) => fileIndex !== index
+  const removeFile = (file) => {
+    setSelectedFiles((curr) =>
+      curr.filter((fileWrapper) => fileWrapper.file !== file)
     );
-    setSelectedFiles(updatedFiles);
   };
+
+  // Handle File Drop
+  const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
+    const mapppedAccepted = acceptedFiles.map((file) =>
+      Object.assign(file, {
+        preview: URL.createObjectURL(file),
+        formattedSize: formatBytes(file.size),
+        errors: [],
+      })
+    );
+    const mappedRejected = rejectedFiles.map((fileWrapper) =>
+      Object.assign(fileWrapper, {
+        preview: URL.createObjectURL(fileWrapper?.file),
+        formattedSize: formatBytes(fileWrapper?.file.size),
+        errors: fileWrapper.errors,
+      })
+    );
+    setSelectedFiles((curr) => [...curr, ...mapppedAccepted, ...mappedRejected]);
+  }, []);
+
+  // Handle File Upload
+  const onUpload = async (file, url) => {
+    const url = await uploadFile(fileWrapper.file, setProgress);
+    console.log("url", url);
+    // setFiles(curr => (curr.map(fileWrapper => {
+    //     if (fileWrapper.file === file) {
+    //         return { ...fileWrapper, url }
+    //     }
+    //     return fileWrapper;
+    // })))
+  }
 
   //   Formats the size
   const formatBytes = (bytes, decimals = 2) => {
@@ -50,16 +107,16 @@ const DropItemZone = ({ name, Form, buttonText, title, fn }) => {
 
   return (
     <>
-      <Dropzone onDrop={(acceptedFiles) => handleAcceptedFiles(acceptedFiles)}>
+      <Dropzone onDrop={onDrop} validator={typeValidator}>
         {({ getRootProps, getInputProps }) => (
-          <div className="dropzone">
+          <div className="dropzone" >
             <div className="dz-message needsclick" {...getRootProps()}>
               <Form.Item
-                name={name?.replaceAll('-', ' ')}
+                name={name?.replaceAll("-", " ")}
                 rules={[
                   {
                     required: true,
-                    message: `Please upload ${name.replaceAll('-', ' ')}!`,
+                    message: `Please upload ${name.replaceAll("-", " ")}!`,
                   },
                 ]}
               >
@@ -74,55 +131,17 @@ const DropItemZone = ({ name, Form, buttonText, title, fn }) => {
             </div>
           </div>
         )}
-      </Dropzone>
+        </Dropzone>
       <div className="dropzone-previews mt-3" id="file-previews">
-        {selectedFiles.map((file, index) => {
-          return (
-            <Card
-              className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-              key={index + "-file"}
-            >
-              <div className="p-2">
-                <Row className="align-items-center">
-                  <Col className="col-auto">
-                    <Link onClick={() => fn?.handlePreview(file)}>
-                      {file?.type.includes("image") ? (
-                        <img
-                          data-dz-thumbnail=""
-                          height="80"
-                          className="avatar-sm rounded bg-light"
-                          alt={file.name}
-                          src={file.preview}
-                        />
-                      ) : (
-                        <RiImageLine size={24} />
-                      )}
-                    </Link>
-                  </Col>
-                  <Col className="d-flex align-items-center justify-content-between">
-                    <div className="text-center">
-                      <p className="text-muted fw-bold font-size-12 m-0">
-                        {file.name}
-                      </p>
-                      <p className="m-0 font-size-14">
-                        <strong>{file.formattedSize}</strong>
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        removeFile(index);
-                        fn?.handleRemoveFile(file);
-                      }}
-                    >
-                      <FaTimes />
-                    </button>
-                  </Col>
-                </Row>
-              </div>
-            </Card>
-          );
-        })}
+        {selectedFiles.map((fileWrapper, index) => (
+          <>
+            {fileWrapper.errors?.length ? (
+              <UploadError key={index + "-file"} fileWrapper={fileWrapper} fn={fn} removeFile={removeFile} />
+            ) : (
+              <FileUploadWithProgress key={index + "-file"} fileWrapper={fileWrapper} fn={fn} removeFile={removeFile} onUpload={onUpload} />
+            )}
+          </>
+        ))}
       </div>
 
       {buttonText && (
@@ -130,6 +149,7 @@ const DropItemZone = ({ name, Form, buttonText, title, fn }) => {
           <Button
             type="dashed"
             className="d-flex align-items-center justify-content-center mx-auto btn-danger-custom"
+            onClick={onUpload}
             style={{
               width: "100%",
             }}
