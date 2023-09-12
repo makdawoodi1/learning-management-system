@@ -119,7 +119,7 @@
   margin: 0 auto;
   /* max-width: 600px; */
   /* height: auto; */
-  max-height: 400px;
+  max-height: 20vw;
   width: auto;
   overflow: hidden;
 }
@@ -130,8 +130,37 @@
   object-fit: cover;
 }
 
-.bar-course-content {
+.navbar-brand-box {
+  width: 11.6vw;
+}
+
+.navbar-brand-box.course-content {
+  width: 34vw;
+}
+
+.navbar-brand-box-collapsed {
+  width: 3.50vw;
+  display: none;
+}
+
+.navbar-brand-box-collapsed .logo-collapsed {
+  display: none;
+}
+
+.vertical-menu-collapsed {
+  width: 3.50vw;
+}
+
+.vertical-menu-course-collapsed {
+  width: 0px;
+}
+
+.vertical-menu-course-content {
   width: 35%;
+}
+
+.main-content-collapsed {
+  margin-left: 3.50vw !important;
 }
 
 @keyframes dotShadow {

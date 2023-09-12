@@ -97,7 +97,7 @@ const CourseSettings = () => {
             <li
               className="previous"
             >
-              {activeTab === 1 ? (
+              {activeTab === 0 ? (
                 <Link to="/auth/my-courses">
                   Go back to My Courses
                 </Link>
@@ -109,7 +109,7 @@ const CourseSettings = () => {
                 </Link>
               )}
             </li>
-            <li className={activeTab === 3 ? "next disabled" : "next"}>
+            <li className={activeTab === 2 ? "next disabled" : "next"}>
               <Link
                 onClick={() => {
                   toggleTab(activeTab + 1);

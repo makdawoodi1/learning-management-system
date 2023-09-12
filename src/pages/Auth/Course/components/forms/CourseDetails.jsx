@@ -116,7 +116,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
             </Popconfirm>
           </Form.Item>
           <hr />
-          <h6 className="text-secondary font-weight-normal">
+          <h6 className="text-secondary text-center font-weight-normal">
             Upload Course Thumbnail
           </h6>
           <Dropzone name="course-thumbnail" Form={Form} buttonText="Upload" />

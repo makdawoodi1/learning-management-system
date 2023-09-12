@@ -8,8 +8,8 @@ const Profile = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        <div className="container h-90">
-          <video src="/videos/video.mp4" />
+        <div className="container h-90 mx-8">
+          {/* <video src="/videos/video.mp4" /> */}
         </div>
       </Container>
     </div>

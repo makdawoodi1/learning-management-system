@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Row,
   Col,
@@ -12,19 +12,12 @@ import {
   DropdownMenu,
 } from "reactstrap";
 
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 // Import menuDropdown
 import NotificationDropdown from "@/components/common/NotificationDropdown";
 import ProfileMenu from "@/components/common/ProfileMenu";
-
-//Import logo Images
-// import logosmdark from "/assets/dashboard-assets/images/logo-sm-dark.png";
-// import logodark from "/assets/dashboard-assets/images/logo-dark.png";
-// import logosmlight from "/assets/dashboard-assets/images/logo-sm-light.png";
-// import logolight from "/assets/dashboard-assets/images/logo-light.png";
 import logo from "/logo.png";
-
 
 //Import Social Profile Images
 import github from "/assets/dashboard-assets/images/brands/github.png";
@@ -35,16 +28,40 @@ import mail_chimp from "/assets/dashboard-assets/images/brands/mail_chimp.png";
 import slack from "/assets/dashboard-assets/images/brands/slack.png";
 
 // Import Icons
-import { RiApps2Line, RiFullscreenLine, RiMenu2Line, RiSearchLine, RiSettings2Line } from 'react-icons/ri'
+import {
+  RiApps2Line,
+  RiFullscreenLine,
+  RiMenu2Line,
+  RiSearchLine,
+  RiSettings2Line,
+} from "react-icons/ri";
+import AuthContext from "@/context/context";
 
 const Navbar = () => {
+  const { pathname } = useLocation();
+  const { toggleSidebar, setToggleSidebar, fullScreenHandle } = useContext(AuthContext);
 
+  console.log(toggleSidebar)
   return (
     <header id="page-topbar">
       <div className="navbar-header">
         <div className="d-flex align-items-center">
-          <div className="navbar-brand-box">
-            <Link to="/auth/dashboard" className="logo logo-dark">
+          <div
+            className={`navbar-brand-box 
+            ${
+              toggleSidebar
+                ? "navbar-brand-box-collapsed"
+                : pathname.includes('enrolled-course')
+                ? "course-content"
+                : ""
+            }`}
+          >
+            <Link
+              to="/auth/dashboard"
+              className={`logo logo-dark ${
+                toggleSidebar ? "logo-collapsed" : ""
+              }`}
+            >
               <span className="logo-sm">
                 <img src={logo} alt="" height="18" style={{ height: "85px" }} />
               </span>
@@ -53,7 +70,12 @@ const Navbar = () => {
               </span>
             </Link>
 
-            <Link to="/auth/dashboard" className="logo logo-light">
+            <Link
+              to="/auth/dashboard"
+              className={`logo logo-light ${
+                toggleSidebar ? "logo-collapsed" : ""
+              }`}
+            >
               <span className="logo-sm">
                 <img src={logo} alt="" height="18" style={{ height: "85px" }} />
               </span>
@@ -67,25 +89,32 @@ const Navbar = () => {
             size="sm"
             color="none"
             type="button"
-            // onClick={this.toggleMenu}
+            onClick={() =>
+              setToggleSidebar((prev) => !prev)
+            }
             className="px-3 font-size-24 header-item waves-effect"
             id="vertical-menu-btn"
           >
             <RiMenu2Line className="align-middle" />
           </Button>
 
-          <Form className="app-search d-none d-lg-block">
-            <div className="position-relative">
-              <Input
-                type="text"
-                className="form-control"
-                style={{ backgroundColor: "#f1f5f7" }}
-                placeholder="Search"
-              />
-              <span><RiSearchLine /></span>
-            </div>
-          </Form>
-
+          {pathname.includes('enrolled-course') ? (
+            <h4 className="m-0">Childhood Overweight & Obesity</h4>
+          ) : (
+            <Form className="app-search d-none d-lg-block">
+              <div className="position-relative">
+                <Input
+                  type="text"
+                  className="form-control"
+                  style={{ backgroundColor: "#f1f5f7" }}
+                  placeholder="Search"
+                />
+                <span>
+                  <RiSearchLine />
+                </span>
+              </div>
+            </Form>
+          )}
         </div>
 
         <div className="d-flex">
@@ -102,8 +131,8 @@ const Navbar = () => {
             </button>
             <div
               className={
-                  "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0 show"
-                  // : "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0 show"
+                // : "dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
               }
               aria-labelledby="page-header-search-dropdown"
             >
@@ -189,7 +218,11 @@ const Navbar = () => {
               color="none"
               type="button"
               className="header-item noti-icon waves-effect"
-              // onClick={this.toggleFullscreen}
+              onClick={
+                fullScreenHandle.active
+                  ? fullScreenHandle.exit
+                  : fullScreenHandle.enter
+              }
             >
               <RiFullscreenLine />
             </Button>
@@ -202,7 +235,7 @@ const Navbar = () => {
           <div className="dropdown d-inline-block">
             <Button
               color="none"
-              // onClick={this.toggleRightbar}
+              // onClick={fullS}
               type="button"
               className="header-item noti-icon right-bar-toggle waves-effect"
             >
