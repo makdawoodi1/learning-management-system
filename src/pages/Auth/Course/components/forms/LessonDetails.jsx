@@ -24,9 +24,9 @@ const LessonDetails = ({ Form, form }) => {
     selectedLesson: null,
     selectedFile: null,
     selectedAttachment: "Images",
+    lessons: [],
     active: getState(),
   });
-  const [lessons, setLessons] = useState([]);
 
   // Refs
   const titleRef = useRef(null);
@@ -50,8 +50,8 @@ const LessonDetails = ({ Form, form }) => {
 
   // Clear State
   const clearState = () => {
-    form.setFieldValue("title", "");
-    form.setFieldValue("description", "");
+    form.setFieldValue("lesson-title", "");
+    form.setFieldValue("lesson-description", "");
     setState({
       ...state,
       mode: "add",
@@ -60,8 +60,11 @@ const LessonDetails = ({ Form, form }) => {
   };
 
   // Submit module handler
-  const handleLessonSubmit = (values) => {
-    const updatedLessons = [...lessons];
+  const handleLessonSubmit = () => {
+    const values = form.getFieldsValue();
+    if (values['lesson-title'] === '' || values['lesson-description'] === '') return
+
+    const updatedLessons = [...state.lessons];
     const index =
       updatedLessons.length &&
       updatedLessons?.findIndex(
@@ -71,27 +74,55 @@ const LessonDetails = ({ Form, form }) => {
 
     if (state.mode === "add") {
       updatedLessons.push({
-        id: lessons.length,
-        title: values.title,
-        description: values.description,
+        id: state.lessons?.length + 1,
+        title: values['lesson-title'],
+        description: values['lesson-description'],
         collapsed: true,
       });
     } else if (index >= 0 && index < updatedLessons.length)
       updatedLessons[index] = {
         ...updatedLessons[index],
-        title: values.title,
-        description: values.description,
+        title: values['lesson-title'],
+        description: values['lesson-description'],
       };
-    setLessons(updatedLessons);
-    clearState();
+
+
+    const currentModule = courseState.modules?.find(module => state.selectedModule === module.id);
+    const moduleIndex = courseState.modules?.indexOf(currentModule);
+    if (currentModule) {
+      currentModule.lessons = [...updatedLessons];
+    
+      setCourseState(prev => {
+        const updatedModules = [...prev.modules]; // Create a copy of the modules array
+    
+        if (moduleIndex !== -1) {
+          // If the module exists in the array, update it
+          updatedModules[moduleIndex] = currentModule;
+        } else {
+          // If the module doesn't exist, add it to the end of the array
+          updatedModules.push(currentModule);
+        }
+    
+        return { ...prev, modules: updatedModules };
+      });
+    
+      setState({
+        ...state,
+        mode: "add",
+        lessons: updatedLessons,
+      });
+    
+      form.setFieldValue("lesson-title", "");
+      form.setFieldValue("lesson-description", "");
+    }
   };
 
   // Edit module
 
   const editModule = (lesson) => {
     titleRef.current.input?.focus();
-    form.setFieldValue("title", lesson.title);
-    form.setFieldValue("description", lesson.description);
+    form.setFieldValue("lesson-title", lesson.title);
+    form.setFieldValue("lesson-description", lesson.description);
     setState({
       ...state,
       mode: "edit",
@@ -102,19 +133,22 @@ const LessonDetails = ({ Form, form }) => {
 
   // Delete Module
   const deleteModule = (lesson) => {
-    const updatedLessons = [...lessons];
+    const updatedLessons = [...state.lessons];
     const index = updatedLessons.findIndex(
       (currentLesson) => currentLesson === lesson
     );
 
     if (index >= 0 && index < updatedLessons.length) {
       updatedLessons.splice(index, 1);
-      setLessons(updatedLessons);
+      setState({ 
+        ...state,
+        lessons: updatedLessons
+       });
     }
   };
 
   const toggleCollapse = ({ id, collapsed }) => {
-    const updatedLessons = lessons.map((lesson) => {
+    const updatedLessons = state.lessons?.map((lesson) => {
       if (lesson.id === id) {
         return { ...lesson, collapsed: !collapsed };
       } else {
@@ -122,7 +156,7 @@ const LessonDetails = ({ Form, form }) => {
       }
     });
 
-    setLessons([...updatedLessons]);
+    setState({ ...state, lessons: updatedLessons });
   };
 
   console.log(courseState)
@@ -137,10 +171,14 @@ const LessonDetails = ({ Form, form }) => {
                 label="Select Module"
                 name="module"
                 rules={[
-                  {
-                    required: true,
-                    message: "Please select the course module",
-                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value) {
+                        return Promise.reject(new Error('Please add module'));
+                      }
+                      return Promise.resolve();
+                    },
+                  }),
                 ]}
               >
                 <Select
@@ -151,21 +189,26 @@ const LessonDetails = ({ Form, form }) => {
                   onChange={(value) =>
                     setState({ ...state, selectedModule: value })
                   }
-                  options={courseState?.modules?.map(module => { return { value: module.title, label: module.title } })}
+                  options={courseState.modules?.map(module => { return { value: module.id, label: module.title } })}
                 />
               </Form.Item>
               <Form.Item
                 label="Lesson Title"
-                name="title"
+                name="lesson-title"
                 rules={[
-                  {
-                    required: true,
-                    message: "Please input the module title!",
-                  },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value) {
+                        return Promise.reject(new Error('Please add module!'));
+                      }
+                      return Promise.resolve();
+                    },
+                  }),
                 ]}
               >
                 <Input
                   ref={titleRef}
+                  disabled={!state.selectedModule}
                   onChange={() =>
                     setState({
                       ...state,
@@ -182,10 +225,11 @@ const LessonDetails = ({ Form, form }) => {
               <Form.Item
                 label="Lesson Description"
                 title="Description"
-                name="description"
+                name="lesson-description"
               >
                 <Input.TextArea
                   ref={descriptionRef}
+                  disabled={!state.selectedModule}
                   onChange={() =>
                     setState({
                       ...state,
@@ -206,7 +250,7 @@ const LessonDetails = ({ Form, form }) => {
                 <Button
                   type="dashed"
                   className="d-flex align-items-center justify-content-center mx-auto"
-                  htmlType="submit"
+                  onClick={handleLessonSubmit}
                   style={{
                     width: "100%",
                   }}
@@ -241,21 +285,22 @@ const LessonDetails = ({ Form, form }) => {
           lg={6}
           className="text-center d-flex flex-column justify-content-center"
         >
-          <Button
-            type="dashed"
-            className="d-flex align-items-center justify-content-center btn-primary-border mx-auto w-full my-8"
-            // htmlType="submit"
-            style={{
-              width: "80%",
-            }}
-            icon={<PlusOutlined />}
-          >
-            Upload Lesson Attachments
-          </Button>
+          <hr />
           <h6 className="text-secondary font-weight-normal">
-            Total Lessons ({lessons.length})
+            Upload Lesson Attachments
           </h6>
-          {lessons.length > 0 && (
+          <Dropzone
+            name="lessonAttachments"
+            buttonText="Upload Zip files"
+            acceptedFileTypes={["application/zip"]}
+            maxFileSize={100 * 1024 * 1024}
+            multiple={false}
+          />
+          <hr />
+          <h6 className="text-secondary font-weight-normal">
+            Total Lessons ({courseState.modules?.find(module => module.id === state?.selectedModule)?.lessons.length ?? 0})
+          </h6>
+          {state.lessons?.length > 0 && (
             <Card
               className="mx-auto my-8 "
               style={{
@@ -265,7 +310,7 @@ const LessonDetails = ({ Form, form }) => {
               }}
             >
               <CardBody>
-                {lessons?.map((currentLesson) => (
+                {courseState.modules.find(module => module.id === state?.selectedModule).lessons?.map((currentLesson) => (
                   <>
                     <div
                       key={currentLesson.id}
@@ -386,8 +431,14 @@ const LessonDetails = ({ Form, form }) => {
             </Button>
           </div>
           <Dropzone
-            name="attachment"
-            Form={Form}
+            name="lessonFiles"
+            buttonText="Upload"
+            acceptedFileTypes={
+              state.selectedAttachment === "Images" ? ["image/jpeg", "image/png"]
+              : ["video/mp4"]
+            }
+            maxFileSize={100 * 1024 * 1024}
+            multiple={false}
             title={`Upload ${state.selectedAttachment}`}
             fn={{ handlePreview, handleRemoveFile }}
           />

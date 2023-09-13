@@ -69,6 +69,8 @@ const ModuleDetails = ({ Form, form }) => {
         id: state.modules?.length + 1,
         title: values['module-title'],
         description: values['module-description'],
+        lessons: [],
+        quiizes: [],
         collapsed: true,
       });
     } else if (index >= 0 && index < updatedModules.length)
@@ -77,7 +79,7 @@ const ModuleDetails = ({ Form, form }) => {
         title: values['module-title'],
         description: values['module-description'],
       };
-    setCourseState({ ...courseState, modules: state.modules })
+    setCourseState({ ...courseState, modules: updatedModules })
     setState({ ...state, mode: "add", modules: updatedModules })
     form.setFieldValue("module-title", "");
     form.setFieldValue("module-description", "");

@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import {
   Row,
   Col,
@@ -14,10 +14,14 @@ import { Link } from "react-router-dom";
 import { CourseDetails, ModuleDetails, LessonDetails } from "./forms";
 import { Form } from "antd";
 import * as TYPES from "./forms/types";
+import AuthContext from "@/context/context";
 
 const CourseSettings = () => {
   const [form] = Form.useForm();
+  const { courseState, setCourseState } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState(0);
+
+  console.log(courseState);
 
   // Functions
   const toggleTab = (tab) => {
@@ -28,9 +32,9 @@ const CourseSettings = () => {
     }
   };
 
-  const handleSubmit = values => {
+  const handleSubmit = () => {
     console.log(form.getFieldsValue())
-    console.log(values)
+    console.log(courseState)
   }
 
   return (
@@ -83,7 +87,7 @@ const CourseSettings = () => {
               className="twitter-bs-wizard-tab-content"
             >
               <TabPane tabId={0}>
-                  <CourseDetails Form={Form} form={form} />
+                  <CourseDetails Form={Form} form={form} handleSubmit={handleSubmit} />
               </TabPane>
               <TabPane tabId={1}>
                   <ModuleDetails Form={Form} form={form} />
@@ -97,7 +101,7 @@ const CourseSettings = () => {
             <li
               className="previous"
             >
-              {activeTab === 1 ? (
+              {activeTab === 0 ? (
                 <Link to="/auth/my-courses">
                   Go back to My Courses
                 </Link>

@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
         price: 0,
         introductoryVideo: null,
         thumbnail: null,
+        lessonAttachments: [],
+        lessonFiles: [],
         archived: false,
         published: false,
         modules: []

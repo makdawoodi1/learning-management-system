@@ -21,7 +21,6 @@ const AddCourse = () => {
           <Col xs={12}>
             <CourseSettings />
             <QuizSettings />
-            <AssignmentSettings />
           </Col>
         </Row>
       </Container>

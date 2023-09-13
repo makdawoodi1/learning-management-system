@@ -134,6 +134,34 @@
   width: 35%;
 }
 
+.uploaded-file-thumbnail {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.uploaded-file-thumbnail img {
+  width: 100%;
+}
+
+.uploaded-file-thumbnail svg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 5px;
+  margin-right: 5px;
+}
+
+.uploaded-video-thumbnail {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 @keyframes dotShadow {
   0% {
     transform: scaleX(1);

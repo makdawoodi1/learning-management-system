@@ -1,97 +1,96 @@
 import { Progress } from "antd";
-import React, { useEffect, useState } from "react";
-import { FaTimes } from "react-icons/fa";
-import { RiImageLine } from "react-icons/ri";
-import { Link } from "react-router-dom";
-import { Card, Col, Row } from "reactstrap";
+import React, { useEffect, useImperativeHandle, useState } from "react";
+import { Row } from "reactstrap";
 
-const FileUploadWithProgress = ({ fileWrapper, fn, removeFile, onUpload }) => {
+const FileUploadWithProgress = React.forwardRef(({ fileWrapper, fn, removeFile, setFileUploading }, ref) => {
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    async function upload() {
-      const url = await uploadFile(fileWrapper.file, setProgress);
-      console.log("url", url);
-    }
+  // useEffect(() => {
+  //   async function upload () {
+  //       const url = await uploadFile(fileWrapper, setProgress)
+  //       console.log(url)
+  //   }
 
-    upload();
-  }, []);
+  //   upload()
+  // }, [])
+
+  // Expose a method to trigger upload externally
+  useImperativeHandle(ref, () => ({
+    startUpload: async (file, url, key) => {
+      // selectedFiles.map(async file => {
+      //   const url = await uploadFile(file, setProgress);
+      //   console.log('url', url)
+      // })
+      // uploadFile(fileWrapper, setProgress)
+      // .then((url) => {
+      //   console.log(`File ${fileWrapper.name} uploaded: ${url}`);
+      //   // Handle successful upload
+      //   setIsUploading(false);
+      //   setFileUploading(false);
+      // })
+      // .catch((error) => {
+      //   console.error(`Error uploading file ${fileWrapper.name}:`, error);
+      //   return setFileUploading(false);
+      // });
+      const uploadResponse = await uploadFile(file, url, key, setProgress)
+      return uploadResponse;
+    },
+    endUpload: (file) => {
+      if(file.xhr) {
+        file.xhr.abort();
+      }
+    }
+  }));
 
   return (
-    <Card className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete">
-      <div className="p-2">
-        <Row className="align-items-center">
-          <Col className="col-auto">
-            <Link
-              onClick={() => fn?.handlePreview(fileWrapper.file ?? fileWrapper)}
-            >
-              {fileWrapper.file?.type.includes("image") ??
-              fileWrapper.type?.includes("image") ? (
-                <img
-                  data-dz-thumbnail=""
-                  height="80"
-                  className="avatar-sm rounded bg-light"
-                  alt={fileWrapper.file?.name ?? fileWrapper.name}
-                  src={fileWrapper.preview}
-                />
-              ) : (
-                <RiImageLine size={24} />
-              )}
-            </Link>
-          </Col>
-          <Col className="d-flex align-items-center justify-content-between">
-            <div className="text-center">
-              <p className="text-muted fw-bold font-size-12 m-0">
-                {fileWrapper.file?.name ?? fileWrapper.name}
-              </p>
-              <p className="m-0 font-size-14">
-                <strong>{fileWrapper.formattedSize}</strong>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                removeFile(fileWrapper.file);
-                fn?.handleRemoveFile(fileWrapper.file ?? fileWrapper);
-              }}
-            >
-              <FaTimes />
-            </button>
-          </Col>
-          <Progress percent={progress} size="small" />
-        </Row>
-      </div>
-    </Card>
+      <Row className="align-items-center">
+        <Progress percent={progress} size="small" />
+      </Row>
   );
-};
+});
 
-function uploadFile(file, onProgress) {
-  const url = "https://api.cloudinary.com/v1_1/demo/image/upload";
-  const key = "docs_upload_example_us_preset";
+const uploadFile = (uploadFile, uploadUrl, uploadKey, onProgress) => {
+  const url = uploadUrl;
+  const key = uploadKey;
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
+    xhr.open('PUT', url);
 
     xhr.onload = () => {
-      const response = JSON.parse(xhr.responseText);
-      resolve(response.secure_url);
+      if (xhr.status === 200 && xhr.statusText === "OK") {
+        const secureURL = xhr.responseURL
+        uploadFile.secureURL = secureURL
+        resolve(uploadFile);
+      }
+      else if (xhr.status === 403) {
+        reject({ message: 'Connection Timeout Error' })
+      }
     };
-
     xhr.onerror = (evt) => reject(evt);
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
         const percentage = (event.loaded / event.total) * 100;
-
         onProgress(Math.round(percentage));
       }
     };
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", key);
 
-    xhr.send();
+    const formData = new FormData();
+    formData.append('file', uploadFile);
+    formData.append('upload_preset', key)
+
+    xhr.send(formData);
+    uploadFile.xhr = xhr;
+    uploadFile.url = url;
+    uploadFile.objectKey = key;
   });
 }
+
+// Function to upload a file and store its XHR object
+// const uploadAndStoreXHR = (file, onProgress) => {
+//   const promise = uploadFile(file, onProgress);
+//   xhrs[file.name] = { xhr: promise };
+//   return promise;
+// };
 
 export default FileUploadWithProgress;
