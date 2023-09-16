@@ -5,6 +5,7 @@ import { Button } from "antd";
 import Dropzone from "react-dropzone";
 import axios from "@/services/axios";
 import toast from "react-hot-toast";
+import useCourseState from "@/hooks/useCourseState";
 
 // Import Icons
 import {
@@ -24,6 +25,7 @@ import AuthContext from "@/context/context";
 
 const DropItemZone = ({
   name,
+  selectedLesson,
   buttonText,
   title,
   fn,
@@ -32,23 +34,25 @@ const DropItemZone = ({
   multiple,
 }) => {
   // Hooks
+  const { updateCourseState } = useCourseState();
   const { courseState, setCourseState } = useContext(AuthContext);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUploading, setFileUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadError, setUploadError] = useState(false);
   const uploadProgressRef = useRef(null);
-
-  console.log(courseState)
 
   // Functions
   // File Type Validator
   const typeValidator = (file) => {
     if (!multiple && name === 'course-thumbnail' && courseState.thumbnail) {
-      toast.error('Cannot upload more than one thumbnail')
+      setUploadError(true);
+      return toast.error('Cannot upload more than one thumbnail');
     }
 
     if (!multiple && name === 'introductory-video' && courseState.introductoryVideo) {
-      toast.error('Cannot upload more than one introductory video')
+      setUploadError(true);
+      return toast.error('Cannot upload more than one introductory video');
     }
 
     if (!acceptedFileTypes.includes(file.type)) {
@@ -120,20 +124,42 @@ const DropItemZone = ({
       })
     );
 
-    setSelectedFiles((curr) => [
-      ...curr,
-      ...mapppedAccepted,
-      ...mappedRejected,
-    ]);
+    if (!uploadError) {
+      setSelectedFiles((curr) => [
+        ...curr,
+        ...mapppedAccepted,
+        ...mappedRejected,
+      ]);
+    }
+    setUploadError(false);
   }, []);
 
   // Handle File Upload
   const onUpload = async () => {
     setFileUploading(true);
+    const fileName = encodeURIComponent(selectedFiles[0].name)
     const fileType = encodeURIComponent(selectedFiles[0].type);
+    const selectedModule = courseState.modules?.filter(module => module.id === selectedLesson.moduleID)[0];
+    // const lesson = module.lessons?.find(lesson => lesson.id === selectedLesson?.id)
+
+    // Upload Keys
+    const folderKey = courseState.courseFolderKey
+    const moduleKey = selectedModule?.moduleFolderKey;
+    const lessonKey = selectedModule?.lessons?.filter(lesson => lesson.id === selectedLesson.id)[0].lessonFolderKey
     try {
       axios
-        .get(`${API_URL}/courses/get-presign-url?fileName=${fileType}`, {
+        .post(`${API_URL}/courses/get-presign-url?fileName=${fileName}&fileType=${fileType}`,
+        JSON.stringify({
+          data: {
+            attributes: { 
+              name, 
+              folderKey, 
+              moduleKey,
+              lessonKey
+            },
+          },
+        }),
+        {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         })
@@ -141,8 +167,15 @@ const DropItemZone = ({
           if (response.data?.success) {
             console.log(response.data);
             const {
-              s3: { uploadUrl, key },
+              s3: { uploadUrl, key, folderKey, moduleKey, lessonKey },
             } = response.data;
+
+            updateCourseState('update-keys', { 
+              name, 
+              selectedModule, 
+              selectedLesson, 
+              keys: { folderKey, moduleKey, lessonKey },
+            })
 
             const uploadResponse = await uploadProgressRef?.current.startUpload(
               selectedFiles[0],
@@ -153,23 +186,13 @@ const DropItemZone = ({
               setUploadedFile(uploadResponse);
               console.log(uploadResponse);
 
-              switch(name) {
-                case "course-thumbnail":
-                  setCourseState((prev) => ({ ...prev, thumbnail: uploadResponse }));
-                  break;  
-
-                case "introductory-video":
-                  setCourseState((prev) => ({ ...prev, introductoryVideo: uploadResponse }))  
-                  break;
-
-                case "lessonAttachments":
-                  setCourseState((prev) => ({ ...prev, lessonAttachments: uploadResponse }))
-                  break;
-
-                case "lessonFiles":
-                  setCourseState((prev) => ({ ...prev, lessonFiles: uploadResponse }))
-                  break;
-              }
+              updateCourseState('file-upload', { 
+                name, 
+                selectedModule, 
+                selectedLesson, 
+                keys: { folderKey, moduleKey, lessonKey }, 
+                uploadResponse
+              })
 
               setSelectedFiles([]);
               toast.success('File Uploaded Successfully');
@@ -191,10 +214,13 @@ const DropItemZone = ({
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
+      setFileUploading(false);
     }
   };
 
   const onRemove = (file) => {
+    setFileUploading(true);
+    const key = name === 'course-thumbnail' ? 'thumbnail' : 'introductoryVideo'
     try {
       axios
         .delete(`${API_URL}/courses/delete-object?objectKey=${file.objectKey}`, {
@@ -205,6 +231,7 @@ const DropItemZone = ({
           if (response.data?.success) {
             console.log(response.data);
             setUploadedFile(null);
+            setCourseState((prev) => ({ ...prev, [key]: null }))
             toast.success('File deleted successfully')
           } else {
             toast.error(response?.data.message);
@@ -216,10 +243,13 @@ const DropItemZone = ({
           }
           console.error("Error Deleting File!:", error.message);
           toast.error(error.message);
-        })
+        }).finally(() => {
+          setFileUploading(false);
+        });
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
+      setFileUploading(false);
     }
   };
 
@@ -239,7 +269,7 @@ const DropItemZone = ({
     selectedFiles.some((file) => file.errors.length > 0)
   );
 
-  console.log(selectedFiles)
+  console.log('courseState', courseState, 'lesson', selectedLesson)
 
   return (
     <>
@@ -252,7 +282,7 @@ const DropItemZone = ({
                 <RiUploadCloudFill className="display-3 text-muted" />
               </div>
               <h4 className="text-muted">
-                {title ?? "Drop files here or click to upload."}
+                {title ?? "Drop file here or click to upload."}
               </h4>
             </div>
           </div>
@@ -366,7 +396,7 @@ const DropItemZone = ({
 
       {buttonText && (
         <div className="text-center mt-4 mb-2">
-          <Button
+            <Button
             type="dashed"
             className={`d-flex align-items-center justify-content-center mx-auto btn-danger-custom ${
               fileUploading ? "pointer-events-none" : ""
@@ -375,14 +405,20 @@ const DropItemZone = ({
             disabled={
               fileUploading ||
               selectedFiles.length === 0 ||
-              selectedFiles.some((file) => file.errors.length > 0)
+              selectedFiles.some((file) => file.errors.length > 0) ||
+              (courseState.introductoryVideo && name === 'introductory-video') ||
+              (courseState.thumbnail && name === 'course-thumbnail') 
             }
             style={{
               width: "100%",
             }}
             icon={<RiUploadCloudLine />}
           >
-            {buttonText ?? "Upload"}
+            {!fileUploading ? (
+              <>{buttonText ?? "Upload"}</>
+            ) : (
+              <span>Progressing...</span>
+            )}
           </Button>
         </div>
       )}

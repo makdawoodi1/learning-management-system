@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from "react";
+import React, { useState, useCallback, useContext, useEffect } from "react";
 import {
   Row,
   Col,
@@ -20,8 +20,6 @@ const CourseSettings = () => {
   const [form] = Form.useForm();
   const { courseState, setCourseState } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState(0);
-
-  console.log(courseState);
 
   // Functions
   const toggleTab = (tab) => {

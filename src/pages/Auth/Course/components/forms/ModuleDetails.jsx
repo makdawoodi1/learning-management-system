@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { Row, Col, Card, CardHeader, CardBody, Collapse } from "reactstrap";
 import { Input, Button, Popconfirm } from "antd";
 import * as TYPES from "./types";
+import { generateUniqueID } from '@/helpers/helper'
 
 // Import Icons
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
@@ -34,11 +35,6 @@ const ModuleDetails = ({ Form, form }) => {
   const descriptionRef = useRef(null);
 
   // Functions
-  // Validate Fields
-  const validateFields = () => {
-    console.log("Validating Module Fields");
-  };
-
   // Clear State
   const clearState = () => {
     form.setFieldValue("module-title", "");
@@ -66,12 +62,14 @@ const ModuleDetails = ({ Form, form }) => {
 
     if (state.mode === "add") {
       updatedModules.push({
-        id: state.modules?.length + 1,
+        id: generateUniqueID(),
+        moduleFolderKey: null, 
         title: values['module-title'],
         description: values['module-description'],
         lessons: [],
         quiizes: [],
         collapsed: true,
+        completed: false,
       });
     } else if (index >= 0 && index < updatedModules.length)
       updatedModules[index] = {

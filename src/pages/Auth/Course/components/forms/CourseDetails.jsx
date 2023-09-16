@@ -122,7 +122,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           </h6>
           <Dropzone 
             name="course-thumbnail"
-            buttonText="Upload" 
+            buttonText="Upload"
             acceptedFileTypes={['image/jpeg', 'image/png']} 
             maxFileSize={100 * 1024 * 1024}
             multiple={false}

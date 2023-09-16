@@ -5,6 +5,7 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }) => {
     const [auth, setAuth] = useState({});
     const [courseState, setCourseState] = useState({
+        courseFolderKey: null,
         courseTitle: null,
         courseDescription: null,
         price: 0,
@@ -14,7 +15,8 @@ export const AuthProvider = ({ children }) => {
         lessonFiles: [],
         archived: false,
         published: false,
-        modules: []
+        modules: [],
+        lessons: []
     })
 
     return (

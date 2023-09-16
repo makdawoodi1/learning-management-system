@@ -3,6 +3,7 @@ import { Row, Col, Card, CardHeader, CardBody, Collapse } from "reactstrap";
 import { Input, Button, Popconfirm, Select } from "antd";
 import Dropzone from "@/components/Dropzone";
 import AuthContext from "@/context/context";
+import { generateUniqueID } from "@/helpers/helper";
 
 // Import Icons
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
@@ -59,63 +60,124 @@ const LessonDetails = ({ Form, form }) => {
     });
   };
 
-  // Submit module handler
+  // Submit lesson handler
   const handleLessonSubmit = () => {
     const values = form.getFieldsValue();
     if (values['lesson-title'] === '' || values['lesson-description'] === '') return
-
-    const updatedLessons = [...state.lessons];
-    const index =
-      updatedLessons.length &&
-      updatedLessons?.findIndex(
-        (module) =>
-          JSON.stringify(module) === JSON.stringify(state.selectedLesson)
-      );
-
-    if (state.mode === "add") {
-      updatedLessons.push({
-        id: state.lessons?.length + 1,
-        title: values['lesson-title'],
-        description: values['lesson-description'],
+    
+    const currentModule = courseState.modules?.find(module => module.id === state.selectedModule)
+    const currentLesson = currentModule.lessons?.find(lesson => lesson.id === state.selectedLesson?.id)
+    const moduleIndex = courseState.modules?.indexOf(currentModule)
+    const lessonIndex = currentModule.lessons?.indexOf(currentLesson)
+    
+    const addLesson = () => {
+      currentModule.lessons.push({
+        id: generateUniqueID(),
+        moduleID: currentModule.id,
+        lessonFolderKey: null,
+        title: values["lesson-title"],
+        description: values["lesson-description"],
+        lessonFiles: [],
         collapsed: true,
-      });
-    } else if (index >= 0 && index < updatedLessons.length)
-      updatedLessons[index] = {
-        ...updatedLessons[index],
-        title: values['lesson-title'],
-        description: values['lesson-description'],
-      };
-
-
-    const currentModule = courseState.modules?.find(module => state.selectedModule === module.id);
-    const moduleIndex = courseState.modules?.indexOf(currentModule);
-    if (currentModule) {
-      currentModule.lessons = [...updatedLessons];
-    
-      setCourseState(prev => {
-        const updatedModules = [...prev.modules]; // Create a copy of the modules array
-    
-        if (moduleIndex !== -1) {
-          // If the module exists in the array, update it
-          updatedModules[moduleIndex] = currentModule;
-        } else {
-          // If the module doesn't exist, add it to the end of the array
-          updatedModules.push(currentModule);
-        }
-    
-        return { ...prev, modules: updatedModules };
-      });
-    
-      setState({
-        ...state,
-        mode: "add",
-        lessons: updatedLessons,
-      });
-    
-      form.setFieldValue("lesson-title", "");
-      form.setFieldValue("lesson-description", "");
+        completed: false,
+      })
     }
-  };
+
+    const editLesson = index => {
+      currentLesson.title = values['lesson-title']
+      currentLesson.description = values['lesson-description']
+
+      return setCourseState((prev) => ({
+        ...prev,
+        modules: [
+          ...prev.modules.slice(0, moduleIndex),
+          {
+            ...prev.modules[moduleIndex],
+            lessons: [
+              ...prev.modules[moduleIndex].lessons.slice(0, lessonIndex),
+              { ...currentLesson },
+              ...prev.modules[moduleIndex].lessons.slice(lessonIndex + 1),
+            ],
+          },
+          ...prev.modules.slice(moduleIndex + 1),
+        ],
+      }));
+    }
+
+    switch(state.mode) {
+      case "add":
+        addLesson();
+        break;
+      
+      case "edit":
+        editLesson(moduleIndex, lessonIndex);
+        break;
+    }
+
+    // setCourseState((prev) => ({ ...prev, lessons: [...prev.lessons, currentLesson] }))
+    setState({
+      ...state,
+      mode: "add",
+      lessons: courseState.lessons,
+    });
+    form.setFieldValue("lesson-title", "");
+    form.setFieldValue("lesson-description", "");
+  }
+
+  // Submit module handler
+  // const handleLessonSubmit = () => {
+  //   const values = form.getFieldsValue();
+  //   if (values["lesson-title"] === "" || values["lesson-description"] === "")
+  //     return;
+
+  //   const updatedLessons = [...state.lessons];
+  //   const index =
+  //     updatedLessons.length &&
+  //     updatedLessons?.findIndex(
+  //       (lesson) =>
+  //         JSON.stringify(lesson) === JSON.stringify(state.selectedLesson)
+  //     );
+
+  //   if (state.mode === "add") {
+  //     updatedLessons.push({
+  //       id: state.lessons?.length + 1,
+  //       title: values["lesson-title"],
+  //       description: values["lesson-description"],
+  //       collapsed: true,
+  //     });
+  //   } else if (index >= 0 && index < updatedLessons.length)
+  //     updatedLessons[index] = {
+  //       ...updatedLessons[index],
+  //       title: values["lesson-title"],
+  //       description: values["lesson-description"],
+  //     };
+
+  //   const currentModule = courseState.modules?.find(
+  //     (module) => state.selectedModule === module.id
+  //   );
+  //   const moduleIndex = courseState.modules?.indexOf(currentModule);
+  //   if (currentModule) {
+  //     currentModule.lessons = [...updatedLessons];
+
+  //     setCourseState((prev) => {
+  //       const updatedModules = [...prev.modules]; // Create a copy of the modules array
+
+  //       if (moduleIndex !== -1) updatedModules[moduleIndex] = currentModule;
+  //       else updatedModules[moduleIndex].lessons.push(currentModule);
+
+  //       return { ...prev, modules: updatedModules };
+  //     });
+
+  //     setState({
+  //       ...state,
+  //       mode: "add",
+  //       lessons: updatedLessons,
+  //     });
+
+  //     form.setFieldValue("lesson-title", "");
+  //     form.setFieldValue("lesson-description", "");
+  //   }
+  // };
 
   // Edit module
 
@@ -140,26 +202,28 @@ const LessonDetails = ({ Form, form }) => {
 
     if (index >= 0 && index < updatedLessons.length) {
       updatedLessons.splice(index, 1);
-      setState({ 
+      setState({
         ...state,
-        lessons: updatedLessons
-       });
+        lessons: updatedLessons,
+      });
     }
   };
 
   const toggleCollapse = ({ id, collapsed }) => {
-    const updatedLessons = state.lessons?.map((lesson) => {
-      if (lesson.id === id) {
-        return { ...lesson, collapsed: !collapsed };
-      } else {
-        return { ...lesson, collapsed: true };
-      }
-    });
+    const updatedLessons = courseState.modules
+      .find((module) => module.id === state?.selectedModule)
+      .lessons?.map((lesson) => {
+        if (lesson.id === id) {
+          return { ...lesson, collapsed: !collapsed };
+        } else {
+          return { ...lesson, collapsed: true };
+        }
+      });
 
     setState({ ...state, lessons: updatedLessons });
   };
 
-  console.log(courseState)
+  console.log(courseState);
 
   return (
     <>
@@ -174,7 +238,7 @@ const LessonDetails = ({ Form, form }) => {
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (courseState.modules?.length === 0 && !value) {
-                        return Promise.reject(new Error('Please add module'));
+                        return Promise.reject(new Error("Please add module"));
                       }
                       return Promise.resolve();
                     },
@@ -185,11 +249,13 @@ const LessonDetails = ({ Form, form }) => {
                   className="w-full"
                   showSearch
                   bordered
-                  placeholder="Search Attachments"
+                  placeholder="Search Module"
                   onChange={(value) =>
                     setState({ ...state, selectedModule: value })
                   }
-                  options={courseState.modules?.map(module => { return { value: module.id, label: module.title } })}
+                  options={courseState.modules?.map((module) => {
+                    return { value: module.id, label: module.title };
+                  })}
                 />
               </Form.Item>
               <Form.Item
@@ -199,7 +265,7 @@ const LessonDetails = ({ Form, form }) => {
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (courseState.modules?.length === 0 && !value) {
-                        return Promise.reject(new Error('Please add module!'));
+                        return Promise.reject(new Error("Please add module!"));
                       }
                       return Promise.resolve();
                     },
@@ -285,22 +351,16 @@ const LessonDetails = ({ Form, form }) => {
           lg={6}
           className="text-center d-flex flex-column justify-content-center"
         >
-          <hr />
           <h6 className="text-secondary font-weight-normal">
-            Upload Lesson Attachments
+            Total Lessons (
+            {courseState.modules?.find(
+              (module) => module.id === state?.selectedModule
+            )?.lessons.length ?? 0}
+            )
           </h6>
-          <Dropzone
-            name="lessonAttachments"
-            buttonText="Upload Zip files"
-            acceptedFileTypes={["application/zip"]}
-            maxFileSize={100 * 1024 * 1024}
-            multiple={false}
-          />
-          <hr />
-          <h6 className="text-secondary font-weight-normal">
-            Total Lessons ({courseState.modules?.find(module => module.id === state?.selectedModule)?.lessons.length ?? 0})
-          </h6>
-          {state.lessons?.length > 0 && (
+          {courseState.modules?.find(
+            (module) => module.id === state?.selectedModule
+          )?.lessons?.length > 0 && (
             <Card
               className="mx-auto my-8 "
               style={{
@@ -310,58 +370,60 @@ const LessonDetails = ({ Form, form }) => {
               }}
             >
               <CardBody>
-                {courseState.modules.find(module => module.id === state?.selectedModule).lessons?.map((currentLesson) => (
-                  <>
-                    <div
-                      key={currentLesson.id}
-                      className="accordion ecommerce my-2"
-                    >
-                      <div className="accordion-item">
-                        <h2
-                          className="accordion-header d-flex align-items-center justify-content-between"
-                          id={`heading${currentLesson.id}`}
-                        >
-                          <button
-                            className={`accordion-button${
-                              currentLesson.collapsed ? " collapsed" : ""
-                            }`}
-                            onClick={() => toggleCollapse(currentLesson)}
-                            type="button"
+                {courseState.modules
+                  .find((module) => module.id === state?.selectedModule)
+                  .lessons?.map((currentLesson) => (
+                    <>
+                      <div
+                        key={currentLesson.id}
+                        className="accordion ecommerce my-2"
+                      >
+                        <div className="accordion-item">
+                          <h2
+                            className="accordion-header d-flex align-items-center justify-content-between"
+                            id={`heading${currentLesson.id}`}
                           >
-                            {currentLesson.title}
-                          </button>
-                          <div className="d-flex gap-2 px-2 cursor-pointer font-size-20 text-muted ">
-                            <RiEdit2Line
-                              color="#62A2B8"
-                              onClick={() => editModule(currentLesson)}
-                            />
-                            <Popconfirm
-                              title="Delete Module"
-                              description="Are you sure to delete this module?"
-                              okButtonProps={{
-                                danger: true,
-                              }}
-                              icon={
-                                <QuestionCircleOutlined className="text-danger" />
-                              }
-                              onConfirm={() => deleteModule(currentLesson)}
+                            <button
+                              className={`accordion-button${
+                                currentLesson.collapsed ? " collapsed" : ""
+                              }`}
+                              onClick={() => toggleCollapse(currentLesson)}
+                              type="button"
                             >
-                              <RiDeleteBinLine color="#DE3545" />
-                            </Popconfirm>
-                          </div>
-                        </h2>
-                        <Collapse
-                          isOpen={!currentLesson.collapsed}
-                          className="accordion-collapse"
-                        >
-                          <div className="accordion-body font-size-14 text-left p-2">
-                            {currentLesson.description}
-                          </div>
-                        </Collapse>
+                              {currentLesson.title}
+                            </button>
+                            <div className="d-flex gap-2 px-2 cursor-pointer font-size-20 text-muted ">
+                              <RiEdit2Line
+                                color="#62A2B8"
+                                onClick={() => editModule(currentLesson)}
+                              />
+                              <Popconfirm
+                                title="Delete Module"
+                                description="Are you sure to delete this module?"
+                                okButtonProps={{
+                                  danger: true,
+                                }}
+                                icon={
+                                  <QuestionCircleOutlined className="text-danger" />
+                                }
+                                onConfirm={() => deleteModule(currentLesson)}
+                              >
+                                <RiDeleteBinLine color="#DE3545" />
+                              </Popconfirm>
+                            </div>
+                          </h2>
+                          <Collapse
+                            isOpen={!currentLesson.collapsed}
+                            className="accordion-collapse"
+                          >
+                            <div className="accordion-body font-size-14 text-left p-2">
+                              {currentLesson.description}
+                            </div>
+                          </Collapse>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                ))}
+                    </>
+                  ))}
               </CardBody>
             </Card>
           )}
@@ -402,46 +464,93 @@ const LessonDetails = ({ Form, form }) => {
         <Col
           xs={12}
           lg={5}
-          className="d-flex flex-column justify-content-center gap-y-8"
+          className="d-flex flex-column justify-content-center"
         >
-          <div className="d-flex gap-x-6 gap-y-8">
-            <Select
-              className="w-full"
-              showSearch
-              bordered
-              placeholder="Search Attachments"
-              onChange={(value) =>
-                setState({ ...state, selectedAttachment: value })
+          <Row>
+            <Col xs={12} lg={6}>
+              <Form.Item
+                name="lesson"
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value)
+                        return Promise.reject(new Error("Please add module"));
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Select
+                  className="w-full"
+                  disabled={!form.getFieldValue('module')}
+                  showSearch
+                  bordered
+                  placeholder="Select Lesson"
+                  onChange={(value) =>
+                    setState({ ...state, selectedLesson: value })
+                  }
+                  options={courseState.modules
+                    .find((module) => module.id === state.selectedModule)
+                    ?.lessons?.map(lesson => ({ value: lesson.id, label: lesson.title }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={12} lg={6}>
+              <Form.Item
+                name="attachment"
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value)
+                        return Promise.reject(new Error("Please add module"));
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Select
+                  className="w-full"
+                  disabled={!form.getFieldValue('lesson')}
+                  showSearch
+                  bordered
+                  placeholder="Select Attachments"
+                  onChange={(value) =>
+                    setState({ ...state, selectedAttachment: value })
+                  }
+                  options={[
+                    { value: "Images", label: "Images" },
+                    { value: "Videos", label: "Videos" },
+                    { value: "Zip", label: "Zip" },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          {form.getFieldValue('lesson') && form.getFieldValue('attachment') && 
+            <>
+              {courseState.modules
+                .find((module) => module.id === state.selectedModule)
+                ?.lessons?.filter(lesson => lesson.id === state.selectedLesson)
+                ?.map((lesson) => (
+                  <Dropzone
+                  name="lesson-files"
+                  selectedLesson={lesson}
+                  buttonText="Upload"
+                  acceptedFileTypes={
+                    state.selectedAttachment === "Images"
+                      ? ["image/jpeg", "image/png"]
+                      : state.selectedAttachment === "Videos"
+                      ? ["video/mp4"]
+                      : ["application/zip"]
+                  }
+                  maxFileSize={100 * 1024 * 1024}
+                  multiple={false}
+                  title={`Upload ${state.selectedAttachment}`}
+                  fn={{ handlePreview, handleRemoveFile }}
+                />))
               }
-              options={[
-                { value: "Images", label: "Images" },
-                { value: "Videos", label: "Videos" },
-              ]}
-            />
-            <Button
-              type="dashed"
-              className="d-flex align-items-center justify-content-center mx-auto w-auto"
-              // htmlType="submit"
-              style={{
-                width: "100%",
-              }}
-              icon={<PlusOutlined />}
-            >
-              Upload Attachments
-            </Button>
-          </div>
-          <Dropzone
-            name="lessonFiles"
-            buttonText="Upload"
-            acceptedFileTypes={
-              state.selectedAttachment === "Images" ? ["image/jpeg", "image/png"]
-              : ["video/mp4"]
-            }
-            maxFileSize={100 * 1024 * 1024}
-            multiple={false}
-            title={`Upload ${state.selectedAttachment}`}
-            fn={{ handlePreview, handleRemoveFile }}
-          />
+            </>
+          }
         </Col>
         <Col xs={12} lg={7} className="text-center">
           {!state?.selectedFile ? (
