@@ -1,17 +1,26 @@
 import express from "express";
 import { 
-    presignURLHandler1, 
-    delteObjectHandler,
     getCoursesHandler,
     getCourseHandler,
     createCourseHandler,
     updateCourseHandler
 } from "../controllers/courseController.js";
 
+import { 
+    presignURLHandler, 
+    delteObjectHandler,
+ } from "../controllers/utils/s3.js"
+
 const router = express.Router();
 
-router.get("/get-presign-url", async (req, res, next) => {
-    await presignURLHandler1(req, res);
+router.post("/get-presign-url", async (req, res, next) => {
+    const { 
+        name, 
+        folderKey, 
+        moduleKey,
+        lessonKey
+    } = req.body.data.attributes;
+    await presignURLHandler(req, res, name, folderKey, moduleKey, lessonKey);
 });
 
 router.delete("/delete-object", async (req, res, next) => {

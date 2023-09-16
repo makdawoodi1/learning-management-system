@@ -38,9 +38,9 @@ model User {
 
 model Course {
   id             Int            @id @default(autoincrement())
+  s3_folder_key  String         @unique @default("")
   title          String         @unique
   description    String?
-  instructor_id  Int
   created_at     DateTime       @default(now())
   updated_at     DateTime       @updatedAt
   course_modules CourseModule[]
