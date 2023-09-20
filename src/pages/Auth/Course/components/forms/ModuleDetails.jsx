@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { Row, Col, Card, CardHeader, CardBody, Collapse } from "reactstrap";
 import { Input, Button, Popconfirm } from "antd";
 import * as TYPES from "./types";
+import { generateUniqueID } from '@/helpers/helper'
 
 // Import Icons
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
@@ -34,11 +35,6 @@ const ModuleDetails = ({ Form, form }) => {
   const descriptionRef = useRef(null);
 
   // Functions
-  // Validate Fields
-  const validateFields = () => {
-    console.log("Validating Module Fields");
-  };
-
   // Clear State
   const clearState = () => {
     form.setFieldValue("module-title", "");
@@ -66,10 +62,14 @@ const ModuleDetails = ({ Form, form }) => {
 
     if (state.mode === "add") {
       updatedModules.push({
-        id: state.modules?.length + 1,
+        id: generateUniqueID(),
+        moduleFolderKey: null, 
         title: values['module-title'],
         description: values['module-description'],
+        lessons: [],
+        quiizes: [],
         collapsed: true,
+        completed: false,
       });
     } else if (index >= 0 && index < updatedModules.length)
       updatedModules[index] = {
@@ -77,7 +77,7 @@ const ModuleDetails = ({ Form, form }) => {
         title: values['module-title'],
         description: values['module-description'],
       };
-    setCourseState({ ...courseState, modules: state.modules })
+    setCourseState({ ...courseState, modules: updatedModules })
     setState({ ...state, mode: "add", modules: updatedModules })
     form.setFieldValue("module-title", "");
     form.setFieldValue("module-description", "");
@@ -229,19 +229,9 @@ const ModuleDetails = ({ Form, form }) => {
           <h6 className="text-secondary font-weight-normal">
             Course Modules ({state.modules?.length})
           </h6>
-          {/* <Button
-            type="dashed"
-            className="d-flex align-items-center justify-content-center mx-auto my-2"
-            onClick={add}
-            style={{
-              width: "80%",
-            }}
-            icon={<PlusOutlined />}
-          >
-            Add Module
-          </Button> */}
           {state.modules?.length > 0 && (
             <Card
+              key={state.modules?.id}
               className="mx-auto my-8 "
               style={{
                 width: "80%",
@@ -293,7 +283,9 @@ const ModuleDetails = ({ Form, form }) => {
                         isOpen={!currentModule.collapsed}
                         className="accordion-collapse"
                       >
-                        <div className="accordion-body font-size-14 text-left p-2">
+                        <div className="accordion-body font-size-14 text-left p-2"
+                          style={{ visibility: "visible" }}
+                        >
                           {currentModule.description}
                         </div>
                       </Collapse>

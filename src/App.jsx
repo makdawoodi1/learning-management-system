@@ -13,8 +13,8 @@ import Page404 from "@/pages/Others/Page404";
 import Unauthorized from "@/pages/Others/Unauthorized";
 
 // Services
-// import RequireAuth from "@/services/RequireAuth";
-// import PersistLogin from "@/services/PersistLogin";
+import RequireAuth from "@/services/RequireAuth";
+import PersistLogin from "@/services/PersistLogin";
 import AuthLayout from "@/layouts/AuthLayout";
 
 const App = () => {
@@ -30,26 +30,30 @@ const App = () => {
           />
         ))}
 
-        {/* <Route element={<RequireAuth allowedRoles={[USER_ROLE.STUDENT, USER_ROLE.ADMIN]} />}>
+        <Route
+          element={
+            <RequireAuth allowedRoles={[USER_ROLE.STUDENT, USER_ROLE.ADMIN]} />
+          }
+        >
           <Route path="unauthorized" element={<Unauthorized />} />
-        </Route> */}
+        </Route>
 
         <Route path="auth" element={<AuthLayout />}>
-          {/* <Route element={<PersistLogin />}> */}
-          {pages.ProtectedRoutes.map((page, index) => (
-            // <Route
-            //   key={index}
-            //   element={<RequireAuth allowedRoles={page.allowedRoles} />}
-            // >
-            <Route
-              key={index}
-              path={page.path}
-              element={page.element}
-              exact={page.exact}
-            />
-            // </Route>
-          ))}
-          {/* </Route> */}
+          <Route element={<PersistLogin />}>
+            {pages.ProtectedRoutes.map((page, index) => (
+              <Route
+                key={index}
+                element={<RequireAuth allowedRoles={page.allowedRoles} />}
+              >
+                <Route
+                  key={index}
+                  path={page.path}
+                  element={page.element}
+                  exact={page.exact}
+                />
+              </Route>
+            ))}
+          </Route>
         </Route>
         <Route path="*" element={<Page404 />} />
       </Route>

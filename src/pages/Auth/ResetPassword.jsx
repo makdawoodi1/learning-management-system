@@ -30,7 +30,6 @@ const ResetPassword = () => {
         )
         .then((response) => {
           if (response.data?.success) {
-            console.log(response.data);
             toast.success("Your password has been succesfully reset!");
             navigate("/login");
           } else {

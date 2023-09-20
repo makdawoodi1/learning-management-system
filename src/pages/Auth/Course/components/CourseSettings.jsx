@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useState, useCallback, useContext, useEffect } from "react";
 import {
   Row,
   Col,
@@ -10,13 +10,21 @@ import {
   TabPane,
 } from "reactstrap";
 import classnames from "classnames";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CourseDetails, ModuleDetails, LessonDetails } from "./forms";
 import { Form } from "antd";
+import { API_URL } from "@/config/config";
 import * as TYPES from "./forms/types";
+import AuthContext from "@/context/context";
+import { filterAndValidateCourse } from "@/helpers/helper";
+import toast from "react-hot-toast";
+import axios from "@/services/axios";
 
 const CourseSettings = () => {
   const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const { auth, courseState, setCourseState } = useContext(AuthContext);
+
   const [activeTab, setActiveTab] = useState(0);
 
   // Functions
@@ -28,10 +36,80 @@ const CourseSettings = () => {
     }
   };
 
-  const handleSubmit = values => {
-    console.log(form.getFieldsValue())
-    console.log(values)
-  }
+  const handleSubmit = () => {
+    if (!courseState.thumbnail) {
+      setCourseState((prev) => ({
+        ...prev,
+        errors: {
+          ...prev.errors,
+          thumbnailError: "Please add course thumbnail",
+        },
+      }));
+      return;
+    }
+
+    if (!courseState.introductoryVideo) {
+      setCourseState((prev) => ({
+        ...prev,
+        errors: { ...prev.errors, videoError: "Please add introductory video" },
+      }));
+      return;
+    }
+
+    // Update courseState with the form values
+    setCourseState((prev) => ({
+      ...prev,
+      courseTitle: form.getFieldValue("course-title"),
+      courseDescription: form.getFieldValue("course-description"),
+      price: parseFloat(form.getFieldValue("price")),
+    }));
+
+    setTimeout(() => {
+      const filteredData = filterAndValidateCourse(courseState);
+      const errorKeys = Object.keys(filteredData.errors);
+      if (errorKeys.length > 0) {
+        return toast.error(Object.values(filteredData.errors)[0]);
+      }
+
+      try {
+        axios
+          .post(
+            `${API_URL}/courses/create-course`,
+            JSON.stringify({
+              data: {
+                attributes: {
+                  ...filteredData
+                },
+              },
+            }),
+            {
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+            }
+          )
+          .then(async (response) => {
+            if (response.data?.success) {
+              toast.success("Course has been created successfully");
+              navigate('/auth/dashboard');
+            } else {
+              toast.error(response?.data.message);
+            }
+          })
+          .catch((error) => {
+            if (error.response?.data?.message) {
+              return toast.error(error.response.data?.message);
+            }
+            console.error("Error creating Course!:", error.message);
+            toast.error(error.message);
+          })
+      } catch (error) {
+        console.error(error);
+        toast.error("Unexpected error occured!");
+      }
+    }, 0);
+  };
+
+  console.log(courseState);
 
   return (
     <Card>
@@ -83,27 +161,29 @@ const CourseSettings = () => {
               className="twitter-bs-wizard-tab-content"
             >
               <TabPane tabId={0}>
-                  <CourseDetails Form={Form} form={form} />
+                <CourseDetails
+                  Form={Form}
+                  form={form}
+                  handleSubmit={handleSubmit}
+                />
               </TabPane>
               <TabPane tabId={1}>
-                  <ModuleDetails Form={Form} form={form} />
+                <ModuleDetails Form={Form} form={form} />
               </TabPane>
               <TabPane tabId={2}>
-                  <LessonDetails Form={Form} form={form} />
+                <LessonDetails Form={Form} form={form} />
               </TabPane>
             </TabContent>
           </Form>
           <ul className="pager wizard twitter-bs-wizard-pager-link">
-            <li
-              className="previous"
-            >
+            <li className="previous">
               {activeTab === 0 ? (
-                <Link to="/auth/my-courses">
-                  Go back to My Courses
-                </Link>
+                <Link to="/auth/my-courses">Go back to My Courses</Link>
               ) : (
                 <Link
-                  onClick={ () => { toggleTab(activeTab - 1) }}
+                  onClick={() => {
+                    toggleTab(activeTab - 1);
+                  }}
                 >
                   Previous
                 </Link>

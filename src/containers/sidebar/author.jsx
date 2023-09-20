@@ -1,55 +1,13 @@
-const name = "Dr. Adrienne Platt";
-const degi = "Phd";
-const desc =
-  "I'm an Afro-Latina digital artist originally from Long Island, NY. I love to paint design and photo manpulate in Adobe Photoshop while helping others learn too. Follow me on Instagram or tweet me";
-
-const socialList = [
-  {
-    link: "#",
-    iconName: "icofont-facebook",
-    className: "facebook",
-  },
-  {
-    link: "#",
-    iconName: "icofont-twitter",
-    className: "twitter",
-  },
-  {
-    link: "#",
-    iconName: "icofont-linkedin",
-    className: "linkedin",
-  },
-  {
-    link: "#",
-    iconName: "icofont-instagram",
-    className: "instagram",
-  },
-  {
-    link: "#",
-    iconName: "icofont-pinterest",
-    className: "pinterest",
-  },
-];
-
-const Author = () => {
+const Author = ({ authorImage }) => {
   return (
     <div className="authors">
       <div className="author-thumb">
-        <img src="/author/01.jpg" alt="rajibraj91" />
+        <img src={authorImage ? authorImage : "/author.jpg"} alt="rajibraj91" />
       </div>
       <div className="author-content">
-        <h5>{name}</h5>
-        <span>{degi}</span>
-        <p>{desc}</p>
-        <ul className="lab-ul social-icons">
-          {socialList.map((val, i) => (
-            <li key={i}>
-              <a href={val.link} className={val.className}>
-                <i className={val.iconName}></i>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <h5>Dr. Adrienne Platt</h5>
+        <span>Phd</span>
+        <p>I'm an Afro-Latina digital artist originally from Long Island, NY. I love to paint design and photo manpulate in Adobe Photoshop while helping others learn too. Follow me on Instagram or tweet me</p>
       </div>
     </div>
   );

@@ -1,131 +1,120 @@
 import { Link } from "react-router-dom";
+import { USER_ROLE } from "@/config/config";
+import axios from "@/services/axios";
+import useLogout from "@/hooks/useLogout";
+import { API_URL } from "@/config/config";
+import toast from "react-hot-toast";
 
-const price = "89";
-const excenge = "Limited time offer";
-const paymentTitle = "Secure Payment:";
-const shareTitle = "Share This Course:";
-const btnText = "Enrolled Now";
+const CourseSideDetail = ({ auth, course, enrolled }) => {
+  const logout = useLogout();
+  const modules = course.course_modules;
+  const lessons = modules?.map((module) => module?.module_lessons)[0];
 
-const csdcList = [
-  {
-    iconName: "icofont-ui-alarm",
-    leftText: "Course level",
-    rightText: "Beginner",
-  },
-  {
-    iconName: "icofont-book-alt",
-    leftText: "Course Duration",
-    rightText: "10 week",
-  },
-  {
-    iconName: "icofont-signal",
-    leftText: "Online Class",
-    rightText: "08",
-  },
-  {
-    iconName: "icofont-video-alt",
-    leftText: "Lessions",
-    rightText: "18x",
-  },
-  {
-    iconName: "icofont-abacus-alt",
-    leftText: "Quizzes",
-    rightText: "0",
-  },
-  {
-    iconName: "icofont-hour-glass",
-    leftText: "Pass parcentages",
-    rightText: "80",
-  },
-  {
-    iconName: "icofont-certificate",
-    leftText: "Certificate",
-    rightText: "Yes",
-  },
-  {
-    iconName: "icofont-globe",
-    leftText: "Language",
-    rightText: "English",
-  },
-];
+  const enroll = () => {
+    try {
+      axios
+        .post(
+          `${API_URL}/courses/enroll-course?courseID=${course.id}`,
+          JSON.stringify({
+            data: {
+              attributes: { username: auth.username },
+            },
+          }),
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          }
+        )
+        .then((response) => {
+          if (response.data?.success) {
+            toast.success("Successfully enrolled in the course!");
+          }
+          console.log("here");
+        })
+        .catch((error) => {
+          if (error.response?.status === 403) logout();
 
-const socialList = [
-  {
-    siteLink: "#",
-    iconName: "icofont-twitter",
-    className: "twitter",
-  },
-  {
-    siteLink: "#",
-    iconName: "icofont-vimeo",
-    className: "vimeo",
-  },
-  {
-    siteLink: "#",
-    iconName: "icofont-rss",
-    className: "rss",
-  },
-];
+          if (error.response?.data?.message) {
+            return toast.error(error.response.data?.message);
+          }
+          console.error("Error enrolling into course!:", error.message);
+        });
+    } catch (error) {
+      console.error(error);
+      toast.error("Unexpected error occured!");
+    }
+  };
 
-const CourseSideDetail = () => {
   return (
     <div className="course-side-detail">
       <div className="csd-title">
         <div className="csdt-left">
-          <h4 className="mb-0">
-            <sup>$</sup>
-            {price}
-          </h4>
+          <h4 className="mb-0">Price</h4>
         </div>
         <div className="csdt-right">
-          <p className="mb-0">
-            <i className="icofont-clock-time"></i>
-            {excenge}
-          </p>
+          <h4 className="mb-0">${course.price}</h4>
         </div>
       </div>
       <div className="csd-content">
         <div className="csdc-lists">
           <ul className="lab-ul">
-            {csdcList.map((val, i) => (
-              <li key={i}>
-                <div className="csdc-left">
-                  <i className={val.iconName}></i>
-                  {val.leftText}
-                </div>
-                <div className="csdc-right">{val.rightText}</div>
-              </li>
-            ))}
+            <li>
+              <div className="csdc-left">
+                <i className="icofont-video-alt"></i>
+                Modules
+              </div>
+              <div className="csdc-right">{modules?.length}</div>
+            </li>
+            <li>
+              <div className="csdc-left">
+                <i className="icofont-video-alt"></i>
+                Lessons
+              </div>
+              <div className="csdc-right">{lessons?.length}</div>
+            </li>
+            <li>
+              <div className="csdc-left">
+                <i className="icofont-abacus-alt"></i>
+                Quizzes
+              </div>
+              <div className="csdc-right">{0}</div>
+            </li>
           </ul>
         </div>
         <div className="sidebar-payment">
           <div className="sp-title">
-            <h6>{paymentTitle}</h6>
+            <h6>Secure Payment</h6>
           </div>
           <div className="sp-thumb">
             <img src="/assets/images/pyment/01.jpg" alt="CodexCoder" />
           </div>
         </div>
-        <div className="sidebar-social">
-          <div className="ss-title">
-            <h6>{shareTitle}</h6>
-          </div>
-          <div className="ss-content">
-            <ul className="lab-ul">
-              {socialList.map((val, i) => (
-                <li key={i}>
-                  <a href={val.siteLink} className={val.className}>
-                    <i className={val.iconName}></i>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
         <div className="course-enroll">
-          <Link to="/register" className="lab-btn">
-            <span>{btnText}</span>
-          </Link>
+          {auth?.role === USER_ROLE.ADMIN ? (
+            <Link
+              to={!auth?.username ? "/login" : `/auth/edit-course/${course.id}`}
+              className="lab-btn"
+            >
+              <span>Edit</span>
+            </Link>
+          ) : (
+            <Link
+              to={
+                !auth?.username
+                  ? "/login"
+                  : enrolled
+                  ? `/auth/enrolled-course/${course.id}`
+                  : ""
+              }
+              className="lab-btn"
+            >
+              {enrolled ? (
+                <span>Go to course</span>
+              ) : (
+                <span onClick={enroll}>Enroll Now</span>
+              )}
+            </Link>
+          )}
         </div>
       </div>
     </div>

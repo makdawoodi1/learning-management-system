@@ -1,11 +1,13 @@
-import React, { useContext, useEffect } from "react";
-import AuthContext from "@/context/context";
+import React, { useContext, useEffect, useState } from "react";
 import { Row, Col } from "reactstrap";
 import { Input, Popconfirm } from "antd";
 import Dropzone from "@/components/Dropzone";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import Editor from "@/components/Editor";
 
 const CourseDetails = ({ Form, form, handleSubmit }) => {
+  const [editorContent, setEditorContent] = useState('');
+
   return (
     <>
       <Row className="place-items-center">
@@ -41,6 +43,10 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
                   },
                 ]}
               >
+                {/* <Editor 
+                  value={editorContent}
+                  onChange={(value) => setEditorContent(value)}
+                /> */}
                 <Input.TextArea
                   size="large"
                   rows={8}
@@ -53,9 +59,12 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
                 Upload Introductory Video
               </h6>
               <Dropzone
-                name="introductory-video"
                 Form={Form}
+                name="introductory-video"
                 buttonText="Upload"
+                acceptedFileTypes={['video/mp4']} 
+                maxFileSize={1000 * 1024 * 1024}
+                multiple={false}
               />
             </Col>
           </Row>
@@ -92,9 +101,9 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
               danger: true,
             }}
             icon={<QuestionCircleOutlined className="text-danger" />}
-            onConfirm={() =>
-              setCourseState()
-            }
+            // onConfirm={() =>
+            //   setCourseState()
+            // }
           >
             <button className="w-full btn btn-warning mt-2 mb-3">
               Archive
@@ -119,7 +128,14 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           <h6 className="text-secondary text-center font-weight-normal">
             Upload Course Thumbnail
           </h6>
-          <Dropzone name="course-thumbnail" Form={Form} buttonText="Upload" />
+          <Dropzone
+            Form={Form}
+            name="course-thumbnail"
+            buttonText="Upload"
+            acceptedFileTypes={['image/jpeg', 'image/png']} 
+            maxFileSize={100 * 1024 * 1024}
+            multiple={false}
+          />
         </Col>
         <Col xs={12}></Col>
       </Row>

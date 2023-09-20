@@ -15,6 +15,7 @@ import TakenAssignment from "@/pages/Auth/Assignment/TakenAssignment";
 import AddCourse from "@/pages/Auth/Course/AddCourse";
 import EditCourse from "@/pages/Auth/Course/EditCourse";
 import EnrolledCourse from "@/pages/Auth/Course/EnrolledCourse";
+import EnrolledCourses from "@/pages/Auth/Course/EnrolledCourses";
 import InstructorCourses from "@/pages/Auth/Course/InstructorCourses";
 
 // Payments
@@ -56,6 +57,7 @@ export {
   AddCourse,
   EditCourse,
   EnrolledCourse,
+  EnrolledCourses,
   InstructorCourses,
   Billing,
   Earnings,

@@ -12,7 +12,7 @@ const Sidebar = ({ toast }) => {
   const { pathname } = useLocation();
 
 
-  if (pathname.includes('enrolled-course')) {
+  if (pathname.includes('enrolled-course/')) {
     return (
       <div className={`vertical-menu ${toggleSidebar ? "vertical-menu-course-collapsed" : "vertical-menu-course-content"}`}>
           <div data-simplebar className="h-100">

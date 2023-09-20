@@ -1,39 +1,46 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useContext, useEffect, useState } from "react";
+import AuthContext from "@/context/context";
 //Import Breadcrumb
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { Container, Row, Col, Card, CardBody, Form, Input } from "reactstrap";
+import { Progress } from "antd";
 import { Link } from "react-router-dom";
 import Rating from "@/containers/sidebar/rating";
 import Pagination from "@/containers/sidebar/pagination";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
+import useLogout from "@/hooks/useLogout";
 import toast from "react-hot-toast";
-import EditorPreview from "@/components/EditorPreview";
 
 import { RiSearchLine } from "react-icons/ri";
 
-const InstructorCourses = () => {
+const EnrolledCourses = () => {
   const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
-    { title: "My Courses", link: "/auth/my-courses" },
+    { title: "Dashboard", link: "/auth/dashboard" },
+    { title: "Enrolled Courses", link: "/auth/enrolled-courses" },
   ]);
   const [courses, setCourses] = useState([]);
+  const { auth } = useContext(AuthContext);
+  const logout = useLogout();
 
   useEffect(() => {
     const fetchCourses = async (req, res) => {
       try {
         axios
-          .get(`${API_URL}/courses/get-courses`, {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          })
+          .get(
+            `${API_URL}/courses/get-enrolled-courses?username=${auth.username}`,
+            {
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+            }
+          )
           .then((response) => {
             if (response.data?.success) {
               setCourses(response.data?.courses);
             }
           })
           .catch((error) => {
+            if (error.response?.status === 403) logout();
             if (error.response?.data?.message) {
               return toast.error(error.response.data?.message);
             }
@@ -51,7 +58,10 @@ const InstructorCourses = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        <Breadcrumbs title="My Courses" breadcrumbItems={breadcrumbItems} />
+        <Breadcrumbs
+          title="Enrolled Courses"
+          breadcrumbItems={breadcrumbItems}
+        />
 
         <Row>
           <Col xs={12}>
@@ -71,11 +81,6 @@ const InstructorCourses = () => {
                       </span>
                     </div>
                   </Form>
-                  <Link to="/auth/add-course">
-                    <button type="button" className="btn-primary-custom px-4">
-                      Create New Course
-                    </button>
-                  </Link>
                 </div>
               </CardBody>
             </Card>
@@ -89,25 +94,29 @@ const InstructorCourses = () => {
                 <div className="course-item">
                   <div className="course-inner">
                     <img
-                      src={course.thumbnail.objectKey}
+                      src={course.thumbnail.preview}
                       alt="Course Thumbnail"
                       width="100%"
                     />
                     <CardBody>
                       <div className="course-content p-0">
                         <div className="course-category"></div>
-                        <Link to={`/course/${course.id}`}>
+                        <Link to={`/auth/enrolled-course/${course.id}`}>
                           <h4>{course.title}</h4>
                         </Link>
-                        {/* <div className="course-details m-0" style={{ maxHeight: "50px", overflow: 'hidden' }}>
-                          <EditorPreview  value={course.description} />
-                        </div> */}
+                        {/* <p>{course.description}</p> */}
                         <div className="course-details mt-2 d-flex align-items-center justify-content-between position-relative">
                           <div className="couse-count">
                             <i className="icofont-video-alt"></i>
                             {course.lessonCount} Lessons
+                            {/* <div className="course-price font-sans">{course.price}$</div> */}
                           </div>
-                          {/* <div className="course-price font-sans">{course.price}$</div> */}
+                          <Progress
+                            percent={
+                              Math.floor((course.completedLessonCount / course.totalLessonCount) * 100)
+                            }
+                            size="small"
+                          />
                         </div>
                       </div>
                     </CardBody>
@@ -123,4 +132,4 @@ const InstructorCourses = () => {
   );
 };
 
-export default InstructorCourses;
+export default EnrolledCourses;

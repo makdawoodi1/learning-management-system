@@ -39,9 +39,8 @@ import AuthContext from "@/context/context";
 
 const Navbar = () => {
   const { pathname } = useLocation();
-  const { toggleSidebar, setToggleSidebar, fullScreenHandle } = useContext(AuthContext);
+  const { courseState, toggleSidebar, setToggleSidebar, fullScreenHandle } = useContext(AuthContext);
 
-  console.log(toggleSidebar)
   return (
     <header id="page-topbar">
       <div className="navbar-header">
@@ -51,7 +50,7 @@ const Navbar = () => {
             ${
               toggleSidebar
                 ? "navbar-brand-box-collapsed"
-                : pathname.includes('enrolled-course')
+                : pathname.includes('enrolled-course/')
                 ? "course-content"
                 : ""
             }`}
@@ -98,8 +97,8 @@ const Navbar = () => {
             <RiMenu2Line className="align-middle" />
           </Button>
 
-          {pathname.includes('enrolled-course') ? (
-            <h4 className="m-0">Childhood Overweight & Obesity</h4>
+          {pathname.includes('enrolled-course/') ? (
+            <h4 className="m-0">{courseState?.courseTitle}</h4>
           ) : (
             <Form className="app-search d-none d-lg-block">
               <div className="position-relative">
@@ -155,64 +154,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          <Dropdown
-            // isOpen={this.state.isSocialPf}
-            // toggle={() => this.setState({ isSocialPf: !this.state.isSocialPf })}
-            className="d-none d-lg-inline-block ms-1"
-          >
-            <DropdownToggle
-              tag="button"
-              className="btn header-item noti-icon waves-effect"
-            >
-              <RiApps2Line />
-            </DropdownToggle>
-            <DropdownMenu className="dropdown-menu-lg dropdown-menu-end">
-              <div className="px-lg-2">
-                <Row className="g-0">
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={github} alt="Github" />
-                      <span>GitHub</span>
-                    </Link>
-                  </Col>
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={bitbucket} alt="bitbucket" />
-                      <span>Bitbucket</span>
-                    </Link>
-                  </Col>
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={dribbble} alt="dribbble" />
-                      <span>Dribbble</span>
-                    </Link>
-                  </Col>
-                </Row>
-
-                <Row className="g-0">
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={dropbox} alt="dropbox" />
-                      <span>Dropbox</span>
-                    </Link>
-                  </Col>
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={mail_chimp} alt="mail_chimp" />
-                      <span>Mail Chimp</span>
-                    </Link>
-                  </Col>
-                  <Col>
-                    <Link className="dropdown-icon-item" to="#">
-                      <img src={slack} alt="slack" />
-                      <span>Slack</span>
-                    </Link>
-                  </Col>
-                </Row>
-              </div>
-            </DropdownMenu>
-          </Dropdown>
-
           <div className="dropdown d-none d-lg-inline-block ms-1">
             <Button
               color="none"
@@ -228,20 +169,9 @@ const Navbar = () => {
             </Button>
           </div>
 
-          <NotificationDropdown />
+          {/* <NotificationDropdown /> */}
 
           <ProfileMenu />
-
-          <div className="dropdown d-inline-block">
-            <Button
-              color="none"
-              // onClick={fullS}
-              type="button"
-              className="header-item noti-icon right-bar-toggle waves-effect"
-            >
-              <RiSettings2Line />
-            </Button>
-          </div>
         </div>
       </div>
     </header>

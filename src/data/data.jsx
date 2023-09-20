@@ -1,4 +1,4 @@
-import { RiAccountBoxLine, RiDashboardLine, RiExchangeDollarFill, RiHome2Line, RiLoginBoxLine, RiNotificationLine, RiQuestionLine, RiUser3Line, RiVideoAddFill } from "react-icons/ri";
+import { RiAccountBoxLine, RiDashboardLine, RiExchangeDollarFill, RiHome2Line, RiLoginBoxLine, RiLogoutBoxRLine, RiNotificationLine, RiQuestionLine, RiUser3Line, RiVideoAddFill, RiVideoAddLine, RiVidiconLine } from "react-icons/ri";
 import { MdOutlineAssignmentTurnedIn } from "react-icons/md"
 import { PiStudentFill } from "react-icons/pi"
 import { TbNewSection } from "react-icons/tb"
@@ -305,20 +305,74 @@ export const enrolledCourse = {
   },
 };
 
-export const sidebarContent = [
+// const items = [
+//   getItem("Childhood Overweight & Obesity", "id1", [
+//     getItem(
+//       "Lessons",
+//       "lessonGroup",
+//       [
+//         getItem("OAdult and Childhood Obesity", "1"),
+//         getItem("Definition of Overweight & Obesity", "2"),
+//         getItem("The Stats", "3"),
+//         getItem("Obesity", "4"),
+//         getItem("Health Impact of Obesity: Type-2 Diabetes.", "5"),
+//         getItem("Diabetes", "6"),
+//       ],
+//       "group"
+//     ),
+//     // getItem('Submenu', 'sub3', null, [getItem('Option 7', '7'), getItem('Option 8', '8')]),
+//     getItem(
+//       "Assignments",
+//       "assignmentGroup",
+//       [getItem("Assignment 1", "assignment1")],
+//       "group"
+//     ),
+//     getItem("Quizzes", "quizGroup", [getItem("Quiz 1", "quiz1")], "group"),
+//   ]),
+//   getItem("Childhood Overweight & Obesity", "sub2", [
+//     getItem(
+//       "Lessons",
+//       "lessonGroup",
+//       [
+//         getItem("OAdult and Childhood Obesity", "1"),
+//         getItem("Definition of Overweight & Obesity", "2"),
+//         getItem("The Stats", "3"),
+//         getItem("Obesity", "4"),
+//         getItem("Health Impact of Obesity: Type-2 Diabetes.", "5"),
+//         getItem("Diabetes", "6"),
+//       ],
+//       "group"
+//     ),
+//     // getItem('Submenu', 'sub3', null, [getItem('Option 7', '7'), getItem('Option 8', '8')]),
+//     getItem(
+//       "Assignments",
+//       "assignmentGroup",
+//       [getItem("Assignment 1", "assignment1")],
+//       "group"
+//     ),
+//     getItem("Quizzes", "quizGroup", [getItem("Quiz 1", "quiz1")], "group"),
+//   ]),
+//   {
+//     type: "divider",
+//   },
+// ];
+
+export const studentSidebarContent = [
   { id: 1, route: "/", icon: <RiHome2Line size={24} />, title: "Home" },
   { id: 2, route: "/auth/dashboard", icon: <RiDashboardLine size={24} />, title: "Dashboard" },
   { id: 3, route: "/auth/profile", icon: <RiUser3Line size={24} />, title: "My Profile" },
-  { id: 4, route: "/auth/my-courses", icon: <RiVideoAddFill size={24} />, title: "My Courses", count: 3 },
-  { id: 4, route: "/auth/enrolled-course/1", icon: <RiVideoAddFill size={24} />, title: "Enrolled Courses" },
-  { id: 5, route: "/auth/announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
-  { id: 6, route: "/auth/earnings", icon: <RiExchangeDollarFill size={24} />, title: "Withdrawals" },
-  { id: 7, route: "/auth/submissions", icon: <RiQuestionLine size={24} />, title: "Quiz Attempts" },
-  { id: 8, route: "/auth/assignments", icon: <MdOutlineAssignmentTurnedIn size={24} />, title: "Assignments" },
-  { id: 9, route: "/auth/student-submissions", icon: <PiStudentFill size={24} />, title: "My Students" },
-  { id: 10, route: "/auth/account-settings", icon: <RiAccountBoxLine size={24} />, title: "Account Settings" },
-  { id: 11, route: "/login", icon: <RiLoginBoxLine size={24} />, title: "Login" },
-  { id: 12, route: "/register", icon: <TbNewSection size={24} />, title: "Register" },
+  { id: 5, route: "/auth/enrolled-courses", icon: <RiVidiconLine size={24} />, title: "Enrolled Courses" },
+  { id: 6, route: "/auth/announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
+  { id: 8, route: "/auth/submissions", icon: <RiQuestionLine size={24} />, title: "Quiz Attempts" },
+]
+
+export const adminSidebarContent = [
+  { id: 1, route: "/", icon: <RiHome2Line size={24} />, title: "Home" },
+  { id: 2, route: "/auth/dashboard", icon: <RiDashboardLine size={24} />, title: "Dashboard" },
+  { id: 3, route: "/auth/profile", icon: <RiUser3Line size={24} />, title: "My Profile" },
+  { id: 4, route: "/auth/my-courses", icon: <RiVideoAddLine size={24} />, title: "My Courses", count: 3 },
+  { id: 6, route: "/auth/announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
+  { id: 7, route: "/auth/earnings", icon: <RiExchangeDollarFill size={24} />, title: "Withdrawals" },
 ]
 
 export const notificationDropdownItems = [
@@ -326,4 +380,20 @@ export const notificationDropdownItems = [
   { id: 2, label: <Link to="/auth/dashboard">2nd Menu Item</Link> },
   { id: 3, label: <Link to="/auth/dashboard">3rd Menu Item</Link> },
   { id: 4, label: <Link to="/auth/dashboard">4th Menu Item</Link> },
+]
+
+export const adminProfileMenuItems = [
+  { id: 1, route: "/auth/profile", icon: <RiUser3Line size={12} className="align-middle me-1" />, title: "My Profile" },
+  { id: 2, route: "/auth/my-courses", icon: <RiVidiconLine size={12} className="align-middle me-1" />, title: "My Courses" },
+  { id: 3, route: "/auth/add-course", icon: <RiVideoAddLine size={12} className="align-middle me-1" />, title: "Create new course" },
+  { id: 4, route: "/auth/announcements", icon: <RiNotificationLine size={12} className="align-middle me-1" />, title: "Announcements" },
+  { id: 5, route: "/auth/logout", icon: <RiLogoutBoxRLine size={12} className="align-middle me-1 text-danger" />, title: "Logout" },
+]
+
+export const studentProfileMenuItems = [
+  { id: 1, route: "/auth/profile", icon: <RiUser3Line size={12} className="align-middle me-1" />, title: "My Profile" },
+  { id: 2, route: "/auth/enrolled-course/:courseID", icon: <RiVidiconLine size={12} className="align-middle me-1" />, title: "Enrolled Courses" },
+  { id: 3, route: "/auth/submissions", icon: <RiQuestionLine size={12} className="align-middle me-1" />, title: "My Quiz Attempts" },
+  { id: 4, route: "/auth/announcements", icon: <RiNotificationLine size={12} className="align-middle me-1" />, title: "Announcements" },
+  { id: 5, route: "/auth/logout", icon: <RiLogoutBoxRLine size={12} className="align-middle me-1 text-danger" />, title: "Logout" },
 ]

@@ -4,8 +4,6 @@ import { Container, Row, Col, Card, CardBody } from "reactstrap";
 //Import Breadcrumb
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 
-console.log(Breadcrumbs)
-
 //Import Components
 import CurrentMonth from "@/pages/Auth/Widgets/CurrentMonth";
 import Earnings from "@/pages/Auth/Widgets/Earnings";

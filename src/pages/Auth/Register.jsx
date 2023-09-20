@@ -39,7 +39,6 @@ const Register = () => {
         )
         .then((response) => {
           if (response.data?.success) {
-            console.log(response.data);
             const accessToken = response.data?.access_token;
             const role = response.data?.user.role;
             setAuth({
@@ -269,7 +268,7 @@ const Register = () => {
                       </div>
                     </Form>
 
-                    <div className="mt-4 pt-2 text-center">
+                    {/* <div className="mt-4 pt-2 text-center">
                       <div>
                         <hr />
                         <h6 className="text-14 my-3 text-gray-500 font-medium ">
@@ -288,7 +287,7 @@ const Register = () => {
                           <GithubOutlined className="text-white text-xl" />
                         </a>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="mt-12 text-center">
                       <p className="text-gray-500 ">

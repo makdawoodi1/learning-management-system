@@ -67,7 +67,6 @@ const Login = () => {
         )
         .then((response) => {
           if (response.data?.success) {
-            console.log(response.data);
             const accessToken = response.data?.access_token;
             const role = response.data?.user.role;
             setAuth({
@@ -185,7 +184,7 @@ const Login = () => {
                         </Form.Item>
                       </div>
 
-                      {/* <div className="mb-6">
+                      <div className="mb-6">
                         <Form.Item name="rememberMe" valuePropName="checked">
                           <Checkbox
                             className="bg-white checked:bg-violet-300 checked:border-bg-violet-300 focus:outline-none transition duration-200 mt-1 align-top ltr:float-left rtl:float-right ltr:mr-2 rtl:ml-2 cursor-pointer focus:ring-offset-0"
@@ -195,7 +194,7 @@ const Login = () => {
                             Remmber Me
                           </Checkbox>
                         </Form.Item>
-                      </div> */}
+                      </div>
 
                       <div className="mb-3">
                         <Form.Item>
@@ -213,7 +212,7 @@ const Login = () => {
                       </div>
                     </Form>
 
-                    <div className="mt-4 pt-2 text-center">
+                    {/* <div className="mt-4 pt-2 text-center">
                       <div>
                         <hr />
                         <h6 className="text-14 my-3 text-gray-500 font-medium">
@@ -232,7 +231,7 @@ const Login = () => {
                           <GithubOutlined className="text-white text-xl" />
                         </a>
                       </div>
-                    </div>
+                    </div> */}
 
                     <div className="mt-12 text-center">
                       <p className="text-gray-500 ">
@@ -247,7 +246,7 @@ const Login = () => {
                           Register
                         </Link>
                       </p>
-                      <p className="text-gray-500 ">
+                      {/* <p className="text-gray-500 ">
                         <Link
                           to="/forgot-password"
                           className="text-violet-500 font-semibold underline cursor-pointer"
@@ -257,7 +256,7 @@ const Login = () => {
                         >
                           Forgot Password?
                         </Link>
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                 </div>

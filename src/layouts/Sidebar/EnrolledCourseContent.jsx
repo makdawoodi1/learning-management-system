@@ -1,10 +1,11 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from "react";
 import AuthContext from "@/context/context";
+import { Menu } from "antd";
+import { useLocation } from "react-router-dom";
+import axios from "@/services/axios";
+import { API_URL } from "@/config/config";
 
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
-import { Menu } from 'antd';
-
-function getItem(label, key, children, type) {
+const getItem = (label, key, children, type) => {
   return {
     key,
     children,
@@ -13,46 +14,98 @@ function getItem(label, key, children, type) {
   };
 }
 
-const items = [
-  getItem('Childhood Overweight & Obesity', 'sub2', [
-    getItem('Lessons', 'lessonGroup', [
-      getItem('OAdult and Childhood Obesity', '1'),
-      getItem('Definition of Overweight & Obesity', '2'),
-      getItem('The Stats', '3'),
-      getItem('Obesity', '4'),
-      getItem('Health Impact of Obesity: Type-2 Diabetes.', '5'),
-      getItem('Diabetes', '6')
-    ], 'group'),
-    // getItem('Submenu', 'sub3', null, [getItem('Option 7', '7'), getItem('Option 8', '8')]),
-    getItem('Assignments', 'assignmentGroup', [getItem('Assignment 1', 'assignment1')], 'group'),
-    getItem('Quizzes', 'quizGroup', [getItem('Quiz 1', 'quiz1')], 'group'),
-  ]),
-  {
-    type: 'divider',
-  },
-];
-
 const EnrolledCourseContent = ({ toast }) => {
-  const { toggleSidebar } = useContext(AuthContext);
+  const { toggleSidebar, setCourseState } = useContext(AuthContext);
+  const [items, setItems] = useState([])
+  const { pathname } = useLocation();
+  const courseID = pathname.split("/")[3];
 
-  const onClick = (e) => {
-    console.log('click ', e);
+  useEffect(() => {
+    const fetchCourse = async (req, res) => {
+      try {
+        return new Promise((resolve, reject) => {
+          axios
+            .get(`${API_URL}/courses/get-enrolled-course?courseID=${courseID}`, {
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+            })
+            .then((response) => {
+              if (response.data?.success) {
+                const fetchedCourse = response.data?.course;
+                setCourseState(prev => ({
+                  ...prev,
+                  courseTitle: fetchedCourse.title,
+                  courseDescription: fetchedCourse.description,
+                  thumbnail: fetchedCourse.thumbnail?.objectKey,
+                  modules: fetchedCourse.modules
+                }));
+                resolve(fetchedCourse);
+              }
+            })
+            .catch((error) => {
+              if (error.response?.data?.message) {
+                reject(toast.error(error.response.data?.message));
+              }
+              console.error("Error Fetching courses!:", error.message);
+            });
+        })
+      } catch (error) {
+        console.error(error);
+        toast.error("Unexpected error occured!");
+      }
+    };
+
+    fetchCourse().then((course) => {
+      generateCourseState(course.modules)
+    }).catch(error => {
+      console.error(error);
+      toast.error("Unexpected error occured!");
+    })
+  }, []);
+
+  const generateCourseState = (modules) => {
+    const items = modules?.map(module => (
+      getItem(module.title, `${module.id}`, [
+        getItem("Lessons", "lessonGroup", module.lessons?.map(lesson => (
+          getItem(lesson.title, `lesson${lesson.id}`)
+        )), "group"),
+        // getItem("Quizzes", "quizGroup", module.quizzes?.map(quiz => (
+        //   getItem(quiz.title, `quiz-${quiz.id}`)
+        // )), "group"),
+        // getItem("Assignments", "assignmentGroup", module.assignments?.map(assignment => (
+        //   getItem(assignment.title, `assignment-${assignment.id}`)
+        // )), "group")
+      ]))
+    )
+    setItems(items)
+  };
+
+  const handleClick = (e) => {
+    const inputArray = e.keyPath;
+    const [type, lessonID] = inputArray[0].split(/(\d+)/);
+    const moduleID = parseInt(inputArray[1]);
+    const resultObject = {
+      type: type.toLowerCase(),
+      lessonID: parseInt(lessonID),
+      moduleID: moduleID
+    };
+    setCourseState(prev => ({ ...prev, selected: resultObject }))
   };
 
   if (!toggleSidebar) {
     return (
       <Menu
-        onClick={onClick}
+        onClick={handleClick}
         style={{
           width: "100%",
         }}
-        defaultSelectedKeys={['1']}
-        defaultOpenKeys={['sub1']}
+        // defaultSelectedKeys={["1"]}
+        // defaultOpenKeys={["sub1"]}
         mode="inline"
         items={items}
       />
-    )
+    );
   }
-}
+};
 
-export default EnrolledCourseContent
+export default EnrolledCourseContent;

@@ -1,0 +1,40 @@
+.ql-container {
+  font-size: 18px;
+  overflow: "auto";
+}
+
+.ql-editor a {
+  color: blue;
+}
+
+/* ul {
+  display: block;
+  margin-left: -10px;
+/* } */
+
+.ql-editor p {
+    margin: 10px 0;
+}
+
+.ql-editor ul li {
+  display: block;
+  position: relative;
+  color: orange;
+  margin: 10px 0;
+}
+
+/* ul li:not(:last-child) {
+  margin-bottom: 16px;
+}
+
+ul li:before {
+  content: "";
+  position: absolute;
+  top: 1.2em;
+  left: -30px;
+  margin-top: -0.9em;
+  background: #f69ec4;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+} */

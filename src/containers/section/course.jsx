@@ -1,153 +1,85 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Rating from "@/containers/sidebar/rating";
-
-const subTitle = "Featured Courses";
-const title = "Pick A Course To Get Started";
-
-const courseList = [
-  {
-    imgUrl: "/course/01.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "Centers for disease control & prevention",
-    totalLeson: "30x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/01.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-  {
-    imgUrl: "/course/02.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "HIGH-RISK NEWBORNS “NEONATE”​ (PART 1)",
-    totalLeson: "25x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/02.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-  {
-    imgUrl: "/course/03.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "Childhood Overweight & Obesity Part 2",
-    totalLeson: "32x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/03.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-  {
-    imgUrl: "/course/04.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "Childhood Overweight & Obesity Part 1",
-    totalLeson: "16x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/04.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-  {
-    imgUrl: "/course/05.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "HIGH-RISK NEWBORNS​ (PART 2)",
-    totalLeson: "18x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/05.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-  {
-    imgUrl: "/course/06.jpg",
-    imgAlt: "course rajibraj91 rajibraj",
-    price: "$30",
-    cate: "Pharmacy",
-    reviewCount: "03 reviews",
-    title: "Leading Health Indicators Healthy People 2030 Part 2",
-    totalLeson: "10x Lesson",
-    level: "Intermediate",
-    authorImgUrl: "/course/author/06.jpg",
-    authorImgAlt: "course author rajibraj91 rajibraj",
-    authorName: "Dr. Adrienne Platt",
-    btnText: "Go to Course",
-  },
-];
+import toast from "react-hot-toast";
+import axios from "@/services/axios";
+import { API_URL } from "@/config/config";
 
 const Course = () => {
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async (req, res) => {
+      try {
+        axios
+          .get(`${API_URL}/courses/get-courses`, {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          })
+          .then((response) => {
+            if (response.data?.success) {
+              setCourses(response.data?.courses);
+            }
+          })
+          .catch((error) => {
+            if (error.response?.data?.message) {
+              return toast.error(error.response.data?.message);
+            }
+            console.error("Error Fetching courses!:", error.message);
+          });
+      } catch (error) {
+        console.error(error);
+        toast.error("Unexpected error occured!");
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  console.log(courses)
+
   return (
     <div className="course-section padding-tb section-bg">
       <div className="container">
         <div className="section-header text-center">
           <div className="badge-text-container">
-            <span className="header-text-md" style={{ fontSize: "1.5rem" }}>{subTitle}</span>
+            <span className="header-text-md" style={{ fontSize: "1.5rem" }}>Featured Courses</span>
           </div>
-          <h2 className="header-text" style={{ fontSize: "4rem" }}>{title}</h2>
+          <h2 className="header-text" style={{ fontSize: "4rem" }}>Pick A Course To Get Started</h2>
         </div>
         <div className="section-wrapper">
           <div className="row g-4 justify-content-center row-cols-xl-3 row-cols-md-2 row-cols-1">
-            {courseList.map((val, i) => (
-              <div className="col" key={i}>
+            {courses.map(course => (
+              <div className="col" key={course.id}>
                 <div className="course-item">
                   <div className="course-inner">
                     <div className="course-thumb">
-                      <img src={`${val.imgUrl}`} alt={`${val.imgAlt}`} />
+                      <img src={course.thumbnail?.objectKey} alt="Course Thumbnail" />
                     </div>
                     <div className="course-content">
-                      <div className="course-price">{val.price}</div>
-                      <div className="course-category">
-                        <div className="course-cate">
-                          <a href="#">{val.cate}</a>
-                        </div>
-                        <div className="course-reiew">
-                          <Rating />
-                          <span className="ratting-count">
-                            {val.reviewCount}
-                          </span>
-                        </div>
-                      </div>
-                      <Link to="/course/1">
-                        <h4>{val.title}</h4>
+                      <div className="course-price">{course.price} $</div>
+                      <Link to={`/course/${course.id}`}>
+                        <h4>{course.title}</h4>
                       </Link>
                       <div className="course-details">
                         <div className="couse-count">
-                          <i className="icofont-video-alt"></i> {val.totalLeson}
-                        </div>
-                        <div className="couse-topic">
-                          <i className="icofont-signal"></i> {val.level}
+                          <i className="icofont-video-alt"></i> {course.lessonCount}
                         </div>
                       </div>
                       <div className="course-footer">
                         <div className="course-author">
                           <img
-                            src={`${val.authorImgUrl}`}
-                            alt={`${val.authorImgAlt}`}
+                            style={{ width: "30px" }}
+                            src={course.authorImage ? course.authorImage : "/author.jpg"}
+                            alt="Course Author"
                           />
                           <Link to="/profile" className="ca-name">
-                            {val.authorName}
+                            Adrianne Platt
                           </Link>
                         </div>
                         <div className="course-btn">
-                          <Link to="/course/1" className="lab-btn-text">
-                            {val.btnText}
+                          <Link to={`/course/${course.id}`} className="lab-btn-text">
+                            Go to Course
                             <i className="icofont-external-link"></i>
                           </Link>
                         </div>

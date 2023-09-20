@@ -1,4 +1,9 @@
-import React from "react";
+import React, { useContext, useState } from "react";
+import { adminProfileMenuItems, studentProfileMenuItems } from "@/data/data";
+import { USER_ROLE } from "@/config/config";
+import useAuth from "@/hooks/useAuth";
+import useLogout from "@/hooks/useLogout";
+import AuthContext from "@/context/context";
 import {
   Dropdown,
   DropdownToggle,
@@ -6,59 +11,88 @@ import {
   DropdownItem,
 } from "reactstrap";
 
-// Import Images
-import avatar2 from "/assets/dashboard-assets/images/users/avatar-2.jpg";
-
 // Import Icons
-import { RiArrowDropDownLine, RiLockUnlockLine, RiSettings2Line, RiShutDownLine, RiUserLine, RiWallet2Line } from "react-icons/ri";
+import {
+  RiArrowDropDownLine,
+} from "react-icons/ri";
+import { Link } from "react-router-dom";
 
 const ProfileMenu = () => {
-  const username = "fahmeed";
+  const [open, setOpen] = useState(false);
+  const { auth } = useContext(AuthContext);
+  const logout = useLogout();
 
   return (
     <Dropdown
-      // isOpen={this.state.menu}
-      // toggle={this.toggle}
+      isOpen={open}
+      toggle={() => setOpen(!open)}
       className="d-inline-block user-dropdown"
     >
       <DropdownToggle
         tag="button"
-        className="btn header-item waves-effect d-flex flex-column align-items-center justify-content-center"
+        className="btn header-item waves-effect d-flex align-items-center justify-content-center"
         id="page-header-user-dropdown"
       >
         <img
           className="rounded-circle header-profile-user me-1"
-          src={avatar2}
+          src={auth.profileImage ?? "/author.jpg"}
           alt="Header Avatar"
         />
         <span className="d-none d-xl-inline-block ms-1 text-transform">
-          {username}
+          {auth.username}
           <RiArrowDropDownLine className="d-none ms-1 d-xl-inline-block" />
         </span>
       </DropdownToggle>
       <DropdownMenu className="dropdown-menu-end">
-        <DropdownItem href="#">
-          <RiUserLine className="align-middle me-1" />
-          Profile
-        </DropdownItem>
-        <DropdownItem href="#">
-          <RiWallet2Line className="align-middle me-1"/>
-          My Wallet
-        </DropdownItem>
-        <DropdownItem className="d-block" href="#">
-          <span className="badge badge-success float-end mt-1">11</span>
-          <RiSettings2Line className="align-middle me-1" />
-          Settings
-        </DropdownItem>
-        <DropdownItem href="#">
-          <RiLockUnlockLine className="align-middle me-1" />
-          Lock screen
-        </DropdownItem>
-        <DropdownItem divider />
-        <DropdownItem className="text-danger" href="/logout">
-          <RiShutDownLine className="align-middle me-1 text-danger" />
-          Logout
-        </DropdownItem>
+        {auth.role === USER_ROLE.ADMIN ? (
+          <>
+            {adminProfileMenuItems.map((menu) => (
+              <DropdownItem key={menu.id}>
+                {menu.title === "Logout" ? (
+                  <Link
+                    onClick={logout}
+                    className="d-flex align-items-center gap-2 font-size-14 text-danger border-spacing-8"
+                  >
+                    {menu.icon}
+                    {menu.title}
+                  </Link>
+                ) : (
+                  <Link
+                    to={menu.route}
+                    className="d-flex align-items-center gap-2 font-size-14"
+                  >
+                    {menu.icon}
+                    {menu.title}
+                  </Link>
+                )}
+              </DropdownItem>
+            ))}
+          </>
+        ) : (
+          <>
+            {studentProfileMenuItems.map((menu) => (
+              <DropdownItem key={menu.id}>
+                {menu.title === "Logout" ? (
+                  <Link
+                    onClick={logout}
+                    className="d-flex align-items-center gap-2 font-size-14 text-danger"
+                  >
+                    {menu.icon}
+                    {menu.title}
+                  </Link>
+                ) : (
+                  <Link
+                    to={menu.route}
+                    className="d-flex align-items-center gap-2 font-size-14"
+                  >
+                    {menu.icon}
+                    {menu.title}
+                  </Link>
+                )}
+              </DropdownItem>
+            ))}
+          </>
+        )}
       </DropdownMenu>
     </Dropdown>
   );

@@ -18,7 +18,7 @@ const useLogout = () => {
         if (response?.status) { 
           toast.success("Logout Successful");
           setAuth({});
-          navigate(from, { replace: true });
+          navigate('/login');
         } else {
           toast.error(response?.data.message);
         }
