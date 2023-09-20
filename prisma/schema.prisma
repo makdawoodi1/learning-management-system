@@ -37,26 +37,53 @@ model User {
 }
 
 model Course {
-  id             Int            @id @default(autoincrement())
-  s3_folder_key  String         @unique @default("")
-  title          String         @unique
-  description    String?
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
-  course_modules CourseModule[]
-  enrollments    Enrollment[]
-  assignments    Assignment[]
-  quizzes        Quiz[]
-  discussions    Discussion[]
+  id                Int            @id @default(autoincrement())
+  title             String         @unique
+  description       String?
+  s3_folder_key     String         @unique @default("")
+  price             Float
+  thumbnail         String
+  introductoryVideo String
+  created_at        DateTime       @default(now())
+  updated_at        DateTime       @updatedAt
+  course_modules    CourseModule[]
+  enrollments       Enrollment[]
+  discussions       Discussion[]
+  Assignment        Assignment[]
+  Quiz              Quiz[]
+  published         Boolean
 }
 
 model CourseModule {
-  id        Int     @id @default(autoincrement())
-  title     String  @unique
-  content   String?
-  order     Int
-  course    Course  @relation(fields: [course_id], references: [id])
-  course_id Int
+  id             Int      @id @default(autoincrement())
+  title          String   @unique
+  description    String?
+  s3_folder_key  String?
+  course         Course   @relation(fields: [course_id], references: [id])
+  course_id      Int
+  module_lessons Lesson[]
+  quizzes        Quiz[]
+}
+
+model Lesson {
+  id            Int          @id @default(autoincrement())
+  title         String
+  description   String
+  content       String
+  completed     Boolean
+  s3_folder_key String?
+  course_module CourseModule @relation(fields: [moduleId], references: [id])
+  moduleId      Int
+  lesson_files  LessonFile[]
+}
+
+model LessonFile {
+  id       Int      @id @default(autoincrement())
+  name     String
+  url      String
+  lesson   Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  fileType FILETYPE @default(IMAGE)
 }
 
 model Enrollment {
@@ -66,6 +93,7 @@ model Enrollment {
   course      Course   @relation(fields: [course_id], references: [id])
   user_id     Int
   course_id   Int
+  progress    String?
 }
 
 model Assignment {
@@ -96,6 +124,7 @@ model Quiz {
   id             Int            @id @default(autoincrement())
   title          String
   description    String?
+  completed      Boolean
   due_date       DateTime
   created_at     DateTime       @default(now())
   updated_at     DateTime       @updatedAt
@@ -103,6 +132,8 @@ model Quiz {
   course_id      Int
   quiz_questions QuizQuestion[]
   quiz_attempts  QuizAttempt[]
+  CourseModule   CourseModule?  @relation(fields: [courseModuleId], references: [id])
+  courseModuleId Int?
 }
 
 model QuizQuestion {
@@ -164,4 +195,10 @@ enum Role {
 enum QuestionType {
   CHECKBOXES
   RADIO
+}
+
+enum FILETYPE {
+  IMAGE
+  VIDEO
+  ZIP
 }

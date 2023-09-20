@@ -1,8 +1,7 @@
-import S3 from "aws-sdk/clients/s3.js";
+import AWS from "aws-sdk";
 import { randomUUID } from "crypto";
-import { PrismaClient } from "@prisma/client";
 
-const s3 = new S3({
+const s3 = new AWS.S3({
   apiVersion: "2006-03-01",
   accessKeyId: process.env.AWS_ACCESS_KEY,
   secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -25,16 +24,26 @@ export const presignURLHandler = async (
 ) => {
   try {
     // Set Contants
-    let Key, uploadUrl, folderKey, moduleKey, lessonKey, hasPresignedURL = null;
+    let Key, uploadUrl, folderKey, moduleKey, lessonKey, hasPresignedURL, ContentType = null;
     const fileName = req.query.fileName;
     const fileType = req.query.fileType;
-    const ContentType = fileType?.includes("image")
-      ? "image/extension"
-      : fileType?.includes("video")
-      ? "video/mp4"
-      : fileType?.includes("zip")
-      ? "application/zip"
-      : null;
+    switch (fileType) {
+      case "image/jpeg":
+        ContentType = "image/jpeg";
+        break;
+      case "image/png":
+        ContentType = "image/png";
+        break;
+      case "video/mp4":
+        ContentType = "video/mp4";
+        break;
+      case "application/zip":
+        ContentType = "application/zip";
+        break;
+      default:
+        ContentType = null;
+        break;
+    }
 
     if (!ContentType) {
       return res.json({
@@ -57,6 +66,8 @@ export const presignURLHandler = async (
       Key = await getUploadKey(name, fileName, folderKey);
       s3Params.Key = Key;
       uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+      // cloudfrontParams.url = `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${Key}`;
+      // cloudfront.getSignedUrl(cloudfrontParams);
       hasPresignedURL = true
     }
 
@@ -82,6 +93,8 @@ export const presignURLHandler = async (
         Key = await getUploadKey(name, fileName, lessonKey);
         s3Params.Key = Key;
         uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+        // cloudfrontParams.url = `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${Key}`;
+        // cloudfront.getSignedUrl(cloudfrontParams);
         hasPresignedURL = true
       }
       else res.json({

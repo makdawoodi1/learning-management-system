@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "FILETYPE" AS ENUM ('IMAGE', 'VIDEO', 'ZIP');
+
+-- AlterTable
+ALTER TABLE "LessonFile" ADD COLUMN     "fileType" "FILETYPE" NOT NULL DEFAULT 'IMAGE';

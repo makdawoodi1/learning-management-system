@@ -34,7 +34,8 @@ export const refreshTokenHandler = async (req, res) => {
     })
 
     // Detected refresh token reuse!
-    if (!user) verifyRefreshToken(req, res, prisma, user.refreshToken)
+    if (!user) return res.sendStatus(401);
+    if (user) verifyRefreshToken(req, res, prisma, user?.refreshToken)
 
     const newRefreshTokenArray = user.refreshToken.filter(
       (rt) => rt !== refreshToken
@@ -461,3 +462,9 @@ export const resetPasswordRouteHandler = async (
     console.log(error);
   }
 };
+
+// export const getUser = async (req, res, username) => {
+//   try {
+
+//   } catch (error)
+// }
