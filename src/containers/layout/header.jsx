@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import useAuth from "@/hooks/useAuth";
+import useLogout from "@/hooks/useLogout";
 
 const header = () => {
+  const { auth } = useAuth();
+  const logout = useLogout();
   const [menuToggle, setMenuToggle] = useState(false);
   const [socialToggle, setSocialToggle] = useState(false);
   const [headerFiexd, setHeaderFiexd] = useState(false);
 
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 200) {
+    if (window.scrollY > 0) {
       setHeaderFiexd(true);
     } else {
       setHeaderFiexd(false);
@@ -45,12 +49,20 @@ const header = () => {
                 </ul>
               </div>
 
-              <Link to="/login" className="login">
-                <i className="icofont-user"></i> <span>LOG IN</span>
-              </Link>
-              <Link to="/register" className="signup">
-                <i className="icofont-users"></i> <span>SIGN UP</span>
-              </Link>
+              {auth?.username ? (
+                <Link className="login logout">
+                  <i className="icofont-user"></i> <span onClick={logout}>LOG OUT</span>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="login">
+                  <i className="icofont-user"></i> <span>LOG IN</span>
+                  </Link>
+                  <Link to="/register" className="signup">
+                    <i className="icofont-users"></i> <span>SIGN UP</span>
+                  </Link>
+                </>
+              )}
 
               <div
                 className={`header-bar d-lg-none ${menuToggle ? "active" : ""}`}

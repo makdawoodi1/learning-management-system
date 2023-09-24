@@ -171,11 +171,65 @@ const filterAndValidateLessonFile = (file, errors) => {
     !filteredFile.size ||
     !filteredFile.name ||
     !filteredFile.type ||
-    !filteredFile.url ||
-    !filteredFile.secureURL
+    !filteredFile.secureURL ||
+    !filteredFile.objectKey
   ) {
     errors.lessonFiles = "Lesson files properties are missing";
   }
 
   return filteredFile;
 };
+
+// const filterAndValidateQuiz = (lesson, errors) => {
+//   if (!lesson || typeof lesson !== "object") {
+//     errors.lessons = "Quizzes are missing or invalid";
+//     return null;
+//   }
+
+//   const filteredQuiz = {
+//     title: quiz.title || null,
+//     description: quiz.description || null,
+//     quizAttempts: quiz.quizAttempts || null,
+//     quizTimer: quiz.quizTimer || null,
+//     passingMarks: quiz.passingMarks || null
+//   };
+
+//   // Check for missing properties
+//   if (
+//     !quiz.title ||
+//     !quiz.title ||
+//     !quiz.description ||
+//     !quiz.quizAttempts ||
+//     !quiz.quizTimer ||
+//     !quiz.passingMarks
+//   ) {
+//     errors.quizzes = "Quiz properties are missing";
+//   }
+
+//   return filteredQuiz;
+// }
+
+// const filterAndValidateQuizQuestion = (question, errors) => {
+//   if (!quiz || typeof quiz !== "object") {
+//     errors.quizzes = "Quiz Questions are missing or invalid";
+//     return null;
+//   }
+//   const filteredFile = {
+//     name: question.name || null,
+//     type: question.type || null,
+//     correct: question.correct || null,
+//     answers: question.answers || null,
+//   };
+
+//   // Check for missing properties
+//   if (
+//     !filteredFile.name ||
+//     !filteredFile.type ||
+//     !filteredFile.correct ||
+//     !filteredFile.answers ||
+//   ) {
+//     errors.quizzes = "Quiz question properties are missing";
+//   }
+
+//   return filteredQuiz;
+// };

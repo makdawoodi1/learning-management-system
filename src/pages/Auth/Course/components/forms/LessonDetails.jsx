@@ -1,11 +1,25 @@
 import React, { useState, useRef, useContext } from "react";
 import { Row, Col, Card, CardHeader, CardBody, Collapse } from "reactstrap";
-import { Input, Button, Popconfirm, Select } from "antd";
+import { Input, Button, Popconfirm, Select, Modal } from "antd";
 import Dropzone from "@/components/Dropzone";
 import AuthContext from "@/context/context";
 import { generateUniqueID } from "@/helpers/helper";
-import Editor from "@/components/Editor";
 import EditorPreview from "@/components/EditorPreview";
+import SunEditor from "suneditor-react";
+import "suneditor/dist/css/suneditor.min.css";
+import "@/components/editorStyles.css";
+import {
+  handleDrop,
+  handleImageUploadBefore,
+  imageUploadHandler,
+  handleImageUploadError,
+  handleAudioUploadBefore,
+  handleAudioUpload,
+  handleAudioUploadError,
+  handleVideoUploadBefore,
+  handleVideoUpload,
+  handleVideoUploadError,
+} from "@/components/editoruploader";
 
 // Import Icons
 import { PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
@@ -15,18 +29,25 @@ import {
   RiEdit2Line,
   RiDeleteBinLine,
   RiUploadCloudLine,
+  RiVideoLine,
+  RiFileZipLine,
 } from "react-icons/ri";
+import { FaTimes } from "react-icons/fa";
+import { LiaFileAudio } from "react-icons/lia";
 
 const LessonDetails = ({ Form, form }) => {
   const { courseState, setCourseState } = useContext(AuthContext);
   const [editorContent, setEditorContent] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modal2Open, setModal2Open] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [state, setState] = useState({
     mode: "add",
     selectedModule: null,
     selectedLesson: null,
-    editorText: "",
     selectedFile: null,
     selectedAttachment: "Images",
+    selectedContentAttachment: "Images",
     lessons: [],
     active: null,
   });
@@ -34,7 +55,7 @@ const LessonDetails = ({ Form, form }) => {
     const selectedKeys = [
       "lesson-title",
       "lesson-description",
-      "lesson-content"
+      "lesson-content",
     ];
     const filteredObject = Object.keys(form.getFieldsValue()).reduce(
       (result, key) => {
@@ -44,8 +65,7 @@ const LessonDetails = ({ Form, form }) => {
       {}
     );
     return (
-      Object.values(filteredObject).some((value) => value !== "") ||
-      state.editorText !== ""
+      Object.values(filteredObject).some((value) => value !== "")
     );
   };
 
@@ -53,6 +73,13 @@ const LessonDetails = ({ Form, form }) => {
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
   const contentRef = useRef(null);
+
+  const editor = useRef(null);
+
+  // Editor Instance
+  const getEditorInstance = (sunEditor) => {
+    editor.current = sunEditor;
+  };
 
   // Functions
   // Handle File preview
@@ -111,6 +138,7 @@ const LessonDetails = ({ Form, form }) => {
         description: values["lesson-description"],
         content: editorContent,
         lessonFiles: [],
+        lessonContentFiles: [],
         collapsed: true,
         completed: false,
       });
@@ -156,6 +184,7 @@ const LessonDetails = ({ Form, form }) => {
     form.setFieldValue("lesson-title", "");
     form.setFieldValue("lesson-description", "");
     form.setFieldValue("lesson-content", "");
+    setEditorContent("");
   };
 
   const editModule = (lesson) => {
@@ -163,13 +192,13 @@ const LessonDetails = ({ Form, form }) => {
     form.setFieldValue("lesson-title", lesson.title);
     form.setFieldValue("lesson-description", lesson.description);
     form.setFieldValue("lesson-content", lesson.content);
+    setEditorContent(lesson.content);
     setState({
       ...state,
       mode: "edit",
       selectedLesson: { ...lesson },
       active: getState(),
     });
-    setEditorContent(lesson.content);
   };
 
   // Delete Module
@@ -233,6 +262,111 @@ const LessonDetails = ({ Form, form }) => {
 
   return (
     <>
+      <Modal
+        title="Upload Lesson Content files"
+        centered
+        open={modalOpen}
+        onCancel={() => setModalOpen(false)}
+        className="video-custom-style"
+        footer={[
+          <Button key="close" onClick={() => setModalOpen(false)}>
+            Close
+          </Button>,
+        ]}
+      >
+        <Col xs={12} className="d-flex flex-column justify-content-center">
+          <Row>
+            <Col xs={12} lg={6}>
+              <Form.Item
+                name="content-lessons"
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value)
+                        return Promise.reject(new Error("Please add module"));
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Select
+                  className="w-full"
+                  disabled={!form.getFieldValue("module")}
+                  showSearch
+                  bordered
+                  placeholder="Select Lesson"
+                  onChange={(value) =>
+                    setState({ ...state, selectedLesson: value })
+                  }
+                  options={courseState.modules
+                    ?.find((module) => module.id === state.selectedModule)
+                    ?.lessons?.map((lesson) => ({
+                      value: lesson.id,
+                      label: lesson.title,
+                    }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={12} lg={6}>
+              <Form.Item
+                name="lesson-content-attachment"
+                rules={[
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (courseState.modules?.length === 0 && !value)
+                        return Promise.reject(new Error("Please add module"));
+                      return Promise.resolve();
+                    },
+                  }),
+                ]}
+              >
+                <Select
+                  className="w-full"
+                  disabled={!form.getFieldValue("content-lessons")}
+                  showSearch
+                  bordered
+                  placeholder="Select Attachments"
+                  onChange={(value) =>
+                    setState({ ...state, selectedContentAttachment: value })
+                  }
+                  options={[
+                    { value: "Images", label: "Images" },
+                    { value: "Audios", label: "Audios" },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          {form.getFieldValue("content-lessons") &&
+            form.getFieldValue("lesson-content-attachment") && (
+              <>
+                {courseState.modules
+                  .find((module) => module.id === state.selectedModule)
+                  ?.lessons?.filter(
+                    (lesson) => lesson.id === state.selectedLesson
+                  )
+                  ?.map((lesson) => (
+                    <Dropzone
+                      key={lesson.id}
+                      Form={Form}
+                      name="lesson-content-files"
+                      selectedLesson={lesson}
+                      buttonText="Upload"
+                      acceptedFileTypes={
+                        state.selectedContentAttachment === "Images"
+                          ? ["image/jpeg", "image/png"]
+                          : "audio/mpeg"
+                      }
+                      maxFileSize={100 * 1024 * 1024}
+                      multiple={false}
+                      showUploadedFiles={true}
+                      title={`Upload ${state.selectedContentAttachment}`}
+                    />
+                  ))}
+              </>
+            )}
+        </Col>
+      </Modal>
       <Row>
         <Col xs={12} lg={6}>
           <Row>
@@ -449,7 +583,8 @@ const LessonDetails = ({ Form, form }) => {
                           isOpen={!currentLesson.collapsed}
                           className="accordion-collapse"
                         >
-                          <div className="accordion-body font-size-14 text-left p-2"
+                          <div
+                            className="accordion-body font-size-14 text-left p-2"
                             style={{ visibility: "visible" }}
                           >
                             <EditorPreview value={currentLesson.content} />
@@ -464,12 +599,24 @@ const LessonDetails = ({ Form, form }) => {
         </Col>
       </Row>
       <Row>
-        <Col
-          xs={12}
-          className="text-center d-flex flex-column justify-content-center mt-4"
-        >
+        <Col xs={12} className="d-flex flex-column justify-content-center mt-4">
           <hr />
-          <h6 className="text-secondary font-weight-normal">Lesson Content</h6>
+          <div className="d-flex align-items-center justify-content-evenly">
+            <h6 className="text-center text-secondary font-weight-normal">
+              Lesson Content
+            </h6>
+            <div className="d-flex align-items-center gap-4">
+              <>
+                <button
+                  className="w-content btn btn-primary mb-4"
+                  onClick={() => {setModalOpen(true); form.setFieldValue('content-lessons', []); form.setFieldValue('lesson-content-attachment', [])}}
+                  disabled={!state.selectedModule}
+                >
+                  Upload
+                </button>
+              </>
+            </div>
+          </div>
           <Col xs={12}>
             <Form.Item
               title="Lesson Content"
@@ -492,31 +639,91 @@ const LessonDetails = ({ Form, form }) => {
                 }),
               ]}
             >
-              <Editor
-                value={editorContent}
-                onChange={value => {
-                  setState({
-                    ...state,
-                    active: getState()
-                  });
-                  setEditorContent(value);
+              <SunEditor
+                setOptions={{
+                  buttonList: [
+                    ["font", "fontSize"],
+                    ["undo", "redo"],
+                    [
+                      "bold",
+                      "underline",
+                      "italic",
+                      "strike",
+                      "subscript",
+                      "superscript",
+                      "removeFormat",
+                      "fontColor",
+                      "hiliteColor",
+                      "link",
+                    ],
+                    [
+                      "indent",
+                      "outdent",
+                      "align",
+                      "list",
+                      "horizontalRule",
+                      "table",
+                    ],
+                    ["image", "audio"],
+                    ["preview", "fullScreen"],
+                  ],
+                  dialogBox: {
+                    linkBox: {
+                      title: "Insert Link",
+                      url: "URL to link",
+                      text: "Text to display",
+                      newWindowCheck: "Open in new window",
+                      downloadLinkCheck: "Download link",
+                    },
+                    imageBox: {
+                      title: "Insert image",
+                      url: "Image URL",
+                      altText: "Alternative text",
+                    },
+                    audioBox: {
+                      title: "Insert Audio",
+                      file: "Select from files",
+                      url: "Audio URL",
+                    },
+                  },
+                  menu: {
+                    spaced: "Spaced",
+                    bordered: "Bordered",
+                    neon: "Neon",
+                    translucent: "Translucent",
+                    shadow: "Shadow",
+                    code: "Code",
+                  },
                 }}
-                disabled={!state.selectedModule}
-              />
-              {/* <Input.TextArea
-                ref={contentRef}
-                disabled={!state.selectedModule}
-                onChange={() =>
-                  setState({
+                getEditorInstance={getEditorInstance}
+                width="100%"
+                height="400px"
+                name="editor-content"
+                hide={!state.selectedModule}
+                placeholder="Enter Lesson Content here..."
+                onChange={(value) => {
+                  setState((state) => ({
                     ...state,
                     active: getState(),
-                  })
-                }
-                size="large"
-                rows={8}
-                className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
-                placeholder="Lesson Content"
-              /> */}
+                  }));
+                  setEditorContent(value);
+                }}
+                setContents={editorContent}
+                // onDrop={handleDrop}
+
+                // Images Handler
+                onImageUploadBefore={handleImageUploadBefore}
+                imageUploadHandler={imageUploadHandler}
+                onImageUploadError={handleImageUploadError}
+                // Audios Handler
+                onAudioUploadBefore={handleAudioUploadBefore}
+                onAudioUpload={handleAudioUpload}
+                onAudioUploadError={handleAudioUploadError}
+                // Videos Handler
+                onVideoUploadBefore={handleVideoUploadBefore}
+                onVideoUpload={handleVideoUpload}
+                onVideoUploadError={handleVideoUploadError}
+              />
             </Form.Item>
           </Col>
         </Col>
@@ -620,6 +827,7 @@ const LessonDetails = ({ Form, form }) => {
                     }
                     maxFileSize={100 * 1024 * 1024}
                     multiple={false}
+                    showUploadedFiles={true}
                     title={`Upload ${state.selectedAttachment}`}
                     fn={{ handlePreview, handleRemoveFile }}
                   />

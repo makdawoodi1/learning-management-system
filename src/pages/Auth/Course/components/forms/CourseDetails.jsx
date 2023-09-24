@@ -94,7 +94,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           <h6 className="text-secondary font-weight-normal mt-4 text-center">
             Course Settings
           </h6>
-          <Popconfirm
+          {/* <Popconfirm
             title="Archive Course"
             description="Are you sure to archive this course?"
             okButtonProps={{
@@ -108,7 +108,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
             <button className="w-full btn btn-warning mt-2 mb-3">
               Archive
             </button>
-          </Popconfirm>
+          </Popconfirm> */}
           <Form.Item>
             <Popconfirm
               title="Publish Course"

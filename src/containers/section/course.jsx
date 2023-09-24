@@ -4,8 +4,10 @@ import Rating from "@/containers/sidebar/rating";
 import toast from "react-hot-toast";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
+import useAuth from "@/hooks/useAuth";
 
 const Course = () => {
+  const { auth } = useAuth();
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
@@ -36,8 +38,6 @@ const Course = () => {
     fetchCourses();
   }, []);
 
-  console.log(courses)
-
   return (
     <div className="course-section padding-tb section-bg">
       <div className="container">
@@ -67,17 +67,17 @@ const Course = () => {
                         </div>
                       </div>
                       <div className="course-footer">
-                        <div className="course-author">
+                        <div className="phs-thumb">
                           <img
-                            style={{ width: "30px" }}
-                            src={course.authorImage ? course.authorImage : "/author.jpg"}
+                            style={{ width: "30px", borderRadius: "50%" }}
+                            src={course?.profileImage ? course.profileImage.objectKey : "/author.jpg"}
                             alt="Course Author"
                           />
-                          <Link to="/profile" className="ca-name">
+                          <Link to="" className="ca-name">
                             Adrianne Platt
                           </Link>
                         </div>
-                        <div className="course-btn">
+                        <div className="course-btn align-self-end">
                           <Link to={`/course/${course.id}`} className="lab-btn-text">
                             Go to Course
                             <i className="icofont-external-link"></i>

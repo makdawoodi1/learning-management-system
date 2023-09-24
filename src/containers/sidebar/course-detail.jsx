@@ -1,17 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { USER_ROLE } from "@/config/config";
 import axios from "@/services/axios";
 import useLogout from "@/hooks/useLogout";
 import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 const CourseSideDetail = ({ auth, course, enrolled }) => {
+  const [disabled, setDisabled] = useState(false); 
   const logout = useLogout();
+  const navigate = useNavigate();
   const modules = course.course_modules;
   const lessons = modules?.map((module) => module?.module_lessons)[0];
 
   const enroll = () => {
     try {
+      setDisabled(true);
       axios
         .post(
           `${API_URL}/courses/enroll-course?courseID=${course.id}`,
@@ -28,8 +32,9 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
         .then((response) => {
           if (response.data?.success) {
             toast.success("Successfully enrolled in the course!");
+            navigate(`/auth/enrolled-course/${course.id}`)
           }
-          console.log("here");
+          
         })
         .catch((error) => {
           if (error.response?.status === 403) logout();
@@ -38,6 +43,8 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
             return toast.error(error.response.data?.message);
           }
           console.error("Error enrolling into course!:", error.message);
+        }).finally(() => {
+          setDisabled(false);
         });
     } catch (error) {
       console.error(error);
@@ -46,7 +53,7 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
   };
 
   return (
-    <div className="course-side-detail">
+    <div className="course-side-detail" style={{ marginTop: "4.7rem" }}>
       <div className="csd-title">
         <div className="csdt-left">
           <h4 className="mb-0">Price</h4>
@@ -60,21 +67,21 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
           <ul className="lab-ul">
             <li>
               <div className="csdc-left">
-                <i className="icofont-video-alt"></i>
+                <i className="icofont-ui-folder"></i>
                 Modules
               </div>
               <div className="csdc-right">{modules?.length}</div>
             </li>
             <li>
               <div className="csdc-left">
-                <i className="icofont-video-alt"></i>
+                <i className="icofont-ui-file"></i>
                 Lessons
               </div>
               <div className="csdc-right">{lessons?.length}</div>
             </li>
             <li>
               <div className="csdc-left">
-                <i className="icofont-abacus-alt"></i>
+                <i className="icofont-question-circle"></i>
                 Quizzes
               </div>
               <div className="csdc-right">{0}</div>
@@ -86,7 +93,7 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
             <h6>Secure Payment</h6>
           </div>
           <div className="sp-thumb">
-            <img src="/assets/images/pyment/01.jpg" alt="CodexCoder" />
+            <img src="/payment.jpg" alt="CodexCoder" />
           </div>
         </div>
         <div className="course-enroll">
@@ -95,7 +102,7 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
               to={!auth?.username ? "/login" : `/auth/edit-course/${course.id}`}
               className="lab-btn"
             >
-              <span>Edit</span>
+              <button className="custom-button-enroll">Edit</button>
             </Link>
           ) : (
             <Link
@@ -109,9 +116,9 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
               className="lab-btn"
             >
               {enrolled ? (
-                <span>Go to course</span>
+                <button className="custom-button-enroll">Go to course</button>
               ) : (
-                <span onClick={enroll}>Enroll Now</span>
+                <button disabled={disabled} className="custom-button-enroll" onClick={enroll}>Enroll Now</button>
               )}
             </Link>
           )}

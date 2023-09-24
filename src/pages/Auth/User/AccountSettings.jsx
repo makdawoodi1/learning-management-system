@@ -13,7 +13,7 @@ import { Container, Row, Col, Card } from "reactstrap";
 
 const AccountSettings = () => {
   const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
+    { title: "Dashboard", link: "/auth/dashboard" },
     { title: "Account Settings", link: "/auth/settings" },
   ]);
 

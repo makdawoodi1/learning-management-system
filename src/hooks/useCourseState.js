@@ -32,6 +32,50 @@ const useCourseState = () => {
         // Add Attachments
         type === "file-upload" &&
           selectedLesson.lessonFiles.push(uploadResponse);
+        if (type === "file-delete") {
+          selectedLesson.lessonFiles = selectedLesson.lessonFiles.filter(file => (
+            file.objectKey !== uploadResponse.objectKey
+          ))
+        } 
+        setCourseState((prev) => ({
+          ...prev,
+          courseFolderKey: keys.folderKey,
+          modules: prev.modules.map((module) => {
+            if (module.id === selectedModule.id) {
+              return {
+                // Update the specific module
+                ...module,
+                ...selectedModule,
+                lessons: module.lessons.map((lesson) => {
+                  if (lesson.id === selectedLesson.id) {
+                    // Update the specific lesson
+                    return {
+                      ...lesson,
+                      ...selectedLesson,
+                    };
+                  }
+                  return lesson;
+                }),
+              };
+            }
+            return module;
+          }),
+        }));
+        break;
+
+      case "lesson-content-files":
+        // Add Folder Keys
+        selectedModule.moduleFolderKey = keys.moduleKey;
+        selectedLesson.lessonFolderKey = keys.lessonKey;
+
+        // Add Attachments
+        type === "file-upload" &&
+          selectedLesson.lessonContentFiles.push(uploadResponse);
+        if (type === "file-delete") {
+          selectedLesson.lessonContentFiles = selectedLesson.lessonContentFiles.filter((file) => (
+            file.objectKey !== uploadResponse.objectKey
+          ));
+        }
         setCourseState((prev) => ({
           ...prev,
           courseFolderKey: keys.folderKey,

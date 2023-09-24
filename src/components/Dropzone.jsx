@@ -5,22 +5,27 @@ import { Button } from "antd";
 import Dropzone from "react-dropzone";
 import axios from "@/services/axios";
 import toast from "react-hot-toast";
+import CopyToClipboard from "react-copy-to-clipboard";
 import useCourseState from "@/hooks/useCourseState";
 
 // Import Icons
 import {
+  RiFileZipLine,
   RiUploadCloudFill,
   RiUploadCloudLine,
+  RiVideoAddLine,
   RiVideoFill,
   RiVideoLine,
 } from "react-icons/ri";
-import { AiOutlineFileZip } from "react-icons/ai";
-import { FaTimes } from "react-icons/fa";
+import { LiaFileAudio } from "react-icons/lia";
+import { AiOutlineFileZip, AiOutlineCopy } from "react-icons/ai";
+import { FaCopy, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import UploadError from "./UploadError";
 import FileUploadWithProgress from "./FileUploadWithProgress";
 import AuthContext from "@/context/context";
 import { generateUniqueID } from "@/helpers/helper";
+import { AWS_CLOUDFRONT_DOMAIN } from "@/config/config";
 
 const DropItemZone = ({
   Form,
@@ -32,15 +37,19 @@ const DropItemZone = ({
   acceptedFileTypes,
   maxFileSize,
   multiple,
+  showUploadedFiles = null,
 }) => {
   // Hooks
   const { updateCourseState } = useCourseState();
   const { courseState, setCourseState } = useContext(AuthContext);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileUploading, setFileUploading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isCopied, setIsCopied] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const uploadProgressRef = useRef(null);
+
+  // Constants
 
   // Functions
   // File Type Validator
@@ -111,6 +120,7 @@ const DropItemZone = ({
 
   // Handle File Drop
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
+    if (selectedFiles.length) return;
     if (!multiple) setSelectedFiles([]);
 
     const mapppedAccepted = acceptedFiles.map((file) =>
@@ -191,7 +201,7 @@ const DropItemZone = ({
               key
             );
             if (uploadResponse.secureURL) {
-              setUploadedFile(uploadResponse);
+              setUploadedFiles((prev) => [...prev, uploadResponse]);
 
               updateCourseState("file-upload", {
                 name,
@@ -227,7 +237,12 @@ const DropItemZone = ({
 
   const onRemove = (file) => {
     setFileUploading(true);
-    const key = name === "course-thumbnail" ? "thumbnail" : "introductoryVideo";
+    const key =
+      name === "course-thumbnail"
+        ? "thumbnail"
+        : name === "introductory-video"
+        ? "introductoryVideo"
+        : "";
     try {
       axios
         .delete(
@@ -239,8 +254,34 @@ const DropItemZone = ({
         )
         .then(async (response) => {
           if (response.data?.success) {
-            setUploadedFile(null);
-            setCourseState((prev) => ({ ...prev, [key]: null }));
+            setUploadedFiles((prev) => {
+              const newFileJSON = JSON.stringify(file);
+
+              const updatedFiles = prev.filter(
+                (uploadedFile) => JSON.stringify(uploadedFile) !== newFileJSON
+              );
+
+              return updatedFiles;
+            });
+            if (key) setCourseState((prev) => ({ ...prev, [key]: null }));
+            else {
+              const selectedModule = courseState.modules?.filter(
+                (module) => module.id === selectedLesson?.moduleID
+              )[0];
+              // Upload Keys
+              const folderKey = courseState.courseFolderKey;
+              const moduleKey = selectedModule?.moduleFolderKey;
+              const lessonKey = selectedModule?.lessons?.filter(
+                (lesson) => lesson.id === selectedLesson?.id
+              )[0].lessonFolderKey;
+              updateCourseState("file-delete", {
+                name,
+                selectedModule,
+                selectedLesson,
+                keys: { folderKey, moduleKey, lessonKey },
+                uploadResponse: file,
+              });
+            }
             toast.success("File deleted successfully");
           } else {
             toast.error(response?.data.message);
@@ -274,11 +315,16 @@ const DropItemZone = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   };
 
+  const handleCopyClick = () => {
+    setIsCopied(true);
+    toast.success('URL has been copied');
+  };
+
   return (
     <>
       <Dropzone onDrop={onDrop} validator={typeValidator} multiple={multiple}>
         {({ getRootProps, getInputProps }) => (
-          <div className="dropzone">
+          <div className="dropzone cursor-pointer">
             <div className="dz-message needsclick" {...getRootProps()}>
               <Form.Item
                 rules={[
@@ -381,41 +427,73 @@ const DropItemZone = ({
             )}
           </div>
         ))}
-        {uploadedFile && (
-          <>
-            {uploadedFile.type?.includes("image") ? (
-              <div className="uploaded-file-thumbnail">
-                <img
-                  data-dz-thumbnail=""
-                  height="80"
-                  className="avatar-sm rounded bg-light"
-                  alt={uploadedFile?.name ?? uploadedFile.name}
-                  src={uploadedFile.preview}
-                />
-                <FaTimes
-                  size={12}
-                  className="cursor-pointer"
-                  onClick={() => onRemove(uploadedFile)}
-                />
-              </div>
-            ) : (
-              <div className="uploaded-video-thumbnail">
-                <FaTimes
-                  size={12}
-                  className="cursor-pointer align-self-end"
-                  onClick={() => onRemove(uploadedFile)}
-                />
-                <RiVideoLine size={40} />
-                <p className="font-size-12">{uploadedFile.name}</p>
-              </div>
-            )}
-          </>
-        )}
+        {uploadedFiles?.length > 0 &&
+          (name === "course-thumbnail" || name === "introductory-video") && (
+            <div className="d-flex align-items-center gap-4">
+              {uploadedFiles.map((file) => (
+                <>
+                  {file.type?.includes("image") ? (
+                    <div className="uploaded-file-thumbnail">
+                      <img
+                        data-dz-thumbnail=""
+                        height="80"
+                        className="avatar-sm rounded bg-light"
+                        alt={file?.name ?? file.name}
+                        src={file.preview}
+                      />
+                      <FaTimes
+                        size={12}
+                        className="cursor-pointer"
+                        onClick={() => onRemove(file)}
+                      />
+                    </div>
+                  ) : file.type?.includes("video") ? (
+                    <div className="uploaded-video-thumbnail">
+                      <FaTimes
+                        size={12}
+                        className="cursor-pointer align-self-end"
+                        onClick={() => onRemove(file)}
+                      />
+                      <RiVideoLine size={40} />
+                      {/* <p className="font-size-12">{file.name}</p> */}
+                    </div>
+                  ) : file.type?.includes("audio") ? (
+                    <div className="uploaded-audio-thumbnail">
+                      <FaTimes
+                        size={12}
+                        className="cursor-pointer align-self-end"
+                        onClick={() => onRemove(file)}
+                      />
+                      <LiaFileAudio size={40} />
+                      {/* <p className="font-size-12">{file.name}</p> */}
+                    </div>
+                  ) : (
+                    <div className="uploaded-zip-thumbnail">
+                      <FaTimes
+                        size={12}
+                        className="cursor-pointer align-self-end"
+                        onClick={() => onRemove(file)}
+                      />
+                      <RiFileZipLine size={40} />
+                      {/* <p className="font-size-12">{file.name}</p> */}
+                    </div>
+                  )}
+                </>
+              ))}
+            </div>
+          )}
       </div>
       {courseState.errors && (
         <>
-          {name === 'course-thumbnail' ? (<pre className="text-danger">{courseState.errors.thumbnailError}</pre>) :
-          name === 'introductory-video' ? (<pre className="text-danger">{courseState.errors.videoError}</pre>) : ""}
+          {name === "course-thumbnail" ? (
+            <pre className="text-danger">
+              {courseState.errors.thumbnailError}
+            </pre>
+          ) : name === "introductory-video" ? (
+            <pre className="text-danger">{courseState.errors.videoError}</pre>
+          ) : (
+            ""
+          )}
         </>
       )}
       {buttonText && (
@@ -440,13 +518,157 @@ const DropItemZone = ({
             icon={<RiUploadCloudLine />}
           >
             {!fileUploading ? (
-              <>{buttonText ?? "Upload"}</>
+              <span>{buttonText ?? "Upload"}</span>
             ) : (
               <span>Progressing...</span>
             )}
           </Button>
         </div>
       )}
+      <div>
+        {showUploadedFiles &&
+          (name === "lesson-content-files" ? (
+            <>
+              {selectedLesson?.lessonContentFiles?.length > 0 ? (
+                <>
+                  <h6 className="text-secondary font-weight-normal my-8">
+                    Uploaded Lesson Files
+                  </h6>
+                  <div className="d-flex gap-6 align-items-center">
+                    {selectedLesson?.lessonContentFiles?.map((file) => (
+                      <div>
+                        {file.type?.includes("image") ? (
+                          <div className="uploaded-file-content-thumbnail"
+                            style={{
+                              backgroundImage: `url(${file.preview})`,
+                              backgroundSize: 'cover',
+                              backgroundRepeat: 'no-repeat',
+                              backgroundPosition: 'center',
+                              border: "solid 1px rgba(0,0,0,0.5)"
+                            }}
+                          >
+                            <CopyToClipboard
+                              text={`https://${AWS_CLOUDFRONT_DOMAIN}/${file.objectKey}`}
+                              onCopy={handleCopyClick}
+                            >
+                              <div className="copy-icon">
+                                <AiOutlineCopy
+                                  size={14}
+                                  className="cursor-pointer"
+                                />
+                              </div>
+                            </CopyToClipboard>
+                            <FaTimes
+                              size={14}
+                              className="cursor-pointer"
+                              onClick={() => onRemove(file)}
+                            />
+                          </div>
+                        ) : (
+                          <div className="uploaded-file-content-thumbnail"
+                            style={{
+                              backgroundImage: `url('/audio.png')`,
+                              backgroundSize: 'cover',
+                              backgroundRepeat: 'no-repeat',
+                              backgroundPosition: 'center',
+                            }}
+                          >
+                            <CopyToClipboard
+                              text={`https://${AWS_CLOUDFRONT_DOMAIN}/${file.objectKey}`}
+                              onCopy={handleCopyClick}
+                            >
+                              <div className="copy-icon">
+                                <AiOutlineCopy
+                                  size={14}
+                                  className="cursor-pointer"
+                                />
+                              </div>
+                            </CopyToClipboard>
+                            <FaTimes
+                              size={14}
+                              className="cursor-pointer"
+                              onClick={() => onRemove(file)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <h6 className="text-secondary text-center font-weight-normal my-8">
+                  No Files Uploaded
+                </h6>
+              )}
+            </>
+          ) : (
+            <>
+              {selectedLesson?.lessonFiles?.length > 0 ? (
+                <>
+                  <h6 className="text-secondary font-weight-normal my-8">
+                    Uploaded Lesson Files
+                  </h6>
+                  <div className="d-flex gap-2 align-items-center">
+                    {selectedLesson?.lessonFiles?.map((file) => (
+                      <div>
+                        {file.type?.includes("image") ? (
+                          <div className="uploaded-file-thumbnail">
+                            <img
+                              data-dz-thumbnail=""
+                              height="80"
+                              className="avatar-sm rounded bg-light"
+                              alt={file?.name ?? file.name}
+                              src={file.preview}
+                            />
+                            <FaTimes
+                              size={12}
+                              className="cursor-pointer"
+                              onClick={() => onRemove(file)}
+                            />
+                          </div>
+                        ) : file.type?.includes("video") ? (
+                          <div className="uploaded-video-thumbnail">
+                            <FaTimes
+                              size={12}
+                              className="cursor-pointer align-self-end"
+                              onClick={() => onRemove(file)}
+                            />
+                            <RiVideoLine size={40} />
+                            {/* <p className="font-size-12">{file.name}</p> */}
+                          </div>
+                        ) : file.type?.includes("audio") ? (
+                          <div className="uploaded-audio-thumbnail">
+                            <FaTimes
+                              size={12}
+                              className="cursor-pointer align-self-end"
+                              onClick={() => onRemove(file)}
+                            />
+                            <LiaFileAudio size={40} />
+                            {/* <p className="font-size-12">{file.name}</p> */}
+                          </div>
+                        ) : (
+                          <div className="uploaded-zip-thumbnail">
+                            <FaTimes
+                              size={12}
+                              className="cursor-pointer align-self-end"
+                              onClick={() => onRemove(file)}
+                            />
+                            <RiFileZipLine size={40} />
+                            {/* <p className="font-size-12">{file.name}</p> */}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <h6 className="text-secondary text-center font-weight-normal my-8">
+                  No Files Uploaded
+                </h6>
+              )}
+            </>
+          ))}
+      </div>
     </>
   );
 };

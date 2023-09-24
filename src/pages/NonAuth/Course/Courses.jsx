@@ -5,12 +5,13 @@ import Header from "@/containers/layout/header";
 import PageHeader from "@/containers/layout/pageheader";
 import GroupSelect from "@/containers/sidebar/group-select";
 import Pagination from "@/containers/sidebar/pagination";
-
+import useAuth from "@/hooks/useAuth";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
 
 const Course = () => {
+  const { auth } = useAuth();
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
@@ -76,10 +77,10 @@ const Course = () => {
                         <div className="course-footer">
                           <div className="course-author">
                             <img
-                              style={{ width: "30px" }}
+                              style={{ width: "30px", borderRadius: "50%" }}
                               src={
-                                course.authorImage
-                                  ? course.authorImage
+                                course?.profileImage
+                                  ? course.profileImage.objectKey
                                   : "/author.jpg"
                               }
                               alt="Course Author"
@@ -88,7 +89,7 @@ const Course = () => {
                               Adrianne Platt
                             </Link>
                           </div>
-                          <div className="course-btn">
+                          <div className="course-btn align-self-end">
                             <Link
                               to={`/course/${course.id}`}
                               className="lab-btn-text"

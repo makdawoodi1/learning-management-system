@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button, Modal } from 'antd';
 import EditorPreview from "@/components/EditorPreview";
+import useAuth from "@/hooks/useAuth";
 
 const PageHeader = ({ course }) => {
+  const { auth } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
+  const videoRef = useRef(null);
 
   return (
     <div className="pageheader-section style-2">
       <Modal
-        title="Introductory Video"
+        title={course.title}
         centered
         open={modalOpen}
-        onCancel={() => setModalOpen(false)}
+        onCancel={() => { videoRef.current.pause(); setModalOpen(false) }}
         className='video-custom-style'
         footer={[
-          <Button key="back" onClick={() => setModalOpen(false)}>
+          <Button key="back" onClick={() => { videoRef.current.pause(); setModalOpen(false) }}>
             Close
           </Button>
         ]}
       >
-        <video controls>
+        <video controls ref={videoRef}>
           <source src={course.introductoryVideo?.objectKey} />
         </video>
       </Modal>
@@ -48,7 +51,7 @@ const PageHeader = ({ course }) => {
                 <EditorPreview value={course.description} />
               </div> */}
               <div className="phs-thumb">
-                <img src={course.authorImage ? course.authorImage : "/author.jpg"} alt="rajibraj91" />
+                <img src={course?.profileImage ? course.profileImage.objectKey : "/author.jpg"} alt="rajibraj91" />
                 <span>Dr. Adrianne Platt</span>
               </div>
             </div>

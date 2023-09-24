@@ -16,14 +16,14 @@ const EnrolledCourse = () => {
   const [content, setContent] = useState("");
   const [disabled, setDisabled] = useState({
     prevButton: false,
-    nextButton: false
+    nextButton: false,
   });
   const [progress, setProgress] = useState({
     completed_lessons: 0,
     total_lessons: 0,
     completed_quizzes: 0,
     total_quizzes: 0,
-  })
+  });
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -60,14 +60,14 @@ const EnrolledCourse = () => {
               const fetchedData = response.data;
               setCourseState((prev) => ({
                 ...prev,
-                modules: fetchedData?.modules
+                modules: fetchedData?.modules,
+                progress: {
+                  ...prev.progress,
+                  completed_lessons: fetchedData?.completedLessons,
+                  total_lessons: fetchedData?.totalLessons,
+                  total_quizzes: fetchedData?.totalQuizzes,
+                }
               }));
-              setProgress(prev => ({
-                ...prev.progress,
-                completed_lessons: fetchedData?.completedLessons,
-                total_lessons: fetchedData?.totalLessons,
-                total_quizzes: fetchedData?.totalQuizzes
-              }))
               setContent(response.data?.lessonContent);
             }
           })
@@ -86,8 +86,8 @@ const EnrolledCourse = () => {
     if (courseState.selected) fetchContent();
     setDisabled({
       prevButton: false,
-      nextButton: false
-    })
+      nextButton: false,
+    });
   }, [courseState.selected]);
 
   // Functions
@@ -109,7 +109,7 @@ const EnrolledCourse = () => {
             const previousLesson = module.module_lessons[lessonIndex - 1];
 
             // Update the state with the previous lesson
-            setCourseState((prev) => ({ 
+            setCourseState((prev) => ({
               ...prev,
               selected: {
                 type: "lesson",
@@ -206,6 +206,7 @@ const EnrolledCourse = () => {
 
   // Handle Lesson Completion
   const handleLessonComplete = () => {
+    let lessonContent = '';
     try {
       axios
         .put(
@@ -222,15 +223,12 @@ const EnrolledCourse = () => {
             const fetchedData = response.data;
             setCourseState((prev) => ({
               ...prev,
-              modules: fetchedData?.modules
-            }));
-            setProgress(prev => ({
-              ...prev.progress,
+              modules: fetchedData?.modules,
               completed_lessons: fetchedData?.completedLessons,
               total_lessons: fetchedData?.totalLessons,
-              total_quizzes: fetchedData?.totalQuizzes
-            }))
-            setContent(response.data?.lessonContent);
+              total_quizzes: fetchedData?.totalQuizzes,
+            }));
+            lessonContent = response.data?.lessonContent
           }
         })
         .catch((error) => {
@@ -238,14 +236,15 @@ const EnrolledCourse = () => {
             return toast.error(error.response.data?.message);
           }
           console.error("Unexpected error occured!:", error.message);
+        }).finally(() => {
+          setContent(lessonContent);
+          getNextLesson();
         });
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
     }
-  }
-
-  if (courseState) console.log(courseState);
+  };
 
   return (
     <div className="page-content my-0">
@@ -260,10 +259,13 @@ const EnrolledCourse = () => {
                   </h6>
                 </Col>
                 <Col xs={10}>
-                  <Progress percent={
-                    Math.floor((progress.completed_lessons / progress.total_lessons) * 100)
-                  } 
-                    size="small" />
+                  <Progress
+                    percent={Math.floor(
+                      (courseState?.progress.completed_lessons / courseState?.progress.total_lessons) *
+                        100
+                    )}
+                    size="small"
+                  />
                 </Col>
               </Row>
               <Row>
@@ -296,7 +298,7 @@ const EnrolledCourse = () => {
                     <hr />
                     <CardBody className="p-6 mt-2 d-flex flex-column">
                       <EditorPreview value={content.content} />
-                      {content.completed ? (
+                      {/* {content.completed && (
                         <div className="d-flex align-items-center justify-content-between">
                           <button
                             type="button"
@@ -315,13 +317,21 @@ const EnrolledCourse = () => {
                             Next Lesson
                           </button>
                         </div>
-                      ) : (
+                      )  */}
+                      {!content.completed ? (
                         <button
                           type="button"
                           className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
                           onClick={handleLessonComplete}
                         >
                           Mark as Completed
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
+                        >
+                          Lesson Completed
                         </button>
                       )}
                     </CardBody>

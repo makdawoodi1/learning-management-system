@@ -34,7 +34,8 @@ import SubmissionDetail from "@/pages/Auth/Submission/SubmissionDetail";
 
 // User
 import AccountSettings from "@/pages/Auth/User/AccountSettings";
-import Notifications from "@/pages/Auth/User/Notifications";
+import Announcements from "@/pages/Auth/User/Announcements";
+import StudentAnnouncements from "@/pages/Auth/User/StudentAnnouncements";
 import Profile from "@/pages/Auth/User/Profile";
 
 import Login from "@/pages/Auth/Login";
@@ -68,7 +69,8 @@ export {
   StudentSubmissions,
   SubmissionDetail,
   AccountSettings,
-  Notifications,
+  Announcements,
+  StudentAnnouncements,
   Profile,
   Login,
   Register,

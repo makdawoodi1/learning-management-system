@@ -13,15 +13,10 @@ import TotalLifetime from "@/pages/Auth/Widgets/TotalLifetime";
 import EarningReport from "@/pages/Auth/Widgets/EarningReport";
 
 const Dashboard = () => {
-  const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
-    { title: "Dashboard", link: "/auth/dashboard" },
-  ]);
 
   return (
     <div className="page-content">
       <Container fluid>
-        <Breadcrumbs title="Dashboard" breadcrumbItems={breadcrumbItems} />
         <Row>
           <Col xl={8}>
             <Row>

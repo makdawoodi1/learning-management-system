@@ -361,8 +361,8 @@ export const studentSidebarContent = [
   { id: 1, route: "/", icon: <RiHome2Line size={24} />, title: "Home" },
   { id: 2, route: "/auth/dashboard", icon: <RiDashboardLine size={24} />, title: "Dashboard" },
   { id: 3, route: "/auth/profile", icon: <RiUser3Line size={24} />, title: "My Profile" },
-  { id: 5, route: "/auth/enrolled-courses", icon: <RiVidiconLine size={24} />, title: "Enrolled Courses" },
-  { id: 6, route: "/auth/announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
+  { id: 5, route: "/auth/enrolled-courses", icon: <RiVidiconLine size={24} />, title: "Enrolled Courses", count: 3 },
+  { id: 6, route: "/auth/student-announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
   { id: 8, route: "/auth/submissions", icon: <RiQuestionLine size={24} />, title: "Quiz Attempts" },
 ]
 
@@ -392,8 +392,8 @@ export const adminProfileMenuItems = [
 
 export const studentProfileMenuItems = [
   { id: 1, route: "/auth/profile", icon: <RiUser3Line size={12} className="align-middle me-1" />, title: "My Profile" },
-  { id: 2, route: "/auth/enrolled-course/:courseID", icon: <RiVidiconLine size={12} className="align-middle me-1" />, title: "Enrolled Courses" },
+  { id: 2, route: "/auth/enrolled-courses", icon: <RiVidiconLine size={12} className="align-middle me-1" />, title: "Enrolled Courses" },
   { id: 3, route: "/auth/submissions", icon: <RiQuestionLine size={12} className="align-middle me-1" />, title: "My Quiz Attempts" },
-  { id: 4, route: "/auth/announcements", icon: <RiNotificationLine size={12} className="align-middle me-1" />, title: "Announcements" },
+  { id: 4, route: "/auth/student-announcements", icon: <RiNotificationLine size={12} className="align-middle me-1" />, title: "Announcements" },
   { id: 5, route: "/auth/logout", icon: <RiLogoutBoxRLine size={12} className="align-middle me-1 text-danger" />, title: "Logout" },
 ]

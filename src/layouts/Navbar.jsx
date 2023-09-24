@@ -100,9 +100,9 @@ const Navbar = () => {
           {pathname.includes('enrolled-course/') ? (
             <h4 className="m-0">{courseState?.courseTitle}</h4>
           ) : (
-            <Form className="app-search d-none d-lg-block">
+            // <Form className="app-search d-none d-lg-block">
               <div className="position-relative">
-                <Input
+                {/* <Input
                   type="text"
                   className="form-control"
                   style={{ backgroundColor: "#f1f5f7" }}
@@ -110,9 +110,9 @@ const Navbar = () => {
                 />
                 <span>
                   <RiSearchLine />
-                </span>
+                </span> */}
               </div>
-            </Form>
+            // </Form>
           )}
         </div>
 

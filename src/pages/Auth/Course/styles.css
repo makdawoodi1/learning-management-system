@@ -1,18 +1,18 @@
-.ql-container {
+/* .ql-container {
   font-size: 18px;
   overflow: "auto";
 }
 
 .ql-editor a {
   color: blue;
-}
+} */
 
 /* ul {
   display: block;
   margin-left: -10px;
 /* } */
 
-.ql-editor p {
+/* .ql-editor p {
     margin: 10px 0;
 }
 
@@ -21,7 +21,7 @@
   position: relative;
   color: orange;
   margin: 10px 0;
-}
+} */
 
 /* ul li:not(:last-child) {
   margin-bottom: 16px;
@@ -38,3 +38,31 @@ ul li:before {
   width: 12px;
   border-radius: 50%;
 } */
+
+.custom-editor-container {
+  font-size: 18px;
+  /* max-width: 400px; */
+  margin: 0 auto; /* Center the editor horizontally */
+}
+
+.custom-editor img {
+  width: 700px;
+  height: auto; 
+  display: block;
+  margin: 0 auto;
+}
+
+.custom-editor a {
+  color: blue;
+}
+
+.custom-editor p {
+  margin: 10px 0;
+}
+
+.custom-editor ul li {
+  display: block;
+  position: relative;
+  color: orange;
+  margin: 10px 0;
+}

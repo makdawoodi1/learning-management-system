@@ -35,7 +35,7 @@ const ProfileMenu = () => {
       >
         <img
           className="rounded-circle header-profile-user me-1"
-          src={auth.profileImage ?? "/author.jpg"}
+          src={auth.profileImage?.objectKey ?? "/author.jpg"}
           alt="Header Avatar"
         />
         <span className="d-none d-xl-inline-block ms-1 text-transform">

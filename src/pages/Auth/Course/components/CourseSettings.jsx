@@ -20,6 +20,7 @@ import { filterAndValidateCourse } from "@/helpers/helper";
 import toast from "react-hot-toast";
 import axios from "@/services/axios";
 
+const titles = ['Course Details', 'Module Details', 'Lesson Details'];
 const CourseSettings = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -65,7 +66,12 @@ const CourseSettings = () => {
     }));
 
     setTimeout(() => {
-      const filteredData = filterAndValidateCourse(courseState);
+      const filteredData = filterAndValidateCourse({
+        ...courseState,
+        courseTitle: form.getFieldValue("course-title"),
+        courseDescription: form.getFieldValue("course-description"),
+        price: parseFloat(form.getFieldValue("price"))
+      });
       const errorKeys = Object.keys(filteredData.errors);
       if (errorKeys.length > 0) {
         return toast.error(Object.values(filteredData.errors)[0]);
@@ -74,11 +80,14 @@ const CourseSettings = () => {
       try {
         axios
           .post(
-            `${API_URL}/courses/create-course`,
+            `${API_URL}/courses/create-course?username=${auth?.username}`,
             JSON.stringify({
               data: {
                 attributes: {
-                  ...filteredData
+                  ...filteredData,
+                  courseTitle: filteredData.courseTitle,
+                  courseDescription: filteredData.courseDescription,
+                  price: filteredData.price
                 },
               },
             }),
@@ -89,6 +98,7 @@ const CourseSettings = () => {
           )
           .then(async (response) => {
             if (response.data?.success) {
+
               toast.success("Course has been created successfully");
               navigate('/auth/dashboard');
             } else {
@@ -109,11 +119,11 @@ const CourseSettings = () => {
     }, 0);
   };
 
-  console.log(courseState);
-
   return (
     <Card>
       <CardBody className="p-6 mt-2">
+        <h6 className="text-secondary font-weight-normal">{titles[activeTab]}</h6>
+
         <div id="basic-pills-wizard" className="twitter-bs-wizard">
           <ul className="twitter-bs-wizard-nav nav nav-pills nav-justified">
             <NavItem>

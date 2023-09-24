@@ -9,12 +9,12 @@ const supportTitle = "Our Support";
 
 const siteList = [
   {
-    text: "Courses",
-    link: "/courses",
+    text: "Home",
+    link: "/",
   },
   {
-    text: "Articles",
-    link: "/articles",
+    text: "Courses",
+    link: "/courses",
   },
   {
     text: "Dashboard",
@@ -59,10 +59,6 @@ const socialList = [
 const Footer = () => {
   return (
     <div className="news-footer-wrap">
-      <div className="fs-shape">
-        <img src="assets/images/shape-img/03.png" alt="fst" className="fst-1" />
-        <img src="assets/images/shape-img/04.png" alt="fst" className="fst-2" />
-      </div>
 
       <div className="news-letter">
         <div className="container">
@@ -121,7 +117,7 @@ const Footer = () => {
                         <ul className="lab-ul">
                           {useList.map((val, i) => (
                             <li key={i}>
-                              <a href={val.link}>{val.text}</a>
+                              <Link>{val.text}</Link>
                             </li>
                           ))}
                         </ul>
@@ -141,7 +137,7 @@ const Footer = () => {
                         <ul className="lab-ul">
                           {socialList.map((val, i) => (
                             <li key={i}>
-                              <a href={val.link}>{val.text}</a>
+                              <Link>{val.text}</Link>
                             </li>
                           ))}
                         </ul>

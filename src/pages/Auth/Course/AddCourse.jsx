@@ -3,12 +3,12 @@ import AuthContext from "@/context/context";
 
 //Import Breadcrumb
 import Breadcrumbs from "@/components/common/Breadcrumbs";
-import { CourseSettings, QuizSettings, AssignmentSettings } from "./components";
+import { CourseSettings } from "./components";
 import { Container, Row, Col } from "reactstrap";
 
 const AddCourse = () => {
   const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
+    { title: "Dashboard", link: "/auth/dashboard" },
     { title: "Courses", link: "/auth/my-courses" },
     { title: "Add Course", link: "/auth/add-course" },
   ]);
@@ -37,7 +37,6 @@ const AddCourse = () => {
         <Row>
           <Col xs={12}>
             <CourseSettings />
-            <QuizSettings />
           </Col>
         </Row>
       </Container>

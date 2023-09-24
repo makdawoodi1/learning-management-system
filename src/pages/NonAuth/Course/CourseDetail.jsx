@@ -12,6 +12,7 @@ import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 import AuthContext from "@/context/context";
+import useAuth from "@/hooks/useAuth";
 
 const CourseSingle = () => {
   const [course, setCourse] = useState([]);
@@ -53,8 +54,6 @@ const CourseSingle = () => {
     fetchCourse();
   }, []);
 
-  console.log(course);
-
   return (
     <>
       <Header />
@@ -68,7 +67,7 @@ const CourseSingle = () => {
                   <div className="course-video-title">
                     <h4>Course Content</h4>
                   </div>
-                  <div className="course-video-content">
+                  <div className="course-video-content" style={{ marginTop: "1.2rem !important" }}>
                     <div className="accordion" id="accordionExample">
                       {course.course_modules?.map((module) => (
                         <div className="accordion-item">
@@ -105,7 +104,7 @@ const CourseSingle = () => {
                     </div>
                   </div>
                 </div>
-                <Author authorImage={course?.authorImage} />  
+                <Author authorImage={course?.profileImage?.objectKey} />  
               </div>
             </div>
             <div className="col-lg-4">

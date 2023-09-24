@@ -6,7 +6,7 @@ import { Container } from "reactstrap";
 
 const StudentSubmissions = () => {
   const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
+    { title: "Dashboard", link: "/auth/dashboard" },
     { title: "My Students", link: "/auth/student-submissions" },
   ]);
 

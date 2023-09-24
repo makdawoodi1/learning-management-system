@@ -111,7 +111,7 @@
   padding: 0.47rem 0.75rem;
   background-color: #5664d2;
   color: #fff;
-  border-radius: 0.25rem;
+  border-radius: 6px;
 }
 
 .image-preview-container {
@@ -128,6 +128,22 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.login {
+  border-left: 1px solid #e3d8d8;
+  border-top: 1px solid #e3d8d8;
+  border-bottom: 1px solid #e3d8d8;
+}
+
+.logout {
+  border: 1px solid #e3d8d8;
+}
+
+.signup {
+  border-right: 1px solid #e3d8d8;
+  border-top: 1px solid #e3d8d8;
+  border-bottom: 1px solid #e3d8d8;
 }
 
 .navbar-brand-box {
@@ -201,12 +217,120 @@
   justify-content: center;
 }
 
+.uploaded-file-content-thumbnail {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* .uploaded-file-content-thumbnail img {
+  width: 100%;
+  background
+} */
+
+.uploaded-file-content-thumbnail svg:nth-child(1) {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 5px;
+  z-index: 5;
+}
+
+.uploaded-file-content-thumbnail svg:nth-child(2) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 5px;
+  z-index: 5;
+}
+
+.uploaded-zip-thumbnail {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploaded-audio-thumbnail {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .video-custom-style {
   width: 50vw !important;
 }
 
-/* React Quill Styles */
+.custom-button-enroll {
+  color: #ffffff;
+  padding: 5px;
+}
 
+/* Navbar NonAuth */
+.header-fixed {
+  top: 0 !important;
+}
+
+.header-wrapper {
+  padding: 0 0 !important;
+}
+
+.header-wrapper .menu-area .signup {
+  background: #458cf0 !important;
+}
+
+.header-wrapper .menu-area .login {
+  color: #458cf0 !important;
+}
+
+/* Hero Area */
+.banner-section .section-wrapper .banner-content form button {
+  background: #3f7bcf !important;
+}
+ 
+.lab-btn-text i {
+  color: #458cf0 !important;
+}
+
+.icofont-video-alt {
+  color: #458cf0 !important;
+}
+
+.profile-picture {
+  margin: 2rem auto !important;
+  width: 400px !important;
+  height: auto !important;
+}
+
+.csd-title {
+  background: #458cf0 !important;
+}
+
+.se-resizing-bar.sun-editor-common {
+  display: none !important;
+}
+
+.course-price {
+  background: #458cf0 !important;
+}
+
+.course-content h4 {
+  color: #458cf0 !important;
+}
+
+.course-content h4:hover, .course-content .ca-name:hover, .course-content .lab-btn-text:hover {
+  color: #458cf0 !important;
+}
 
 @keyframes dotShadow {
   0% {

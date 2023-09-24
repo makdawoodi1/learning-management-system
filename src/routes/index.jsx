@@ -25,7 +25,8 @@ import {
     StudentSubmissions,
     SubmissionDetail,
     AccountSettings,
-    Notifications,
+    Announcements,
+    StudentAnnouncements,
     Profile,
     Login,
     Register,
@@ -83,7 +84,8 @@ export const pages = {
         { path: 'student-submissions', element: <StudentSubmissions />, exact: false, allowedRoles: [USER_ROLE.ADMIN] },
         { path: 'submission-detail/:submissionID', element: <SubmissionDetail />, exact: false },
         { path: 'account-settings', element: <AccountSettings />, exact: false, allowedRoles: [USER_ROLE.STUDENT, USER_ROLE.ADMIN] },
-        { path: 'announcements', element: <Notifications />, exact: false, allowedRoles: [USER_ROLE.STUDENT, USER_ROLE.ADMIN] },
+        { path: 'student-announcements', element: <StudentAnnouncements />, exact: false, allowedRoles: [USER_ROLE.STUDENT] },
+        { path: 'announcements', element: <Announcements />, exact: false, allowedRoles: [USER_ROLE.ADMIN] },
         { path: 'profile', element: <Profile />, exact: false, allowedRoles: [USER_ROLE.STUDENT, USER_ROLE.ADMIN] },
     ]
 };

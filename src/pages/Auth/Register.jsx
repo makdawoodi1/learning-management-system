@@ -6,8 +6,13 @@ import axios from "@/services/axios";
 import useAuth from "@/hooks/useAuth";
 
 // Icons
-import { GoogleOutlined, LinkedinOutlined, GithubOutlined } from "@ant-design/icons";
+import {
+  GoogleOutlined,
+  LinkedinOutlined,
+  GithubOutlined,
+} from "@ant-design/icons";
 import { API_URL } from "../../config/config";
+import { FaArrowCircleLeft } from "react-icons/fa";
 
 const Register = () => {
   // Hooks
@@ -98,7 +103,19 @@ const Register = () => {
             <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
               <div className="w-full bg-white xl:p-12 p-10 ">
                 <div className="flex h-[90vh] flex-col">
-                  <div className="mx-auto"></div>
+                  <div>
+                    <Link
+                      to="/"
+                      className="d-flex align-items-center gap-2"
+                      style={{ color: "#458cf0" }}
+                    >
+                      <FaArrowCircleLeft
+                        size={32}
+                        color="#458cf0"
+                      />
+                      Go Back
+                    </Link>
+                  </div>
 
                   <div className="my-auto">
                     <div className="text-center">
@@ -247,7 +264,7 @@ const Register = () => {
                             <a
                               href="#"
                               className="text-violet-500"
-                              style={{ color: "rgb(139 92 246 / 1)" }}
+                              style={{ color: "#458cf0" }}
                             >
                               &nbsp;Terms of Use
                             </a>
@@ -258,7 +275,7 @@ const Register = () => {
                         <Button
                           className={`btn border-transparent bg-violet-500 w-full text-white hover:text-white w-100 waves-effect py-0 waves-light shadow-md shadow-violet-200  `}
                           style={{
-                            backgroundColor: "rgb(139 92 246 / 1)",
+                            backgroundColor: "#458cf0",
                           }}
                           htmlType="submit"
                           disabled={submitting}
@@ -296,7 +313,7 @@ const Register = () => {
                           to="/login"
                           className="text-violet-500 font-semibold underline cursor-pointer"
                           style={{
-                            color: "rgb(139 92 246 / 1)",
+                            color: "#458cf0",
                           }}
                         >
                           Login

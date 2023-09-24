@@ -6,7 +6,7 @@ import { Container } from "reactstrap";
 
 const Earnings = () => {
   const [breadcrumbItems] = useState([
-    { title: "Home", link: "/" },
+    { title: "Dashboard", link: "/auth/dashboard" },
     { title: "Withdrawals", link: "/auth/earnings" },
   ]);
 

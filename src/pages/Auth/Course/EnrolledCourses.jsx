@@ -20,6 +20,8 @@ const EnrolledCourses = () => {
     { title: "Enrolled Courses", link: "/auth/enrolled-courses" },
   ]);
   const [courses, setCourses] = useState([]);
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { auth } = useContext(AuthContext);
   const logout = useLogout();
 
@@ -37,6 +39,7 @@ const EnrolledCourses = () => {
           .then((response) => {
             if (response.data?.success) {
               setCourses(response.data?.courses);
+              setFilteredCourses(response.data?.courses);
             }
           })
           .catch((error) => {
@@ -55,6 +58,18 @@ const EnrolledCourses = () => {
     fetchCourses();
   }, []);
 
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Filter the courses based on the search query
+    const filtered = courses?.filter((course) =>
+      course.title.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setFilteredCourses(filtered);
+  };
+
   return (
     <div className="page-content">
       <Container fluid>
@@ -68,19 +83,29 @@ const EnrolledCourses = () => {
             <Card>
               <CardBody>
                 <div className="d-flex justify-content-between align-items-center">
-                  <Form className="app-search d-none d-lg-block p-0">
-                    <div className="position-relative">
-                      <Input
-                        type="text"
-                        className="form-control"
-                        style={{ backgroundColor: "#f1f5f7" }}
-                        placeholder="Search Courses"
-                      />
-                      <span>
-                        <RiSearchLine />
-                      </span>
-                    </div>
-                  </Form>
+                  {courses?.length > 0 ? (
+                    <Form className="app-search d-none d-lg-block p-0">
+                      <div className="position-relative">
+                        <Input
+                          type="text"
+                          className="form-control"
+                          style={{ backgroundColor: "#f1f5f7" }}
+                          placeholder="Search Courses"
+                          onChange={handleSearch}
+                        />
+                        <span>
+                          <RiSearchLine />
+                        </span>
+                      </div>
+                    </Form>
+                  ) : (
+                    <h6 className="text-secondary font-weight-normal mb-0">There are no courses from instructor</h6>
+                  )}
+                  <Link to="/courses">
+                    <button type="button" className="btn-primary-custom px-4">
+                      Find courses to enroll
+                    </button>
+                  </Link>
                 </div>
               </CardBody>
             </Card>
@@ -88,13 +113,13 @@ const EnrolledCourses = () => {
         </Row>
 
         <Row>
-          {courses?.map((course) => (
+          {filteredCourses?.map((course) => (
             <Col key={course.id} xs={12} lg={4} className="w-25">
               <Card>
                 <div className="course-item">
                   <div className="course-inner">
                     <img
-                      src={course.thumbnail.preview}
+                      src={course.thumbnail.objectKey}
                       alt="Course Thumbnail"
                       width="100%"
                     />

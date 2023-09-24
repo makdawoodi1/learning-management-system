@@ -12,9 +12,15 @@ import axios from "@/services/axios";
 // Ant Design & Toaster imports
 import { Button, Checkbox, Form, Input } from "antd";
 import toast, { Toaster } from "react-hot-toast";
+import { FaArrowCircleLeft } from "react-icons/fa";
 
 // Icons
-import { GithubOutlined, GoogleCircleFilled, GoogleOutlined, LinkedinOutlined } from "@ant-design/icons";
+import {
+  GithubOutlined,
+  GoogleCircleFilled,
+  GoogleOutlined,
+  LinkedinOutlined,
+} from "@ant-design/icons";
 
 const Login = () => {
   // Form State
@@ -67,15 +73,22 @@ const Login = () => {
         )
         .then((response) => {
           if (response.data?.success) {
-            const accessToken = response.data?.access_token;
-            const role = response.data?.user.role;
+            const fetchedData = response.data;
+            const accessToken = fetchedData?.access_token;
+            const role = fetchedData?.user.role;
+            const { key, value } =
+              role === "ADMIN"
+                ? { key: "courses", value: fetchedData.user.courses }
+                : { key: "enrollments", value: fetchedData.user.enrollments };
             setAuth({
-              username: response.data.user.username,
+              username: fetchedData.user.username,
               role,
               accessToken,
+              profileImage: fetchedData.user.profile_picture,
+              [key]: value,
             });
             toast.success("Login Successful");
-            navigate(from, { replace: true });
+            navigate("/auth/dashboard");
           } else {
             toast.error(response?.data.message);
           }
@@ -126,8 +139,10 @@ const Login = () => {
             <div className="col-span-12 md:col-span-5 lg:col-span-4 xl:col-span-3 relative z-50">
               <div className="w-full bg-white xl:p-12 p-10 ">
                 <div className="flex h-[90vh] flex-col">
-                  <div className="mx-auto">
-                    <a className=""></a>
+                  <div>
+                    <Link to="/" className="d-flex align-items-center gap-2 " style={{ color: "#458cf0" }}>
+                      <FaArrowCircleLeft size={32} color="#458cf0" /> Go Back
+                    </Link>
                   </div>
 
                   <div className="my-auto">
@@ -201,7 +216,7 @@ const Login = () => {
                           <Button
                             className={`btn border-transparent bg-violet-500 w-full py-0 text-white hover:text-white w-100 waves-effect waves-light shadow-md shadow-violet-200 `}
                             style={{
-                              backgroundColor: "rgb(139 92 246 / 1)",
+                              backgroundColor: "#458cf0",
                             }}
                             htmlType="submit"
                             disabled={submitting}
@@ -240,7 +255,7 @@ const Login = () => {
                           to="/register"
                           className="text-violet-500 font-semibold underline cursor-pointer"
                           style={{
-                            color: "rgb(139 92 246 / 1)",
+                            color: "#458cf0",
                           }}
                         >
                           Register

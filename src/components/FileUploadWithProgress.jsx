@@ -2,6 +2,7 @@ import { Progress } from "antd";
 import React, { useEffect, useImperativeHandle, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { Row } from "reactstrap";
+import axios from "axios";
 
 const FileUploadWithProgress = React.forwardRef(
   ({ fileWrapper, fn, removeFile, setFileUploading }, ref) => {
@@ -29,8 +30,8 @@ const FileUploadWithProgress = React.forwardRef(
         return uploadResponse;
       },
       endUpload: (file) => {
-        if (file.xhr) {
-          file.xhr.abort();
+        if (file && file.cancel) {
+          file.cancel();
         }
       },
     }));
@@ -43,41 +44,80 @@ const FileUploadWithProgress = React.forwardRef(
   }
 );
 
-const uploadFile = (uploadFile, uploadUrl, uploadKey, onProgress) => {
-  const url = uploadUrl;
-  const key = uploadKey;
-
+const uploadFile = async (uploadFile, uploadUrl, uploadKey, onProgress) => {
   return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
+    const CancelToken = axios.CancelToken;
+    const cancelTokenSource = CancelToken.source();
 
-    xhr.onload = () => {
-      if (xhr.status === 200 && xhr.statusText === "OK") {
-        const secureURL = xhr.responseURL;
-        uploadFile.secureURL = secureURL;
-        resolve(uploadFile);
-      } else if (xhr.status === 403) {
-        reject({ message: "Connection Timeout Error" });
-      }
+    const request = axios.put(uploadUrl, uploadFile, {
+      onUploadProgress: (progressEvent) => {
+        // if (progressEvent.lengthComputable) {
+          const percentage = (progressEvent.loaded / progressEvent.total) * 100;
+          onProgress(Math.round(percentage));
+        // }
+      },
+      cancelToken: cancelTokenSource.token,
+    });
+
+    request
+      .then((response) => {
+        if (response.status === 200) {
+          const secureURL = response.request.responseURL;
+          uploadFile.secureURL = secureURL;
+          resolve(uploadFile);
+        } else if (response.status === 403) {
+          reject({ message: "Connection Timeout Error" });
+        } else {
+          reject({ message: "Upload failed with status " + response.status });
+        }
+      })
+      .catch((error) => {
+        if (axios.isCancel(error)) {
+          reject({ message: "Upload aborted by user" });
+        } else {
+          reject(error);
+        }
+      });
+
+    uploadFile.objectKey = uploadKey;
+    uploadFile.cancel = () => {
+      cancelTokenSource.cancel("Upload aborted by user");
     };
-    xhr.onerror = (evt) => reject(evt);
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentage = (event.loaded / event.total) * 100;
-        onProgress(Math.round(percentage));
-      }
-    };
-
-    const formData = new FormData();
-    formData.append("file", uploadFile);
-    formData.append("upload_preset", key);
-
-    xhr.send(formData);
-    uploadFile.xhr = xhr;
-    uploadFile.url = url;
-    uploadFile.objectKey = key;
   });
 };
+
+  // return new Promise((resolve, reject) => {
+  //   const formData = new FormData();
+    // formData.append("file", uploadFile);
+    // formData.append("upload_preset", uploadKey);
+
+    // const config = {
+    //   onUploadProgress: (progressEvent) => {
+    //     if (progressEvent.lengthComputable) {
+    //       const percentage = (progressEvent.loaded / progressEvent.total) * 100;
+    //       onProgress(Math.round(percentage));
+    //     }
+    //   },
+    // };
+
+    // axios
+    //   .put(uploadUrl, formData, config)
+    //   .then((response) => {
+    //     if (response.status === 200) {
+    //       const secureURL = response.request.responseURL;
+    //       uploadFile.secureURL = secureURL;
+    //       resolve(uploadFile);
+    //     } else if (response.status === 403) {
+    //       reject({ message: "Connection Timeout Error" });
+    //     } else {
+    //       reject({ message: "Upload failed with status " + response.status });
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     reject(error);
+    //   });
+  // });
+// };
 
 // Function to upload a file and store its XHR object
 // const uploadAndStoreXHR = (file, onProgress) => {
