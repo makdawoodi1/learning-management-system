@@ -11,7 +11,7 @@ import connectPgSimple from "connect-pg-simple";
 import authRoutes from "./routes/authRoutes.js";
 import assignmentRoutes from "./routes/assignmentRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
-import discussionRoutes from "./routes/discussionRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
 import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import submissionRoutes from "./routes/submissionRoutes.js";
@@ -64,11 +64,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // })
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
-app.use("/api/assignments", assignmentRoutes);
-app.use("/api/enrollments", enrollmentRoutes);
+// app.use("/api/assignments", assignmentRoutes);
+// app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/quizzes", quizRoutes);
-app.use("/api/discussions", discussionRoutes);
-app.use("/api/submissions", submissionRoutes);
+app.use("/api/announcements", announcementRoutes);
+// app.use("/api/submissions", submissionRoutes);
 
 app.listen(port, () => console.log(`Server listening to port ${process.env.APP_URL_SERVER}:${port}`));
 // app.listen(port, '0.0.0.0', () => { console.log('Server is running on port 8747') });

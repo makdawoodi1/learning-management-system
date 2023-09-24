@@ -1,18 +1,16 @@
-import AWS from "aws-sdk";
+// import AWS from "aws-sdk";
 import { randomUUID } from "crypto";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
-const s3 = new AWS.S3({
-  apiVersion: "2006-03-01",
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_KEY,
+const client = new S3Client({
   region: process.env.AWS_REGION,
-  signatureVersion: "v4",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+  },
 });
-
-const s3Params = {
-  Bucket: process.env.AWS_BUCKET,
-  Expires: 60 * 5,
-};
+const EXPIRY = 360000
 
 export const presignURLHandler = async (
   req,
@@ -27,31 +25,6 @@ export const presignURLHandler = async (
     let Key, uploadUrl, folderKey, moduleKey, lessonKey, hasPresignedURL, ContentType = null;
     const fileName = req.query.fileName;
     const fileType = req.query.fileType;
-    switch (fileType) {
-      case "image/jpeg":
-        ContentType = "image/jpeg";
-        break;
-      case "image/png":
-        ContentType = "image/png";
-        break;
-      case "video/mp4":
-        ContentType = "video/mp4";
-        break;
-      case "application/zip":
-        ContentType = "application/zip";
-        break;
-      default:
-        ContentType = null;
-        break;
-    }
-
-    if (!ContentType) {
-      return res.json({
-        success: false,
-        message: "Unknown File Extension",
-      });
-    }
-    s3Params.ContentType = ContentType;
 
     // Folder Key
     folderKey = 
@@ -64,15 +37,21 @@ export const presignURLHandler = async (
 
     if (folderKey && name === 'introductory-video' || name === 'course-thumbnail') {
       Key = await getUploadKey(name, fileName, folderKey);
-      s3Params.Key = Key;
-      uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+      // s3Params.Key = Key;
+      const command = new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET,
+        Key
+      });
+      uploadUrl = await getSignedUrl(client, command, { expiresIn: EXPIRY });
+
+      // uploadUrl = await s3.getSignedUrl("putObject", s3Params);
       // cloudfrontParams.url = `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${Key}`;
       // cloudfront.getSignedUrl(cloudfrontParams);
       hasPresignedURL = true
     }
 
     // Module & Lesson Keys
-    if (folderKey && name === 'lesson-files') {
+    if (folderKey && name === 'lesson-files' || name === 'lesson-content-files') {
       moduleKey = 
       s3_module_key ? s3_module_key 
       : await createKey(req, res, {
@@ -91,8 +70,13 @@ export const presignURLHandler = async (
 
       if (moduleKey && lessonKey) {
         Key = await getUploadKey(name, fileName, lessonKey);
-        s3Params.Key = Key;
-        uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+        const command = new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET,
+          Key
+        });
+        uploadUrl = await getSignedUrl(client, command, { expiresIn: EXPIRY });
+        // s3Params.Key = Key;
+        // uploadUrl = await s3.getSignedUrl("putObject", s3Params);
         // cloudfrontParams.url = `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${Key}`;
         // cloudfront.getSignedUrl(cloudfrontParams);
         hasPresignedURL = true
@@ -106,7 +90,7 @@ export const presignURLHandler = async (
     if (hasPresignedURL) {
       return res.json({
         success: true,
-        expires_in: s3Params.Expires,
+        expires_in: EXPIRY,
         s3: {
           uploadUrl,
           key: Key,
@@ -141,50 +125,91 @@ export const delteObjectHandler = async (req, res) => {
       Key,
     };
 
-    s3.deleteObject(s3Params, (err, data) => {
-      if (err) console.log(err, err.stack);
-      else {
-        console.log("Delete Success", data);
-        return res.json({
-          success: true,
-          message: "File Delete Successfully",
-        });
-      }
+    const deleteCommand = new DeleteObjectCommand(s3Params);
+    const response = await client.send(deleteCommand);
+
+    console.log("Delete Success", response);
+
+    return res.json({
+      success: true,
+      message: "File Delete Successfully",
     });
   } catch (error) {
+    console.error("Error deleting object:", error);
+
     res.status(500).json({
       success: false,
-      message: "Unexpected error occured",
+      message: "Unexpected error occurred",
       error: error.message,
     });
-
-    console.log(error);
   }
 };
+
+// export const delteObjectHandler = async (req, res) => {
+//   try {
+//     const Key = req.query.objectKey;
+
+//     const s3Params = {
+//       Bucket: process.env.AWS_BUCKET,
+//       Key,
+//     };
+
+//     s3.deleteObject(s3Params, (err, data) => {
+//       if (err) console.log(err, err.stack);
+//       else {
+//         console.log("Delete Success", data);
+//         return res.json({
+//           success: true,
+//           message: "File Delete Successfully",
+//         });
+//       }
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Unexpected error occured",
+//       error: error.message,
+//     });
+
+//     console.log(error);
+//   }
+// };
 
 const createKey = async (req, res, params) => {
   try {
-    return new Promise((resolve, reject) => {
-      s3.putObject(params, (err, data) => {
-        if (err) {
-          console.error("Error creating folder:", err);
-          reject(err);
-        } else {
-          console.log("Folder created successfully.");
-          resolve(params.Key);
-        }
-      });
-    });
+    const command = new PutObjectCommand(params);
+    await client.send(command);
+    console.log("Folder created successfully.");
+    return params.Key;
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Unexpected error occured",
-      error: error.message,
-    });
-
-    console.log(error);
+    console.error("Error creating folder:", error);
+    throw error;
   }
 };
+
+// const createKey = async (req, res, params) => {
+//   try {
+//     return new Promise((resolve, reject) => {
+//       s3.putObject(params, (err, data) => {
+//         if (err) {
+//           console.error("Error creating folder:", err);
+//           reject(err);
+//         } else {
+//           console.log("Folder created successfully.");
+//           resolve(params.Key);
+//         }
+//       });
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Unexpected error occured",
+//       error: error.message,
+//     });
+
+//     console.log(error);
+//   }
+// };
 
 const getUploadKey = async (name, fileName, key) => {
   return new Promise((resolve, reject) => {
@@ -196,6 +221,9 @@ const getUploadKey = async (name, fileName, key) => {
         return resolve(`${key}${name}-${fileName}`);
 
       case "lesson-files":
+        return resolve(`${key}${name}-${fileName}`);
+
+      case "lesson-content-files":
         return resolve(`${key}${name}-${fileName}`);
 
       default:

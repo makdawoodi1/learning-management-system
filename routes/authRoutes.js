@@ -1,6 +1,8 @@
 import express from "express";
 import {
   forgotPasswordRouteHandler,
+  fetchUserHandler,
+  updateProfilePictureHandler,
   loginRouteHandler,
   logoutRouteHandler,
   refreshTokenHandler,
@@ -8,6 +10,10 @@ import {
   updateRouteHandler,
   resetPasswordRouteHandler,
 } from "../controllers/authController.js";
+import {
+  presignURLHandler,
+  delteObjectHandler
+} from "../controllers/utils/userS3.js"
 import { verifyToken } from "../controllers/utils/jwt-config.js";
 
 export const router = express.Router();
@@ -15,6 +21,23 @@ export const router = express.Router();
 router.get("/refresh", async (req, res, next) => {
   await refreshTokenHandler(req, res);
 });
+
+router.post("/get-presign-url", async (req, res, next) => {
+  await presignURLHandler(req, res);
+});
+
+router.delete("/delete-object", async (req, res, next) => {
+  await delteObjectHandler(req, res);
+});
+
+router.get("/fetch-user", async (req, res, next) => {
+  await fetchUserHandler(req, res);
+})
+
+router.put("/update-profile-picture", async (req, res, next) => {
+  const { username, file } = req.body.data.attributes;
+  await updateProfilePictureHandler(req, res, username, file);
+})
 
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body.data.attributes;
@@ -40,9 +63,9 @@ router.post("/register", async (req, res) => {
   );
 });
 
-router.post("/update-user", async (req, res) => {
-  const { username, email, password, role } = req.body.data.attributes;
-  await updateRouteHandler(req, res, username, email, password, role);
+router.put("/update-user", async (req, res) => {
+  const { firstname, lastname, email } = req.body.data.attributes;
+  await updateRouteHandler(req, res, firstname, lastname, email);
 });
 
 router.post("/forgot-password", async (req, res, next) => {

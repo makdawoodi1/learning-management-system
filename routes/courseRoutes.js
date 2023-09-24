@@ -14,7 +14,7 @@ import {
 import { 
     presignURLHandler, 
     delteObjectHandler,
- } from "../controllers/utils/s3.js"
+ } from "../controllers/utils/courseS3.js"
 
 const router = express.Router();
 

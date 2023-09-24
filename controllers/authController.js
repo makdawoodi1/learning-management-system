@@ -9,12 +9,12 @@ import {
 } from "../mail/mail.js";
 import Stripe from "stripe";
 import { createStripeCustomer } from "./utils/stripe.js";
-import { 
-  createSignToken, 
-  createRefreshToken, 
-  verifyRefreshToken, 
+import {
+  createSignToken,
+  createRefreshToken,
+  verifyRefreshToken,
   evaluateRefreshToken,
-  createResetPasswordToken
+  createResetPasswordToken,
 } from "./utils/jwt-config.js";
 
 dotenv.config();
@@ -29,24 +29,120 @@ export const refreshTokenHandler = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        refreshToken: [refreshToken]
+        refreshToken: [refreshToken],
       },
-    })
+    });
 
     // Detected refresh token reuse!
     if (!user) return res.sendStatus(401);
-    if (user) verifyRefreshToken(req, res, prisma, user?.refreshToken)
+    if (user) verifyRefreshToken(req, res, prisma, user?.refreshToken);
 
     const newRefreshTokenArray = user.refreshToken.filter(
       (rt) => rt !== refreshToken
     );
 
     // evaluate jwt
-    evaluateRefreshToken(req, res, prisma, user, newRefreshTokenArray)
+    evaluateRefreshToken(req, res, prisma, user, newRefreshTokenArray);
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Unexpected error occured",
+      error: error.message,
+    });
+
+    console.log(error);
+  }
+};
+
+export const fetchUserHandler = async (req, res) => {
+  try {
+    const username = req.query.username;
+    const prisma = new PrismaClient();
+    let user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+
+    if (user) {
+      return res.json({
+        success: true,
+        user: {
+          firstname: user.firstname,
+          lastname: user.lastname,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          profile_picture: JSON.parse(user.profile_picture),
+        },
+      });
+    }
+
+    res.status(403).json({
+      success: false,
+      message: "Failed to fetched user",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error Fetching user data",
+      error: error.message,
+    });
+
+    console.log(error);
+  }
+};
+
+export const updateProfilePictureHandler = async (req, res, username, file) => {
+  try {
+    const prisma = new PrismaClient();
+
+    if (file) {
+      let user = await prisma.user.update({
+        where: { username: username },
+        data: {
+          profile_picture: JSON.stringify({
+            ...file,
+            objectKey: `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${file.objectKey}`,
+          }),
+        },
+      });
+
+      if (user) {
+        return res.json({
+          success: true,
+          userProfilePicture: JSON.parse(user.profile_picture),
+        });
+      }
+
+      res.status(403).json({
+        success: false,
+        message: "Failed to upload file",
+      });
+    } else {
+      let user = await prisma.user.update({
+        where: { username: username },
+        data: {
+          profile_picture: null,
+        },
+      });
+
+      if (user) {
+        return res.json({
+          success: true,
+          userProfilePicture: null,
+        });
+      }
+
+      res.status(403).json({
+        success: false,
+        message: "Failed to update user profile image",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating user profile picture",
       error: error.message,
     });
 
@@ -65,9 +161,9 @@ export const loginRouteHandler = async (req, res, email, password) => {
       },
       include: {
         enrollments: true,
+        courses: true,
         submissions: true,
-        quiz_attempts: true,
-        discussion_posts: true,
+        quiz_attempts: true
       },
     });
 
@@ -132,6 +228,10 @@ export const loginRouteHandler = async (req, res, email, password) => {
           maxAge: 24 * 60 * 60 * 1000,
         });
 
+        const { key, value } =
+          user.role === "ADMIN"
+            ? { key: "courses", value: user.courses }
+            : { key: "enrollments", value: user.enrollments };
         return res.json({
           success: true,
           token_type: "Bearer",
@@ -142,7 +242,8 @@ export const loginRouteHandler = async (req, res, email, password) => {
             username: user.username,
             email: user.email,
             role: user.role,
-            profile_info: user.profile_info,
+            profile_picture: JSON.parse(user.profile_picture),
+            [key]: value,
           },
         });
       } else {
@@ -168,7 +269,7 @@ export const logoutRouteHandler = async (req, res) => {
     const prisma = new PrismaClient();
 
     const cookies = req.cookies;
-    if (!cookies?.jwt ) return res.sendStatus(204);
+    if (!cookies?.jwt) return res.sendStatus(204);
     const refreshToken = cookies.jwt;
 
     // Is refreshToken in db?
@@ -234,7 +335,7 @@ export const registerRouteHandler = async (
     if (user) {
       return res.status(400).json({
         success: false,
-        message: "Email or Username is already in use"
+        message: "Email or Username is already in use",
       });
     }
 
@@ -242,7 +343,7 @@ export const registerRouteHandler = async (
     if (!password || password.length < 8) {
       return res.status(500).json({
         success: false,
-        message: "Password must be at least 8 characters long."
+        message: "Password must be at least 8 characters long.",
       });
     }
 
@@ -349,12 +450,47 @@ export const registerRouteHandler = async (
   }
 };
 
-export const updateRouteHandler = async (req, res) => {
+export const updateRouteHandler = async (
+  req,
+  res,
+  firstname,
+  lastname,
+  email
+) => {
   try {
+    const prisma = new PrismaClient();
+
+    const username = req.query.username;
+    let user = await prisma.user.update({
+      where: { username: username },
+      data: {
+        firstname: firstname,
+        lastname: lastname,
+        email: email,
+      },
+    });
+
+    if (user) {
+      return res.json({
+        success: true,
+        user: {
+          firstname: user.firstname,
+          lastname: user.lastname,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        }
+      });
+    }
+
+    res.status(403).json({
+      success: false,
+      message: "Failed to update user infromation",
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error resetting password",
+      message: "Error updating user information",
       error: error.message,
     });
 

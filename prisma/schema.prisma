@@ -18,22 +18,22 @@ model Session {
 }
 
 model User {
-  id               Int              @id @default(autoincrement())
-  firstname        String
-  lastname         String
-  username         String           @unique
-  email            String           @unique
-  password         String
-  role             Role             @default(STUDENT)
-  profile_info     String?
-  refreshToken     String[]         @unique
-  verified         Boolean
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  enrollments      Enrollment[]
-  submissions      Submission[]
-  quiz_attempts    QuizAttempt[]
-  discussion_posts DiscussionPost[]
+  id              Int           @id @default(autoincrement())
+  firstname       String
+  lastname        String
+  username        String        @unique
+  email           String        @unique
+  password        String
+  role            Role          @default(STUDENT)
+  profile_picture String?
+  refreshToken    String[]      @unique
+  verified        Boolean
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  courses         Course[]
+  enrollments     Enrollment[]
+  submissions     Submission[]
+  quiz_attempts   QuizAttempt[]
 }
 
 model Course {
@@ -48,10 +48,12 @@ model Course {
   updated_at        DateTime       @updatedAt
   course_modules    CourseModule[]
   enrollments       Enrollment[]
-  discussions       Discussion[]
+  announcements     Announcement[]
   Assignment        Assignment[]
   Quiz              Quiz[]
   published         Boolean
+  User              User?          @relation(fields: [userId], references: [id])
+  userId            Int?
 }
 
 model CourseModule {
@@ -165,26 +167,15 @@ model QuizAttempt {
   user_id         Int
 }
 
-model Discussion {
-  id               Int              @id @default(autoincrement())
-  title            String
-  description      String?
-  created_at       DateTime         @default(now())
-  updated_at       DateTime         @updatedAt
-  course           Course           @relation(fields: [course_id], references: [id])
-  course_id        Int
-  discussion_posts DiscussionPost[]
-}
-
-model DiscussionPost {
-  id            Int        @id @default(autoincrement())
-  post_text     String
-  created_at    DateTime   @default(now())
-  updated_at    DateTime   @updatedAt
-  discussion    Discussion @relation(fields: [discussion_id], references: [id])
-  user          User       @relation(fields: [user_id], references: [id])
-  discussion_id Int
-  user_id       Int
+model Announcement {
+  id         Int      @id @default(autoincrement())
+  title      String
+  content    String
+  active     Boolean
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  course     Course   @relation(fields: [course_id], references: [id])
+  course_id  Int
 }
 
 enum Role {

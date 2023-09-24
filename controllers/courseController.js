@@ -31,6 +31,7 @@ export const getCoursesHandler = async (req, res) => {
             module_lessons: true,
           },
         },
+        User: true
       },
     });
 
@@ -41,6 +42,7 @@ export const getCoursesHandler = async (req, res) => {
       price: course.price,
       thumbnail: JSON.parse(course.thumbnail),
       introductoryVideo: JSON.parse(course.introductoryVideo),
+      profileImage: JSON.parse(course.User?.profile_picture),
       lessonCount: course.course_modules
         ? course.course_modules.reduce(
             (totalLessonCount, module) =>
@@ -82,6 +84,7 @@ export const getCourseHandler = async (req, res, username, courseID) => {
             module_lessons: true,
           },
         },
+        User: true
       },
     });
 
@@ -106,6 +109,7 @@ export const getCourseHandler = async (req, res, username, courseID) => {
           ...course,
           thumbnail: JSON.parse(course.thumbnail),
           introductoryVideo: JSON.parse(course.introductoryVideo),
+          profileImage: JSON.parse(user.profile_picture),
         },
       });
     }
@@ -118,6 +122,7 @@ export const getCourseHandler = async (req, res, username, courseID) => {
           ...course,
           thumbnail: JSON.parse(course.thumbnail),
           introductoryVideo: JSON.parse(course.introductoryVideo),
+          profileImage: JSON.parse(course.User?.profile_picture),
         },
       });
     }
@@ -143,7 +148,14 @@ export const createCourseHandler = async (req, res) => {
       introductoryVideo,
       modules,
     } = req.body.data.attributes;
+    const username = req.query.username;
     const prisma = new PrismaClient();
+
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
 
     // Creating Admin Account
     const newCourse = await prisma.course.create({
@@ -161,6 +173,7 @@ export const createCourseHandler = async (req, res) => {
           objectKey: `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${introductoryVideo.objectKey}`,
         }),
         published: true,
+        userId: user.id,
         course_modules: {
           create: modules.map((module) => ({
             title: module.title,
@@ -176,7 +189,7 @@ export const createCourseHandler = async (req, res) => {
                 lesson_files: {
                   create: lesson.lessonFiles.map((lessonFile) => ({
                     name: lessonFile.name,
-                    url: lessonFile.url,
+                    url: lessonFile.objectKey,
                     fileType:
                       lessonFile.type === "application/zip"
                         ? "ZIP"
