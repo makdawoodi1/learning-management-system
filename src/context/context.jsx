@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [toggleSidebar, setToggleSidebar] = useState(false);
     const [toggleFullScreen, setToggleFullScreen] = useState(false);
     const [courseState, setCourseState] = useState({})
+    const [quizState, setQuizState] = useState({})
 
     const fullScreenHandle = useFullScreenHandle();
 
@@ -17,6 +18,8 @@ export const AuthProvider = ({ children }) => {
             setAuth,
             courseState,
             setCourseState,
+            quizState,
+            setQuizState,
             toggleSidebar,
             setToggleSidebar,
             fullScreenHandle

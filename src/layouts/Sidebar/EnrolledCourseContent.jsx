@@ -15,7 +15,7 @@ const getItem = (label, key, children, type) => {
 }
 
 const EnrolledCourseContent = ({ toast }) => {
-  const { toggleSidebar, setCourseState } = useContext(AuthContext);
+  const { toggleSidebar, setCourseState, auth } = useContext(AuthContext);
   const [items, setItems] = useState([])
   const { pathname } = useLocation();
   const courseID = pathname.split("/")[3];
@@ -25,7 +25,7 @@ const EnrolledCourseContent = ({ toast }) => {
       try {
         return new Promise((resolve, reject) => {
           axios
-            .get(`${API_URL}/courses/get-enrolled-course?courseID=${courseID}`, {
+            .get(`${API_URL}/courses/get-enrolled-course?username=${auth.username}&courseID=${courseID}`, {
               headers: { "Content-Type": "application/json" },
               withCredentials: true,
             })
@@ -69,9 +69,9 @@ const EnrolledCourseContent = ({ toast }) => {
         getItem("Lessons", "lessonGroup", module.lessons?.map(lesson => (
           getItem(lesson.title, `lesson${lesson.id}`)
         )), "group"),
-        // getItem("Quizzes", "quizGroup", module.quizzes?.map(quiz => (
-        //   getItem(quiz.title, `quiz-${quiz.id}`)
-        // )), "group"),
+        getItem("Quizzes", "quizGroup", module.quizzes?.map(quiz => (
+          getItem(quiz.title, `quiz${quiz.id}`)
+        )), "group"),
         // getItem("Assignments", "assignmentGroup", module.assignments?.map(assignment => (
         //   getItem(assignment.title, `assignment-${assignment.id}`)
         // )), "group")
@@ -82,13 +82,14 @@ const EnrolledCourseContent = ({ toast }) => {
 
   const handleClick = (e) => {
     const inputArray = e.keyPath;
-    const [type, lessonID] = inputArray[0].split(/(\d+)/);
+    const [type, id] = inputArray[0].split(/(\d+)/);
     const moduleID = parseInt(inputArray[1]);
+ 
     const resultObject = {
       type: type.toLowerCase(),
-      lessonID: parseInt(lessonID),
       moduleID: moduleID
     };
+    type === 'lesson' ? resultObject.lessonID = parseInt(id) : resultObject.quizID = parseInt(id)
     setCourseState(prev => ({ ...prev, selected: resultObject }))
   };
 

@@ -21,7 +21,7 @@ const EnrolledCourses = () => {
   ]);
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const { auth } = useContext(AuthContext);
   const logout = useLogout();
 
@@ -99,7 +99,9 @@ const EnrolledCourses = () => {
                       </div>
                     </Form>
                   ) : (
-                    <h6 className="text-secondary font-weight-normal mb-0">There are no courses from instructor</h6>
+                    <h6 className="text-secondary font-weight-normal mb-0">
+                      There are no courses from instructor
+                    </h6>
                   )}
                   <Link to="/courses">
                     <button type="button" className="btn-primary-custom px-4">
@@ -137,9 +139,13 @@ const EnrolledCourses = () => {
                             {/* <div className="course-price font-sans">{course.price}$</div> */}
                           </div>
                           <Progress
-                            percent={
-                              Math.floor((course.completedLessonCount / course.totalLessonCount) * 100)
-                            }
+                            percent={Math.floor(
+                              ((course.completedLessonCount +
+                                course.completedQuizCount) /
+                                (course.totalLessonCount +
+                                  course.totalQuizCount)) *
+                                100
+                            )}
                             size="small"
                           />
                         </div>

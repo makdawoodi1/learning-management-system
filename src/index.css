@@ -114,6 +114,14 @@
   border-radius: 6px;
 }
 
+.btn-success-custom {
+  display: inline-block;
+  padding: 0.47rem 0.75rem;
+  background-color: #1fe240;
+  color: #fff;
+  border-radius: 6px;
+}
+
 .image-preview-container {
   padding: 2%;
   margin: 0 auto;
@@ -330,6 +338,96 @@
 
 .course-content h4:hover, .course-content .ca-name:hover, .course-content .lab-btn-text:hover {
   color: #458cf0 !important;
+}
+
+/* Ant Design */
+.dynamic-delete-button {
+  position: relative;
+  top: 4px;
+  margin: 0 8px;
+  color: #999;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.dynamic-delete-button:hover {
+  color: #777;
+}
+.dynamic-delete-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Radio Group Custom for QUIZ */
+.ant-radio-group {
+  display: block;
+}
+
+.ant-radio-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  border: 1px solid #d9d9d9;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.ant-radio-wrapper:hover {
+  border-color: #1890ff;
+}
+
+.ant-radio-checked:disabled {
+  color: white;
+}
+
+.ant-radio-checked .ant-radio-wrapper {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-radio-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+/* Checkbox Group Custom for QUIZ */
+.ant-checkbox-group {
+  display: block;
+}
+
+.ant-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  border: 1px solid #d9d9d9;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.ant-checkbox-wrapper:hover {
+  border-color: #1890ff;
+}
+
+.ant-checkbox-checked:disabled .ant-checkbox-wrapper:disabled {
+  color: white;
+}
+
+.ant-checkbox-checked .ant-checkbox-wrapper {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-checkbox-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
 }
 
 @keyframes dotShadow {

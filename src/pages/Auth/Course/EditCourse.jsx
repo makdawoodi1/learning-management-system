@@ -3,7 +3,7 @@ import AuthContext from "@/context/context";
 
 //Import Breadcrumb
 import Breadcrumbs from "@/components/common/Breadcrumbs";
-import { CourseSettings, QuizSettings } from "./components";
+import { EditCourseSettings, QuizSettings } from "./components";
 import { Container, Row, Col } from "reactstrap";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
@@ -17,32 +17,21 @@ const EditCourse = () => {
     { title: "Edit Course", link: "/auth/edit-course" },
   ]);
   const { pathname } = useLocation();
-  const courseID = pathname.split("/")[2];
-  const { setCourseState, auth } = useContext(AuthContext);
+  const courseID = pathname.split("/")[3];
+  const { courseState, setCourseState, auth } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchCourse = async (req, res) => {
       try {
         axios
-          .get(`${API_URL}/courses/get-course?username=${auth?.username}&courseID=${courseID}`, {
+          .get(`${API_URL}/courses/get-edit-course?username=${auth?.username}&courseID=${courseID}`, {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
           })
           .then((response) => {
             if (response.data?.success) {
               const course = response.data?.course;
-              setCourseState({
-                courseFolderKey: course.courseFolderKey,
-                courseTitle: course.courseTitle,
-                courseDescription: course.courseDescription,
-                price: course.Price,
-                introductoryVideo: course.introductoryVideo,
-                thumbnail: course.thumbnail,
-                archived: course.archived,
-                published: course.published,
-                modules: [],
-                errors: {},
-              });
+              setCourseState({...course});
             }
           })
           .catch((error) => {
@@ -60,6 +49,8 @@ const EditCourse = () => {
     fetchCourse();
   }, []);
 
+  if (courseState) console.log(courseState);
+
   return (
     <div className="page-content">
       <Container fluid>
@@ -67,7 +58,7 @@ const EditCourse = () => {
 
         <Row>
           <Col xs={12}>
-            <CourseSettings />
+            <EditCourseSettings />
             <QuizSettings />
           </Col>
         </Row>

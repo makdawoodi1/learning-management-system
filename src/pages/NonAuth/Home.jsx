@@ -20,11 +20,11 @@ import { useNavigate } from "react-router-dom";
 const Home = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    window.location.href = 'https://webwire.site/adrienne-platt/'
-  }, []);
+  // useEffect(() => {
+  //   window.location.href = 'https://webwire.site/adrienne-platt/'
+  // }, []);
 
-  return null;
+  // return null;
 
   return (
     <div>

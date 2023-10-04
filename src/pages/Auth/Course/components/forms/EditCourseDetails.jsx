@@ -1,14 +1,24 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Row, Col } from "reactstrap";
 import { Input, Popconfirm } from "antd";
-import Dropzone from "@/components/Dropzone";
+import EditDropzone from "@/components/EditDropzone";
 import { QuestionCircleOutlined } from "@ant-design/icons";
 import Editor from "@/components/Editor";
 import { useLocation } from "react-router-dom";
 import AuthContext from "@/context/context";
 
-const CourseDetails = ({ Form, form, handleSubmit }) => {
+const EditCourseDetails = ({ Form, form, handleSubmit }) => {
   const [editorContent, setEditorContent] = useState('');
+  const { courseState, setCourseState } = useContext(AuthContext)
+  const { pathname } = useLocation();
+
+  if (pathname.includes('edit-course/')) {
+    form.setFieldsValue({
+      'course-title': courseState.courseTitle,
+      'course-description': courseState.courseDescription,
+      'price': courseState.price,
+    });
+  }
 
   return (
     <>
@@ -60,7 +70,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
               <h6 className="text-secondary font-weight-normal text-center">
                 Upload Introductory Video
               </h6>
-              <Dropzone
+              <EditDropzone
                 Form={Form}
                 name="introductory-video"
                 buttonText="Upload"
@@ -113,7 +123,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           </Popconfirm> */}
           <Form.Item>
             <Popconfirm
-              title="Publish Course"
+              title="Edit Course"
               description="Are you sure to publish this course?"
               okButtonProps={{
                 danger: true,
@@ -122,7 +132,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
               onConfirm={handleSubmit}
             >
               <button type="submit" className="w-full btn btn-primary mb-4">
-                Publish
+                Edit Course
               </button>
             </Popconfirm>
           </Form.Item>
@@ -130,7 +140,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           <h6 className="text-secondary text-center font-weight-normal">
             Upload Course Thumbnail
           </h6>
-          <Dropzone
+          <EditDropzone
             Form={Form}
             name="course-thumbnail"
             buttonText="Upload"
@@ -145,4 +155,4 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
   );
 };
 
-export default CourseDetails;
+export default EditCourseDetails;

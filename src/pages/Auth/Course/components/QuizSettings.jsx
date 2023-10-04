@@ -13,15 +13,20 @@ import classnames from "classnames";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Input } from "antd";
 import AuthContext from "@/context/context";
+import { filterAndValidateCourse } from "@/helpers/helper";
 
 // Components
 import { QuizDetails, QuizQuestions } from "./forms";
+import toast from "react-hot-toast";
 
 const titles = ["Quiz Details", "Quiz Questions"];
 const QuizSettings = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { auth, courseState, setCourseState } = useContext(AuthContext);
+  const { courseState, setCourseState } = useContext(AuthContext);
+  const [state, setState] = useState({
+    mode: "add"
+  })
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -32,52 +37,6 @@ const QuizSettings = () => {
         setActiveTab(tab);
       }
     }
-  };
-
-  const handleSubmit = () => {
-
-    setTimeout(() => {
-      const filteredData = filterAndValidateCourse(courseState);
-      const errorKeys = Object.keys(filteredData.errors);
-      if (errorKeys.length > 0) {
-        return toast.error(Object.values(filteredData.errors)[0]);
-      }
-
-      try {
-        axios
-          .post(
-            `${API_URL}/quizzes/create-quiz`,
-            JSON.stringify({
-              data: {
-                attributes: {
-                  ...filteredData,
-                },
-              },
-            }),
-            {
-              headers: { "Content-Type": "application/json" },
-              withCredentials: true,
-            }
-          )
-          .then(async (response) => {
-            if (response.data?.success) {
-              toast.success("Quiz has been added successfully");
-            } else {
-              toast.error(response?.data.message);
-            }
-          })
-          .catch((error) => {
-            if (error.response?.data?.message) {
-              return toast.error(error.response.data?.message);
-            }
-            console.error("Error creating Course!:", error.message);
-            toast.error(error.message);
-          });
-      } catch (error) {
-        console.error(error);
-        toast.error("Unexpected error occured!");
-      }
-    }, 0);
   };
 
   return (
@@ -126,11 +85,13 @@ const QuizSettings = () => {
                 <QuizDetails
                   Form={Form}
                   form={form}
-                  handleSubmit={handleSubmit}
+                  // handleSubmit={handleSubmit}
+                  rootState={state} 
+                  setRootState={setState}
                 />
               </TabPane>
               <TabPane tabId={1}>
-                <QuizQuestions Form={Form} form={form} />
+                <QuizQuestions Form={Form} form={form} rootState={state} setRootState={setState} />
               </TabPane>
             </TabContent>
           </Form>

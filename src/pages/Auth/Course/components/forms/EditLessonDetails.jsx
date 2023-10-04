@@ -1,7 +1,7 @@
 import React, { useState, useRef, useContext } from "react";
 import { Row, Col, Card, CardHeader, CardBody, Collapse } from "reactstrap";
 import { Input, Button, Popconfirm, Select, Modal } from "antd";
-import EditDropzone from "@/components/EditDropzone";
+import Dropzone from "@/components/Dropzone";
 import AuthContext from "@/context/context";
 import { generateUniqueID } from "@/helpers/helper";
 import EditorPreview from "@/components/EditorPreview";
@@ -35,7 +35,7 @@ import {
 import { FaTimes } from "react-icons/fa";
 import { LiaFileAudio } from "react-icons/lia";
 
-const LessonDetails = ({ Form, form }) => {
+const EditLessonDetails = ({ Form, form }) => {
   const { courseState, setCourseState } = useContext(AuthContext);
   const [editorContent, setEditorContent] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -258,8 +258,6 @@ const LessonDetails = ({ Form, form }) => {
     });
   };
 
-  if (courseState) console.log(courseState);
-
   return (
     <>
       <Modal
@@ -346,7 +344,7 @@ const LessonDetails = ({ Form, form }) => {
                     (lesson) => lesson.id === state.selectedLesson
                   )
                   ?.map((lesson) => (
-                    <EditDropzone
+                    <Dropzone
                       key={lesson.id}
                       Form={Form}
                       name="lesson-content-files"
@@ -812,7 +810,7 @@ const LessonDetails = ({ Form, form }) => {
                   (lesson) => lesson.id === state.selectedLesson
                 )
                 ?.map((lesson) => (
-                  <EditDropzone
+                  <Dropzone
                     key={lesson.id}
                     Form={Form}
                     name="lesson-files"
@@ -866,4 +864,4 @@ const LessonDetails = ({ Form, form }) => {
   );
 };
 
-export default LessonDetails;
+export default EditLessonDetails;

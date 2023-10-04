@@ -1,23 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 //Import Breadcrumb
 import Breadcrumbs from "@/components/common/Breadcrumbs";
 import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import { Link } from "react-router-dom";
-import Rating from "@/containers/sidebar/rating";
-import Pagination from "@/containers/sidebar/pagination";
 import DataTable from "react-data-table-component";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
+import AuthContext from "@/context/context";
 import { Modal, Form, Input, Button, Select } from "antd";
 import { RiSearchLine } from "react-icons/ri";
 import moment from "moment";
-
-// SunEditor
-import EditorPreview from "@/components/EditorPreview";
-import SunEditor from "suneditor-react";
-import { PlusOutlined } from "@ant-design/icons";
 
 const customStyles = {
   rows: {
@@ -58,20 +52,18 @@ const customRowStyles = {
   },
 };
 
-const Announcements = () => {
+const QuizAttempts = () => {
   const [breadcrumbItems] = useState([
     { title: "Dashboard", link: "/auth/dashboard" },
-    { title: "Announcements", link: "/auth/announcements" },
+    { title: "Quiz Attempts", link: "/auth/quiz-attempts" },
   ]);
+  const { auth } = useContext(AuthContext);
   const [form] = Form.useForm();
-  const [editorContent, setEditorContent] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [mode, setMode] = useState("add");
-  const [courses, setCourses] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
-  const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState([]);
-  const [activeAnnouncement, setActiveAnnouncement] = useState([]);
+  const [quizAttempts, setQuizAttempts] = useState([]);
+  const [filteredQuizAttempts, setFilteredQuizAttempts] = useState([]);
+  const [selectedQuizAttempts, setSelectedQuizAttempts] = useState([]);
+  const [activeQuizAttempts, setActiveQuizAttempts] = useState([]);
   const [activeRow, setActiveRow] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -81,19 +73,19 @@ const Announcements = () => {
       name: "Course",
       selector: (row) => (
         <p>
-          {row.course.title.length > 30
-            ? `${row.course.title.substring(0, 30)}...`
-            : row.course.title}
+          {row.courseTitle.length > 30
+            ? `${row.courseTitle.substring(0, 30)}...`
+            : row.courseTitle}
         </p>
       ),
     },
     {
-      name: "Announcement",
+      name: "Quiz",
       selector: (row) => (
         <p>
-          {row.title.length > 30
-            ? `${row.title.substring(0, 30)}...`
-            : row.title}
+          {row.quizTitle.length > 30
+            ? `${row.quizTitle.substring(0, 30)}...`
+            : row.quizTitle}
         </p>
       ),
     },
@@ -101,44 +93,51 @@ const Announcements = () => {
       name: "Status",
       selector: (row) => (
         <span className="inline-flex items-center m-2 px-3 py-1 bg-blue-200 hover:bg-blue-300 rounded-full text-sm font-semibold text-blue-600">
-          <span className="ml-1">{row.active ? "Active" : "Archived"}</span>
+          <span className="ml-1">{row.completed ? `Passed with ${(row.totalScore / row.passingScore) * 100} %` : "Failed"}</span>
         </span>
       ),
     },
     {
-      name: "Date Created",
+      name: "Attempted Date",
       selector: (row) => moment(row.created_at).format("MMM Do YY"),
-    },
-    {
-      name: "Date Updated",
-      selector: (row) => moment(row.updated_at).format("MMM Do YY"),
-    },
+    }
   ];
 
-  // Editor Instance
-  const getEditorInstance = (sunEditor) => {
-    editor.current = sunEditor;
-  };
-
   useEffect(() => {
-    const fetchAnnouncements = async (req, res) => {
+    const fetchQuizAttemptsForStudent = async (req, res) => {
       try {
         axios
-          .get(`${API_URL}/announcements/get-announcements`, {
+          .get(`${API_URL}/quizzes/get-user-quiz-attempts?username=${auth.username}`, {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
           })
           .then((response) => {
             if (response.data?.success) {
-              setAnnouncements(response.data?.announcements);
-              setFilteredAnnouncements(response.data?.announcements);
+              const fetchedData = response.data?.quizAttempts;
+              const filteredData = fetchedData?.map((item) => {
+                const totalScore = JSON.parse(item.progress)?.reduce(
+                  (totalScore, question) => totalScore + Number(question.isCorrectAnswer),
+                  0
+                )
+                const passingScore = item.quiz?.quiz_questions.length
+
+                return {
+                courseTitle: item.enrollment?.course.title,
+                quizTitle: item.quiz?.title,
+                totalScore,
+                passingScore,
+                completed: totalScore >= passingScore,
+                created_at: item.created_at
+              }})
+              setQuizAttempts(filteredData);
+              setFilteredQuizAttempts(filteredData);
             }
           })
           .catch((error) => {
             if (error.response?.data?.message) {
               return toast.error(error.response.data?.message);
             }
-            console.error("Error Fetching announcements!:", error.message);
+            console.error("Error Fetching Quiz Attempts!:", error.message);
           });
       } catch (error) {
         console.error(error);
@@ -146,32 +145,7 @@ const Announcements = () => {
       }
     };
 
-    const fetchCourses = async (req, res) => {
-      try {
-        axios
-          .get(`${API_URL}/courses/get-courses`, {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          })
-          .then((response) => {
-            if (response.data?.success) {
-              setCourses(response.data?.courses);
-            }
-          })
-          .catch((error) => {
-            if (error.response?.data?.message) {
-              return toast.error(error.response.data?.message);
-            }
-            console.error("Error Fetching courses!:", error.message);
-          });
-      } catch (error) {
-        console.error(error);
-        toast.error("Unexpected error occured!");
-      }
-    };
-
-    fetchAnnouncements();
-    fetchCourses();
+    fetchQuizAttemptsForStudent();
   }, []);
 
   const handleSearch = (e) => {
@@ -179,125 +153,17 @@ const Announcements = () => {
     setSearchQuery(query);
 
     // Filter the courses based on the search query
-    const filtered = announcements?.filter((announcement) =>
-      announcement.title.toLowerCase().includes(query.toLowerCase())
+    const filtered = quizAttempts?.filter((quizAttempt) =>
+      quizAttempt.title.toLowerCase().includes(query.toLowerCase())
     );
 
-    setFilteredAnnouncements(filtered);
+    setFilteredQuizAttempts(filtered);
   };
-
-  // Submit Handler
-  const handleAnnouncementSubmit = (values) => {
-    try {
-      const apiUrl =
-        mode === "edit"
-          ? `${API_URL}/announcements/edit-announcement?annoucementID=${activeAnnouncement.id}&courseID=${activeAnnouncement.course.id}`
-          : `${API_URL}/announcements/create-announcement`;
-      axios
-        .post(
-          apiUrl,
-          JSON.stringify({
-            data: {
-              attributes: {
-                announcementTitle: form.getFieldValue("announcement-title"),
-                announcementContent: form.getFieldValue("announcement-content"),
-                courseID: form.getFieldValue("course"),
-                announcementStatus: form.getFieldValue("announcement-status"),
-              },
-            },
-          }),
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        )
-        .then(async (response) => {
-          if (response.data?.success) {
-            toast.success(
-              `Announcement has been ${
-                mode === "edit" ? "updated" : "created"
-              } successfully`
-            );
-            setAnnouncements(response.data?.announcements);
-            setFilteredAnnouncements(response.data?.announcements);
-            setModalOpen(false);
-          } else {
-            toast.error(response?.data.message);
-          }
-        })
-        .catch((error) => {
-          if (error.response?.data?.message) {
-            return toast.error(error.response.data?.message);
-          }
-          console.error(
-            `Error ${mode === "edit" ? "updating" : "creating"} Announcement!:`,
-            error.message
-          );
-          toast.error(error.message);
-        });
-    } catch (error) {
-      console.error(error);
-      toast.error("Unexpected error occured!");
-    }
-  };
-
-  // Delete Announcement
-  const deleteAnnouncement = () => {
-    console.log(activeAnnouncement);
-    try {
-      const apiUrl = `${API_URL}/announcements/delete-announcement?annoucementID=${activeAnnouncement.id}&courseID=${activeAnnouncement.course.id}`
-      axios
-        .delete(
-          apiUrl,
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        )
-        .then(async (response) => {
-          if (response.data?.success) {
-            toast.success(
-              `Announcement has been deleted successfully`
-            );
-            setAnnouncements(response.data?.announcements);
-            setFilteredAnnouncements(response.data?.announcements);
-            setModalOpen(false);
-          } else {
-            toast.error(response?.data.message);
-          }
-        })
-        .catch((error) => {
-          if (error.response?.data?.message) {
-            return toast.error(error.response.data?.message);
-          }
-          console.error(
-            `Error deleting Announcement!:`,
-            error.message
-          );
-          toast.error(error.message);
-        });
-    } catch (error) {
-      console.error(error);
-      toast.error("Unexpected error occured!");
-    }
-  }
-
-  const clearState = () => {
-    form.setFieldValue("announcement-title", "");
-    form.setFieldValue("announcement-content", "");
-    form.setFieldValue("course", []);
-    form.setFieldValue("announcement-status", []);
-    setEditorContent("");
-    setActiveAnnouncement([]);
-    setMode("add");
-  };
-
-  console.log(activeAnnouncement);
 
   return (
     <div className="page-content">
       <Container fluid>
-        <Modal
+        {/* <Modal
           title="Create Announcement"
           centered
           open={modalOpen}
@@ -499,50 +365,10 @@ const Announcements = () => {
               </Row>
             </Form>
           </Col>
-        </Modal>
-        <Breadcrumbs title="Announcements" breadcrumbItems={breadcrumbItems} />
+        </Modal> */}
+        <Breadcrumbs title="Quiz Attempts" breadcrumbItems={breadcrumbItems} />
 
-        <Row>
-          <Col xs={12}>
-            <Card>
-              <CardBody>
-                <div className="d-flex justify-content-between align-items-center">
-                  {announcements?.length > 0 ? (
-                    <Form className="app-search d-none d-lg-block p-0">
-                      <div className="position-relative">
-                        <Input
-                          type="text"
-                          className="form-control"
-                          style={{ backgroundColor: "#f1f5f7" }}
-                          placeholder="Search Announcements"
-                          onChange={handleSearch}
-                        />
-                        <span>
-                          <RiSearchLine />
-                        </span>
-                      </div>
-                    </Form>
-                  ) : (
-                    <h6 className="text-secondary font-weight-normal mb-0">
-                      There are no Announcements
-                    </h6>
-                  )}
-                  <Link>
-                    <button
-                      type="button"
-                      className="btn-primary-custom px-4"
-                      onClick={() => setModalOpen(true)}
-                    >
-                      Create New Announcements
-                    </button>
-                  </Link>
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-
-        {announcements?.length > 0 && (
+        {quizAttempts?.length > 0 && (
           <Row>
             <Col xs={12}>
               <Card>
@@ -557,27 +383,11 @@ const Announcements = () => {
                     ]}
                     pagination
                     columns={columns}
-                    data={filteredAnnouncements}
+                    data={filteredQuizAttempts}
                     persistTableHead
                     // subHeader
                     // progressPending={Loading}
                     selectableRows
-                    onRowClicked={(row) => {
-                      setModalOpen(true);
-                      setMode("edit");
-                      setActiveAnnouncement(row);
-                      form.setFieldValue("announcement-title", row.title);
-                      form.setFieldValue("announcement-content", row.content);
-                      setEditorContent(row.content);
-                      form.setFieldValue("course", row.course.title);
-                      form.setFieldValue(
-                        "announcement-status",
-                        row.status === true ? "Active" : "Archived"
-                      );
-                    }}
-                    onSelectedRowsChange={(e) =>
-                      setSelectedAnnouncement(e.selectedRows)
-                    }
                     onRowMouseEnter={(row) => setActiveRow(row)}
                     onRowMouseLeave={() => setActiveRow(null)}
                     subHeaderComponent={
@@ -628,4 +438,4 @@ const Announcements = () => {
   );
 };
 
-export default Announcements;
+export default QuizAttempts;

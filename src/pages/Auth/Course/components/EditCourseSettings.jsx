@@ -10,8 +10,8 @@ import {
   TabPane,
 } from "reactstrap";
 import classnames from "classnames";
-import { Link, useNavigate } from "react-router-dom";
-import { CourseDetails, ModuleDetails, LessonDetails } from "./forms";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { EditCourseDetails, EditModuleDetails, EditLessonDetails } from "./forms";
 import { Form } from "antd";
 import { API_URL } from "@/config/config";
 import * as TYPES from "./forms/types";
@@ -21,12 +21,14 @@ import toast from "react-hot-toast";
 import axios from "@/services/axios";
 
 const titles = ['Course Details', 'Module Details', 'Lesson Details'];
-const CourseSettings = ({ mode }) => {
+const EditCourseSettings = ({ mode }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { auth, courseState, setCourseState } = useContext(AuthContext);
 
   const [activeTab, setActiveTab] = useState(0);
+  const { pathname } = useLocation();
+  const courseID = pathname.split("/")[3];
 
   // Functions
   const toggleTab = (tab) => {
@@ -80,8 +82,8 @@ const CourseSettings = ({ mode }) => {
 
       try {
         axios
-          .post(
-            `${API_URL}/courses/create-course?username=${auth?.username}`,
+          .put(
+            `${API_URL}/courses/edit-course?courseID=${courseID}&username=${auth?.username}`,
             JSON.stringify({
               data: {
                 attributes: {
@@ -100,7 +102,7 @@ const CourseSettings = ({ mode }) => {
           .then(async (response) => {
             if (response.data?.success) {
 
-              toast.success("Course has been created successfully");
+              toast.success("Course has been updated successfully");
               navigate('/auth/dashboard');
             } else {
               toast.error(response?.data.message);
@@ -110,7 +112,7 @@ const CourseSettings = ({ mode }) => {
             if (error.response?.data?.message) {
               return toast.error(error.response.data?.message);
             }
-            console.error("Error creating Course!:", error.message);
+            console.error("Error updating Course!:", error.message);
             toast.error(error.message);
           })
       } catch (error) {
@@ -172,17 +174,17 @@ const CourseSettings = ({ mode }) => {
               className="twitter-bs-wizard-tab-content"
             >
               <TabPane tabId={0}>
-                <CourseDetails
+                <EditCourseDetails
                   Form={Form}
                   form={form}
                   handleSubmit={handleSubmit}
                 />
               </TabPane>
               <TabPane tabId={1}>
-                <ModuleDetails Form={Form} form={form} />
+                <EditModuleDetails Form={Form} form={form} />
               </TabPane>
               <TabPane tabId={2}>
-                <LessonDetails Form={Form} form={form} />
+                <EditLessonDetails Form={Form} form={form} />
               </TabPane>
             </TabContent>
           </Form>
@@ -216,4 +218,4 @@ const CourseSettings = ({ mode }) => {
   );
 };
 
-export default CourseSettings;
+export default EditCourseSettings;

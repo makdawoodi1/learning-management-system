@@ -28,8 +28,8 @@ import Quizzes from "@/pages/Auth/Quiz/Quizzes";
 import QuizDetail from "@/pages/Auth/Quiz/QuizDetail";
 
 // Submissions
-import Submissions from "@/pages/Auth/Submission/Submissions";
-import StudentSubmissions from "@/pages/Auth/Submission/StudentSubmissions";
+import QuizAttempts from "@/pages/Auth/Submission/QuizAttempts";
+import StudentQuizAttempts from "@/pages/Auth/Submission/StudentQuizAttempts";
 import SubmissionDetail from "@/pages/Auth/Submission/SubmissionDetail";
 
 // User
@@ -65,8 +65,8 @@ export {
   PaymentDetails,
   Quizzes,
   QuizDetail,
-  Submissions,
-  StudentSubmissions,
+  QuizAttempts,
+  StudentQuizAttempts,
   SubmissionDetail,
   AccountSettings,
   Announcements,

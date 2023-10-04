@@ -30,11 +30,13 @@ export const filterAndValidateCourse = (input) => {
     errors
   );
   const price = validateNumber(input.price, "price", errors);
-  const introductoryVideo = filterAndValidateLessonFile(
+  const introductoryVideo = filterAndValidateFile(
+    'introductoryVideo',
+    'Introductory video',
     input.introductoryVideo,
     errors
   );
-  const thumbnail = filterAndValidateLessonFile(input.thumbnail, errors);
+  const thumbnail = filterAndValidateFile('thumbnail', 'Thumbnail', input.thumbnail, errors);
 
   const modules = [];
   if (Array.isArray(input.modules)) {
@@ -87,11 +89,6 @@ const filterAndValidateModule = (module, errors) => {
     errors.modules = "Modules are missing or invalid";
     return null;
   }
-  const filteredModule = {
-    title: module.title || null,
-    description: module.description || null,
-    moduleFolderKey: module.moduleFolderKey || null
-  };
 
   const lessons = [];
   if (Array.isArray(module.lessons)) {
@@ -102,17 +99,28 @@ const filterAndValidateModule = (module, errors) => {
   }
   // Check if there's at least 1 lesson
   // if (lessons.length === 0) errors.lessons = "At least 1 lesson is required in each module";
-  filteredModule.lessons = lessons;
+  module.lessons = lessons;
+
+  const quizzes = [];
+  if (Array.isArray(module.quizzes)) {
+      for (let i = 0; i < module.quizzes?.length; i++) {
+        const quiz = filterAndValidateQuiz(module.quizzes[i], errors);
+        quizzes.push(quiz);
+      }
+  }
+  // Check if there's at least 1 quiz
+  // if (lessons.length === 0) errors.lessons = "At least 1 lesson is required in each module";
+  module.quizzes = quizzes;
 
   // Check for missing properties
   if (
-    !filteredModule.title ||
-    !filteredModule.description
+    !module.title ||
+    !module.description
   ) {
     errors.modules = "Module properties are missing";
   }
 
-  return filteredModule;
+  return module;
 };
 
 const filterAndValidateLesson = (lesson, errors) => {
@@ -120,116 +128,134 @@ const filterAndValidateLesson = (lesson, errors) => {
     errors.lessons = "Lessons are missing or invalid";
     return null;
   }
-  const filteredLesson = {
-    title: lesson.title || null,
-    description: lesson.description || null,
-    content: lesson.content || null,
-    lessonFolderKey: lesson.lessonFolderKey || null
-  };
 
   const lessonFiles = [];
   if (Array.isArray(lesson.lessonFiles)) {
     for (let i = 0; i < lesson.lessonFiles.length; i++) {
-      const lessonFile = filterAndValidateLessonFile(lesson.lessonFiles[i], errors);
+      const lessonFile = filterAndValidateFile('lessonFiles', 'Lesson files', lesson.lessonFiles[i], errors);
       lessonFiles.push(lessonFile);
     }
   }
-  filteredLesson.lessonFiles = lessonFiles;
+  lesson.lessonFiles = lessonFiles;
+
+  const lessonContentFiles = [];
+  if (Array.isArray(lesson.lessonContentFiles)) {
+    for (let i = 0; i < lesson.lessonContentFiles.length; i++) {
+      const lessonFile = filterAndValidateFile('lessonContentFiles', 'Lesson Content files', lesson.lessonContentFiles[i], errors);
+      lessonContentFiles.push(lessonFile);
+    }
+  }
+  lesson.lessonContentFiles = lessonContentFiles;
 
 
   // Check for missing properties
   if (
-    !filteredLesson.title ||
-    !filteredLesson.description ||
-    !filteredLesson.content
+    !lesson.title ||
+    !lesson.description ||
+    !lesson.content
   ) {
     errors.lessons = "Lesson properties are missing";
   }
 
-  return filteredLesson;
+  return lesson;
 };
 
-const filterAndValidateLessonFile = (file, errors) => {
+const filterAndValidateFile = (key, name, file, errors) => {
   if (!file || typeof file !== "object") {
-    errors.lessonFiles = "Lesson files are missing or invalid";
+    errors[key] = `${name} are missing or invalid`;
     return null;
   }
-  const filteredFile = {
-    objectKey: file.objectKey || null,
-    formattedSize: file.formattedSize || null,
-    size: file.size || null,
-    name: file.name || null,
-    type: file.type || null,
-    url: file.url || null,
-    secureURL: file.secureURL || null,
-    preview: file.preview || null,
+
+  // Check for missing properties
+  if (
+    !file.formattedSize ||
+    !file.path ||
+    !file.secureURL ||
+    !file.objectKey
+  ) {
+    errors[key] = `${name} properties are missing`;
+  }
+
+  return file;
+};
+
+export const filterAndValidateQuiz = (quiz) => {
+  const errors = {};
+
+  const quizTitle = validateObjectProperty(
+    quiz,
+    "quizTitle",
+    "quizTitle",
+    errors
+  );
+  const quizDescription = validateObjectProperty(
+    quiz,
+    "quizDescription",
+    "quizDescription",
+    errors
+  );
+  const quizTimer = validateNumber(quiz.quizTimer, "quizTimer", errors);
+  const quizTimerOptions = validateObjectProperty(
+    quiz,
+    "quizTimerOptions",
+    "quizTimerOptions",
+    errors
+  )
+  const quizAttemptNumbers = validateNumber(quiz.quizAttemptNumbers, "quizAttemptNumbers", errors);
+  const quizPassingMarks = validateNumber(quiz.quizPassingMarks, "quizPassingMarks", errors);
+
+  const questions = [];
+  // if (Array.isArray(quiz.questions)) {
+  //   for (let i = 0; i < quiz.questions.length; i++) {
+  //     const quiz = filterAndValidateQuizQuestion(quiz.questions[i], errors);
+  //     questions.push(quiz);
+  //   }
+  // }
+  // if (questions.length === 0) errors.quizzes = "Quiz Questions are missing or invalid";
+  // if (!modules.filter(module => module.lessons.length === 0).length)  {
+  //   errors.lessons = "At least 1 lesson is required in each module"
+  // }
+
+  return {
+    quizTitle,
+    quizDescription,
+    quizTimer,
+    quizTimerOptions,
+    quizAttemptNumbers,
+    quizPassingMarks,
+    questions: questions ?? [],
+    errors: Object.keys(errors).length === 0 ? {} : errors,
+  };
+};
+
+export const filterAndValidateQuizQuestion = (question) => {
+  const errors = {}
+  if (!question || typeof question !== "object") {
+    errors.quizzes = "Quiz Questions are missing or invalid";
+    return null;
+  }
+  const filteredQuestion = {
+    question: question.question || null,
+    type: question.type || null,
+    options: question.options || [],
+    correctAnswer: question.correctAnswer || null,
   };
 
   // Check for missing properties
   if (
-    !filteredFile.formattedSize ||
-    !filteredFile.size ||
-    !filteredFile.name ||
-    !filteredFile.type ||
-    !filteredFile.secureURL ||
-    !filteredFile.objectKey
+    !filteredQuestion.question ||
+    !filteredQuestion.type ||
+    !filteredQuestion.options ||
+    !filteredQuestion.correctAnswer
   ) {
-    errors.lessonFiles = "Lesson files properties are missing";
+    errors.quizzes = "Quiz question properties are missing";
   }
 
-  return filteredFile;
+  return {
+    question: filteredQuestion.question,
+    questionType: filteredQuestion.type,
+    options: filteredQuestion.options,
+    correctAnswer: filteredQuestion.correctAnswer,
+    errors: Object.keys(errors).length === 0 ? {} : errors,
+  };
 };
-
-// const filterAndValidateQuiz = (lesson, errors) => {
-//   if (!lesson || typeof lesson !== "object") {
-//     errors.lessons = "Quizzes are missing or invalid";
-//     return null;
-//   }
-
-//   const filteredQuiz = {
-//     title: quiz.title || null,
-//     description: quiz.description || null,
-//     quizAttempts: quiz.quizAttempts || null,
-//     quizTimer: quiz.quizTimer || null,
-//     passingMarks: quiz.passingMarks || null
-//   };
-
-//   // Check for missing properties
-//   if (
-//     !quiz.title ||
-//     !quiz.title ||
-//     !quiz.description ||
-//     !quiz.quizAttempts ||
-//     !quiz.quizTimer ||
-//     !quiz.passingMarks
-//   ) {
-//     errors.quizzes = "Quiz properties are missing";
-//   }
-
-//   return filteredQuiz;
-// }
-
-// const filterAndValidateQuizQuestion = (question, errors) => {
-//   if (!quiz || typeof quiz !== "object") {
-//     errors.quizzes = "Quiz Questions are missing or invalid";
-//     return null;
-//   }
-//   const filteredFile = {
-//     name: question.name || null,
-//     type: question.type || null,
-//     correct: question.correct || null,
-//     answers: question.answers || null,
-//   };
-
-//   // Check for missing properties
-//   if (
-//     !filteredFile.name ||
-//     !filteredFile.type ||
-//     !filteredFile.correct ||
-//     !filteredFile.answers ||
-//   ) {
-//     errors.quizzes = "Quiz question properties are missing";
-//   }
-
-//   return filteredQuiz;
-// };
