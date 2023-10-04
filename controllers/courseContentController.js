@@ -3,17 +3,33 @@ import { PrismaClient } from "@prisma/client";
 export const getLessonContent = async (req, res, lessonID, moduleID) => {
   try {
     const prisma = new PrismaClient();
+    const { username, courseID } = req.query;
 
-    const modules = await prisma.courseModule.findMany({
-      include: {
-        module_lessons: {
-          include: true,
-        },
-        quizzes: {
-          include: true,
-        },
+    const user = await prisma.user.findUnique({
+      where: { username: username }
+    })
+
+    const enrolledCourse = await prisma.enrollment.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: parseInt(courseID)
       },
+      include: {
+        course: {
+          include: {
+            course_modules: {
+              include: {
+                module_lessons: true,
+                quizzes: true
+              }
+            }
+          }
+        }
+      }
     });
+    const modules = enrolledCourse.progress ? JSON.parse(enrolledCourse.progress) : enrolledCourse.course.course_modules;
+    const lessonCompleted = modules
+      .map(module => module.module_lessons.find(lesson => lesson.id === parseInt(lessonID)))[0]?.completed;
 
     const lesson = await prisma.lesson.findUnique({
       where: {
@@ -24,8 +40,9 @@ export const getLessonContent = async (req, res, lessonID, moduleID) => {
       },
     });
     if (lesson) {
-      // Calculate the count of completed lessons
+      // Calculate the count of completed lessons and completed quizzes
       const completedLessonsCount = getCompletedLessonCountForModules(modules);
+      const completedQuizCount = getCompletedQuizForUser(modules);
 
       res.json({
         success: true,
@@ -39,15 +56,16 @@ export const getLessonContent = async (req, res, lessonID, moduleID) => {
         totalQuizzes: modules.reduce((count, module) => {
           return count + (module.quizzes ? module.quizzes.length : 0);
         }, 0),
-        lessonContent: {
+        content: {
           id: lesson.id,
           title: lesson.title,
           description: lesson.description,
           content: lesson.content,
-          completed: lesson.completed,
+          completed: lessonCompleted,
           lessonFiles: lesson.lesson_files,
         },
         completedLessons: completedLessonsCount,
+        completedQuizzes: completedQuizCount
       });
     } else {
       res.json({
@@ -66,57 +84,71 @@ export const getLessonContent = async (req, res, lessonID, moduleID) => {
   }
 };
 
-export const handleLessonContent = async (req, res, lessonID, moduleID) => {
+export const handleLessonContent = async (req, res, username, courseID, lessonID) => {
   try {
     const prisma = new PrismaClient();
 
-    const modules = await prisma.courseModule.findMany({
-      include: {
-        module_lessons: {
-          include: true,
-        },
-        quizzes: {
-          include: true,
-        },
-      },
-    });
+    const user = await prisma.user.findUnique({
+      where: { username: username }
+    })
 
-    const updatedLesson = await prisma.lesson.update({
+    const enrolledCourse = await prisma.enrollment.findFirst({
       where: {
-        id: lessonID,
-      },
-      data: {
-        completed: true,
-      },
-      include: {
-        lesson_files: true,
+        user_id: user.id,
+        course_id: parseInt(courseID)
       },
     });
 
-    if (updatedLesson) {
-      // Filter lessons that are completed
-      const completedLessonsCount = getCompletedLessonCountForModules(modules);
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: parseInt(lessonID) },
+      include: {
+        lesson_files: true
+      }
+    })
+
+    const { modules } = req.body.data.attributes;
+
+    if (enrolledCourse) {
+      const updatedModules = modules.map(module => ({
+        ...module,
+        module_lessons: module.module_lessons.map(lesson => {
+          if (lesson.id === lessonID) {
+            return { ...lesson, completed: true };
+          }
+          return lesson;
+        }),
+      }));
+      const completedLessonsCount = getCompletedLessonCountForModules(updatedModules);
+      const completedQuizzesCount = getCompletedQuizCountForModules(updatedModules);
+
+      await prisma.enrollment.update({
+        where: { id: enrolledCourse.id },
+        data: {
+          progress: JSON.stringify(updatedModules)
+        }
+      })
 
       res.json({
         success: true,
-        message: "Lesson content has been fetched successfully!",
-        modules,
-        completedLessons: completedLessonsCount,
-        totalLessons: modules.reduce((count, module) => {
+        message: "Quiz content has been fetched successfully!",
+        modules: updatedModules,
+        completed_lessons: completedLessonsCount,
+        completed_quizzes: completedQuizzesCount,
+        totalLessons: updatedModules.reduce((count, module) => {
           return (
             count + (module.module_lessons ? module.module_lessons.length : 0)
           );
         }, 0),
-        totalQuizzes: modules.reduce((count, module) => {
+        totalQuizzes: updatedModules.reduce((count, module) => {
           return count + (module.quizzes ? module.quizzes.length : 0);
         }, 0),
-        lessonContent: {
-          id: updatedLesson.id,
-          title: updatedLesson.title,
-          description: updatedLesson.description,
-          content: updatedLesson.content,
-          completed: updatedLesson.completed,
-          lessonFiles: updatedLesson.lesson_files,
+        content: {
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description,
+          content: lesson.content,
+          completed: true,
+          lessonFiles: lesson.lesson_files,
         },
       });
     } else {
@@ -139,7 +171,86 @@ export const handleLessonContent = async (req, res, lessonID, moduleID) => {
 
 export const getQuizContent = async (req, res, quizID, moduleID) => {
   try {
-    console.log("working getQuizContent");
+    const prisma = new PrismaClient();
+    const { username, courseID } = req.query;
+
+    const user = await prisma.user.findUnique({
+      where: { username: username }
+    })
+
+    const enrolledCourse = await prisma.enrollment.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: parseInt(courseID)
+      },
+      include: {
+        course: {
+          include: {
+            course_modules: {
+              include: {
+                module_lessons: true,
+                quizzes: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const modules = enrolledCourse.progress ? JSON.parse(enrolledCourse.progress) : enrolledCourse.course.course_modules;
+    const quizCompleted = modules
+      .map(module => module.quizzes.find(quiz => quiz.id === parseInt(quizID)))[0]?.completed;
+
+    const quiz = await prisma.quiz.findUnique({
+      where: {
+        id: quizID,
+      },
+      include: {
+        quiz_questions: true,
+      }
+    });
+    if (quiz) {
+      // Calculate the count of completed lessons
+      const attemptedQuiz = await prisma.quizAttempt.findMany({
+        where: { quiz_id: parseInt(quizID), enrollment_id: enrolledCourse.id }
+      });
+      const completedLessonsCount = getCompletedLessonCountForModules(modules);
+      const completedQuizCount = getCompletedQuizForUser(modules);
+
+      res.json({
+        success: true,
+        message: "Lesson content has been fetched successfully!",
+        modules,
+        totalLessons: modules.reduce((count, module) => {
+          return (
+            count + (module.module_lessons ? module.module_lessons.length : 0)
+          );
+        }, 0),
+        totalQuizzes: modules.reduce((count, module) => {
+          return count + (module.quizzes ? module.quizzes.length : 0);
+        }, 0),
+        completedLessons: completedLessonsCount,
+        completedQuizzes: completedQuizCount,
+        content: {
+          id: quiz.id,
+          moduleID: quiz.courseModuleId,
+          title: quiz.title,
+          description: quiz.description,
+          attemptNumbers: quiz.attemptNumber,
+          passingMarks: quiz.passingMarks,
+          timer: quiz.timer,
+          timerOptions: quiz.timerOption === 'MINUTES' ? 'minutes' : 'seconds',
+          questions: quiz.quiz_questions,
+          completed: quizCompleted,
+          attemptedQuizz: attemptedQuiz.length,
+        },
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "Lesson content not found.",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -215,6 +326,30 @@ export const getCompletedLessonCountForModules = (modules) => {
   }, 0);
 }
 
+export const getCompletedQuizCountForModules = (modules) => {
+  return modules.reduce((count, module) => {
+    if (module.quizzes) {
+      const completedModuleQuizzes = module.quizzes.filter(
+        (quiz) => quiz.completed === true
+      );
+      return count + completedModuleQuizzes.length;
+    }
+    return count;
+  }, 0);
+}
+
+export const getCompletedQuizForUser = (modules) => {
+  return modules.reduce((count, module) => {
+    if (module.quizzes) {
+      const attemptedModuleQuizzes = module.quizzes.filter(
+        (quiz) => quiz.completed === true
+      );
+      return count + attemptedModuleQuizzes.length;
+    }
+    return count;
+  }, 0);
+}
+
 export const getCompletedLessonCountForUserAndCourse = async (userID, courseID) => {
   try {
     const prisma = new PrismaClient();
@@ -223,33 +358,72 @@ export const getCompletedLessonCountForUserAndCourse = async (userID, courseID) 
         course_id: courseID,
         user_id: userID,
       },
+      include: {
+        course: {
+          include: {
+            course_modules: {
+              include: {
+                module_lessons: true,
+              }
+            }
+          }
+        }
+      }
     });
 
     if (enrollment) {
-      const course = await prisma.course.findUnique({
-        where: {
-          id: courseID,
-        },
-        include: {
-          course_modules: {
-            include: {
-              module_lessons: true,
-            },
-          },
-        },
-      });
-    
-      if (course) {
-        return course.course_modules.reduce((count, module) => {
-          if (module.module_lessons) {
-            const completedModuleLessons = module.module_lessons.filter(
-              (lesson) => lesson.completed === true
-            );
-            return count + completedModuleLessons.length;
+      return enrollment.course.course_modules?.reduce((count, module) => {
+        if (module.module_lessons) {
+          const completedModuleLessons = module.module_lessons.filter(
+            (lesson) => lesson.completed === true
+          );
+          return count + completedModuleLessons.length;
+        }
+        return count;
+      }, 0)
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occured",
+      error: error.message,
+    });
+
+    console.log(error);
+  }
+}
+
+export const getCompletedQuizCountForUserAndCourse = async (userID, courseID) => {
+  try {
+    const prisma = new PrismaClient();
+    const enrollment = await prisma.enrollment.findFirst({
+      where: {
+        course_id: courseID,
+        user_id: userID,
+      },
+      include: {
+        course: {
+          include: {
+            course_modules: {
+              include: {
+                quizzes: true
+              }
+            }
           }
-          return count;
-        }, 0);
+        }
       }
+    });
+
+    if (enrollment) {
+      return enrollment.course.course_modules?.reduce((count, module) => {
+        if (module.quizzes) {
+          const completedModuleQuizzes = module.quizzes.filter(
+            (lesson) => lesson.completed === true
+          );
+          return count + completedModuleQuizzes.length;
+        }
+        return count;
+      }, 0)
     }
   } catch (error) {
     res.status(500).json({

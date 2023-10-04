@@ -38,7 +38,10 @@ export const getAnnouncementHandler = async (req, res) => {
       },
       where: {
         active: true
-      }
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
     });
 
     if (announcements) {
@@ -128,6 +131,9 @@ export const editAnnouncementHandler = async (req, res, annoucementID, courseID)
         include: {
           course: true
         },
+        orderBy: {
+          updated_at: 'desc',
+        },
       });
 
       return res.json({
@@ -144,5 +150,51 @@ export const editAnnouncementHandler = async (req, res, annoucementID, courseID)
     });
 
     console.log(error);
+  }
+};
+
+export const deleteAnnouncementHandler = async (req, res, announcementID, courseID) => {
+  try {
+    const prisma = new PrismaClient();
+
+    // Check if the announcement exists
+    const announcement = await prisma.announcement.findUnique({
+      where: { id: parseInt(announcementID), course_id: parseInt(courseID) },
+    });
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: "Announcement not found",
+      });
+    }
+
+    // Delete the announcement
+    await prisma.announcement.delete({
+      where: { id: parseInt(announcementID) },
+    });
+
+    const announcements = await prisma.announcement.findMany({
+      include: {
+        course: true,
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
+    });
+
+    return res.json({
+      success: true,
+      announcements,
+      message: "The Announcement has been deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
+
+    console.error(error);
   }
 };

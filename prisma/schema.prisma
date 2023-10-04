@@ -68,15 +68,16 @@ model CourseModule {
 }
 
 model Lesson {
-  id            Int          @id @default(autoincrement())
-  title         String
-  description   String
-  content       String
-  completed     Boolean
-  s3_folder_key String?
-  course_module CourseModule @relation(fields: [moduleId], references: [id])
-  moduleId      Int
-  lesson_files  LessonFile[]
+  id                   Int                 @id @default(autoincrement())
+  title                String
+  description          String
+  content              String
+  completed            Boolean
+  s3_folder_key        String?
+  course_module        CourseModule        @relation(fields: [moduleId], references: [id])
+  moduleId             Int
+  lesson_files         LessonFile[]
+  lesson_content_files LessonContentFile[]
 }
 
 model LessonFile {
@@ -88,14 +89,24 @@ model LessonFile {
   fileType FILETYPE @default(IMAGE)
 }
 
+model LessonContentFile {
+  id       Int      @id @default(autoincrement())
+  name     String
+  url      String
+  lesson   Lesson   @relation(fields: [lessonId], references: [id])
+  lessonId Int
+  fileType FILETYPE @default(IMAGE)
+}
+
 model Enrollment {
-  id          Int      @id @default(autoincrement())
-  enrolled_at DateTime @default(now())
-  user        User     @relation(fields: [user_id], references: [id])
-  course      Course   @relation(fields: [course_id], references: [id])
+  id          Int           @id @default(autoincrement())
+  enrolled_at DateTime      @default(now())
+  user        User          @relation(fields: [user_id], references: [id])
+  course      Course        @relation(fields: [course_id], references: [id])
   user_id     Int
   course_id   Int
   progress    String?
+  QuizAttempt QuizAttempt[]
 }
 
 model Assignment {
@@ -123,48 +134,47 @@ model Submission {
 }
 
 model Quiz {
-  id             Int            @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   title          String
   description    String?
+  timer          Int
+  timerOption    QuizTimerOption @default(MINUTES)
+  attemptNumber  Int
+  passingMarks   Int
   completed      Boolean
-  due_date       DateTime
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
-  course         Course         @relation(fields: [course_id], references: [id])
-  course_id      Int
+  due_date       DateTime?
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
   quiz_questions QuizQuestion[]
   quiz_attempts  QuizAttempt[]
-  CourseModule   CourseModule?  @relation(fields: [courseModuleId], references: [id])
+  CourseModule   CourseModule?   @relation(fields: [courseModuleId], references: [id])
   courseModuleId Int?
+  Course         Course?         @relation(fields: [courseId], references: [id])
+  courseId       Int?
 }
 
 model QuizQuestion {
-  id            Int          @id @default(autoincrement())
-  question_text String
-  question_type QuestionType @default(CHECKBOXES)
-  quiz          Quiz         @relation(fields: [quiz_id], references: [id])
-  quiz_id       Int
-  quiz_options  QuizOption[]
-}
-
-model QuizOption {
-  id          Int          @id @default(autoincrement())
-  option_text String
-  is_correct  Boolean
-  question    QuizQuestion @relation(fields: [question_id], references: [id])
-  question_id Int
+  id             Int          @id @default(autoincrement())
+  question       String
+  question_type  QuestionType @default(SINGLE_CHOICE)
+  correct_answer String[]
+  quiz           Quiz         @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz_id        Int
+  quiz_options   String[]
 }
 
 model QuizAttempt {
-  id              Int      @id @default(autoincrement())
-  submission_time DateTime
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  score           Float
-  quiz            Quiz     @relation(fields: [quiz_id], references: [id])
-  user            User     @relation(fields: [user_id], references: [id])
-  quiz_id         Int
-  user_id         Int
+  id            Int        @id @default(autoincrement())
+  // submission_time DateTime
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  progress      String
+  quiz          Quiz       @relation(fields: [quiz_id], references: [id])
+  user          User       @relation(fields: [user_id], references: [id])
+  enrollment    Enrollment @relation(fields: [enrollment_id], references: [id])
+  quiz_id       Int
+  user_id       Int
+  enrollment_id Int
 }
 
 model Announcement {
@@ -174,7 +184,7 @@ model Announcement {
   active     Boolean
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  course     Course   @relation(fields: [course_id], references: [id])
+  course     Course   @relation(fields: [course_id], references: [id], onDelete: Cascade)
   course_id  Int
 }
 
@@ -184,12 +194,19 @@ enum Role {
 }
 
 enum QuestionType {
-  CHECKBOXES
-  RADIO
+  TRUE_FALSE
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+}
+
+enum QuizTimerOption {
+  MINUTES
+  SECONDS
 }
 
 enum FILETYPE {
   IMAGE
   VIDEO
   ZIP
+  AUDIO
 }

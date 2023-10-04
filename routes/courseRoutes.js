@@ -2,6 +2,7 @@ import express from "express";
 import { 
     getCoursesHandler,
     getCourseHandler,
+    getEditCourseHandler,
     createCourseHandler,
     updateCourseHandler,
     enrollCourseHandler,
@@ -41,14 +42,19 @@ router.get("/get-course", async (req, res, next) => {
     await getCourseHandler(req, res, username, courseID);
 });
 
+router.get("/get-edit-course", async (req, res, next) => {
+    const { username, courseID } = req.query;
+    await getEditCourseHandler(req, res, username, courseID);
+});
+
 router.get("/get-enrolled-courses", async (req, res, next) => {
     const { username } = req.query;
     await getEnrolledCoursesHandler(req, res, username);
 });
 
 router.get("/get-enrolled-course", async (req, res, next) => {
-    const { courseID } = req.query;
-    await getEnrolledCourseHandler(req, res, courseID);
+    const { username, courseID } = req.query;
+    await getEnrolledCourseHandler(req, res, username, courseID);
 })
 
 router.get("/get-content", async (req, res, next) => {
@@ -57,8 +63,8 @@ router.get("/get-content", async (req, res, next) => {
 })
 
 router.put("/mark-complete", async (req, res, next) => {
-    const { contentObject } = req.query;
-    await contentHandler(req, res, contentObject);
+    const { username, courseID, contentObject } = req.query;
+    await contentHandler(req, res, username, courseID, contentObject);
 })
 
 router.post("/create-course", async (req, res, next) => {

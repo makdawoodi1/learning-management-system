@@ -5,6 +5,7 @@ import {
     getAnnouncementHandler,
     createAnnouncement,
     editAnnouncementHandler,
+    deleteAnnouncementHandler
 } from "../controllers/announcementController.js";
 
 const router = express.Router();
@@ -24,6 +25,11 @@ router.post("/create-announcement", async (req, res, next) => {
 router.post("/edit-announcement", async (req, res, next) => {
     const { annoucementID, courseID } = req.query;
     await editAnnouncementHandler(req, res, annoucementID, courseID);
+})
+
+router.delete("/delete-announcement", async (req, res, next) => {
+    const { annoucementID, courseID } = req.query;
+    await deleteAnnouncementHandler(req, res, annoucementID, courseID);
 })
 
 export default router;
