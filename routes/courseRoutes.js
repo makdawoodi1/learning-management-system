@@ -8,8 +8,10 @@ import {
     enrollCourseHandler,
     getEnrolledCoursesHandler,
     getEnrolledCourseHandler,
+    getEnrolledCourseProgress,
     getCourseContent,
-    contentHandler
+    contentHandler,
+    generateCertificateHandler
 } from "../controllers/courseController.js";
 
 import { 
@@ -57,6 +59,11 @@ router.get("/get-enrolled-course", async (req, res, next) => {
     await getEnrolledCourseHandler(req, res, username, courseID);
 })
 
+router.get("/get-enrolled-course-progress", async (req, res, next) => {
+    const { username, courseID } = req.query;
+    await getEnrolledCourseProgress(req, res, username, courseID);
+})
+
 router.get("/get-content", async (req, res, next) => {
     const { contentObject } = req.query;
     await getCourseContent(req, res, contentObject);
@@ -79,6 +86,10 @@ router.post("/enroll-course", async (req, res, next) => {
 router.put("/edit-course", async (req, res, next) => {
     const { courseID } = req.query;
     await updateCourseHandler(req, res, courseID);
+})
+
+router.post("/generate-certificate", async (req, res, next) => {
+    await generateCertificateHandler(req, res)
 })
 
 export default router;

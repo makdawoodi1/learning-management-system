@@ -10,8 +10,15 @@ import {
   getCompletedLessonCountForUserAndCourse,
   getCompletedQuizCountForUserAndCourse,
   getCompletedLessonCountForModules,
-  getCompletedQuizCountForModules
+  getCompletedQuizCountForModules,
 } from "./courseContentController.js";
+import { generateCertificate2 } from "../services/certificateGenerator.js"
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import fs, { createReadStream } from "fs";
+import path from "path";
+
+import PDFDocument from 'pdfkit';
+import blobStream from 'blob-stream';
 
 aws.config.setPromisesDependency();
 const s3 = new aws.S3({
@@ -381,8 +388,12 @@ export const updateCourseHandler = async (req, res, courseID) => {
       });
     }
 
-    const thumbnailObjectKey = thumbnail.objectKey.split(process.env.AWS_CLOUDFRONT_DOMAIN)[1].replace(/^\//, '');
-    const introductoryVideoObjectKey = introductoryVideo.objectKey.split(process.env.AWS_CLOUDFRONT_DOMAIN)[1].replace(/^\//, '');
+    const thumbnailObjectKey = thumbnail.objectKey
+      .split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
+      .replace(/^\//, "");
+    const introductoryVideoObjectKey = introductoryVideo.objectKey
+      .split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
+      .replace(/^\//, "");
 
     const updatedCourse = await prisma.course.update({
       where: { id: parseInt(courseID) },
@@ -393,11 +404,11 @@ export const updateCourseHandler = async (req, res, courseID) => {
         price,
         thumbnail: {
           ...thumbnail,
-          objectKey: thumbnailObjectKey
+          objectKey: thumbnailObjectKey,
         },
         introductoryVideo: {
           ...introductoryVideo,
-          objectKey: introductoryVideoObjectKey
+          objectKey: introductoryVideoObjectKey,
         },
         published: true,
         course_modules: {
@@ -423,9 +434,11 @@ export const updateCourseHandler = async (req, res, courseID) => {
                           name: file.path,
                           url: JSON.stringify({
                             ...file,
-                            objectKey: 
-                              `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${file.objectKey.split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
-                              .replace(/^\//, '')}`,
+                            objectKey: `https://${
+                              process.env.AWS_CLOUDFRONT_DOMAIN
+                            }/${file.objectKey
+                              .split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
+                              .replace(/^\//, "")}`,
                           }),
                           fileType:
                             file.type === "application/zip"
@@ -456,11 +469,14 @@ export const updateCourseHandler = async (req, res, courseID) => {
                           name: file.path,
                           url: JSON.stringify({
                             ...file,
-                            objectKey: 
-                              `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${file.objectKey.split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
-                              .replace(/^\//, '')}`,
+                            objectKey: `https://${
+                              process.env.AWS_CLOUDFRONT_DOMAIN
+                            }/${file.objectKey
+                              .split(process.env.AWS_CLOUDFRONT_DOMAIN)[1]
+                              .replace(/^\//, "")}`,
                           }),
-                          fileType: file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
+                          fileType:
+                            file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
                         },
                         create: {
                           name: file.path,
@@ -468,7 +484,8 @@ export const updateCourseHandler = async (req, res, courseID) => {
                             ...file,
                             objectKey: `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${file.objectKey}`,
                           }),
-                          fileType: file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
+                          fileType:
+                            file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
                         },
                       })),
                     },
@@ -501,7 +518,8 @@ export const updateCourseHandler = async (req, res, courseID) => {
                           ...file,
                           objectKey: `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${file.objectKey}`,
                         }),
-                        fileType: file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
+                        fileType:
+                          file.type === "audio/mpeg" ? "AUDIO" : "IMAGE",
                       })),
                     },
                   },
@@ -588,7 +606,7 @@ export const getEnrolledCoursesHandler = async (req, res, username) => {
                 course_modules: {
                   include: {
                     module_lessons: true,
-                    quizzes: true
+                    quizzes: true,
                   },
                 },
               },
@@ -605,15 +623,15 @@ export const getEnrolledCoursesHandler = async (req, res, username) => {
       });
 
     const coursePromises = user.enrollments.map(async (enrollment) => {
-      const completedLessonCount = enrollment.progress ?
-        await getCompletedLessonCountForModules(
-          JSON.parse(enrollment.progress)
-        ) : 0;
+      const completedLessonCount = enrollment.progress
+        ? await getCompletedLessonCountForModules(
+            JSON.parse(enrollment.progress)
+          )
+        : 0;
 
-      const completedQuizCount = enrollment.progress ? 
-        await getCompletedQuizCountForModules(
-          JSON.parse(enrollment.progress)
-        ) : 0;
+      const completedQuizCount = enrollment.progress
+        ? await getCompletedQuizCountForModules(JSON.parse(enrollment.progress))
+        : 0;
 
       return {
         id: enrollment.course_id,
@@ -633,8 +651,7 @@ export const getEnrolledCoursesHandler = async (req, res, username) => {
         totalQuizCount: enrollment.course.course_modules
           ? enrollment.course.course_modules.reduce(
               (totalQuizCount, module) =>
-                totalQuizCount +
-                (module.quizzes ? module.quizzes.length : 0),
+                totalQuizCount + (module.quizzes ? module.quizzes.length : 0),
               0
             )
           : 0,
@@ -668,13 +685,18 @@ export const getEnrolledCoursesHandler = async (req, res, username) => {
   }
 };
 
-export const getEnrolledCourseHandler = async (req, res, username, courseID) => {
+export const getEnrolledCourseHandler = async (
+  req,
+  res,
+  username,
+  courseID
+) => {
   try {
     const prisma = new PrismaClient();
 
     const user = await prisma.user.findUnique({
-      where: { username: username }
-    })
+      where: { username: username },
+    });
 
     const course = await prisma.course.findUnique({
       where: {
@@ -684,19 +706,22 @@ export const getEnrolledCourseHandler = async (req, res, username, courseID) => 
         course_modules: {
           include: {
             module_lessons: true,
-            quizzes: true
-          }
-        }
-      }
+            quizzes: true,
+          },
+        },
+      },
     });
 
     const enrolledCourse = await prisma.enrollment.findFirst({
       where: {
         user_id: user.id,
-        course_id: parseInt(courseID)
+        course_id: parseInt(courseID),
       },
     });
-    const modules = enrolledCourse.progress ? JSON.parse(enrolledCourse.progress) : course.course_modules;
+
+    const modules = enrolledCourse.progress
+      ? JSON.parse(enrolledCourse.progress)
+      : course.course_modules;
 
     if (course && enrolledCourse) {
       res.json({
@@ -735,6 +760,75 @@ export const getEnrolledCourseHandler = async (req, res, username, courseID) => 
   }
 };
 
+export const getEnrolledCourseProgress = async (
+  req,
+  res,
+  username,
+  courseID
+) => {
+  try {
+    const prisma = new PrismaClient();
+
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+    });
+
+    const course = await prisma.course.findUnique({
+      where: {
+        id: parseInt(courseID),
+      },
+      include: {
+        course_modules: {
+          include: {
+            module_lessons: true,
+            quizzes: true,
+          },
+        },
+      },
+    });
+
+    const enrolledCourse = await prisma.enrollment.findFirst({
+      where: {
+        user_id: user.id,
+        course_id: parseInt(courseID),
+      },
+    });
+    const modules = enrolledCourse.progress
+      ? JSON.parse(enrolledCourse.progress)
+      : course.course_modules;
+
+    if (course && enrolledCourse) {
+      const completedLessonsCount = getCompletedLessonCountForModules(modules);
+      const completedQuizCount = getCompletedQuizCountForModules(modules);
+
+      res.json({
+        success: true,
+        message: "Course progress have been successfully fetched!",
+        progress: {
+          completed_lessons: completedLessonsCount,
+          completed_quizzes: completedQuizCount,
+          total_lessons: modules.reduce((count, module) => {
+            return (
+              count + (module.module_lessons ? module.module_lessons.length : 0)
+            );
+          }, 0),
+          total_quizzes: modules.reduce((count, module) => {
+            return count + (module.quizzes ? module.quizzes.length : 0);
+          }, 0),
+        },
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occured",
+      error: error.message,
+    });
+
+    console.log(error);
+  }
+};
+
 export const getCourseContent = async (req, res, contentObject) => {
   try {
     const requestedContent = JSON.parse(contentObject);
@@ -745,7 +839,7 @@ export const getCourseContent = async (req, res, contentObject) => {
           req,
           res,
           requestedContent.lessonID,
-          requestedContent.moduleID,
+          requestedContent.moduleID
         );
       case "quiz":
         return await getQuizContent(
@@ -773,7 +867,13 @@ export const getCourseContent = async (req, res, contentObject) => {
   }
 };
 
-export const contentHandler = async (req, res, username, courseID, contentObject) => {
+export const contentHandler = async (
+  req,
+  res,
+  username,
+  courseID,
+  contentObject
+) => {
   try {
     const requestedContent = JSON.parse(contentObject);
 
@@ -784,7 +884,7 @@ export const contentHandler = async (req, res, username, courseID, contentObject
           res,
           username,
           courseID,
-          requestedContent.lessonID,
+          requestedContent.lessonID
         );
       case "quiz":
         return await handleQuizContent(
@@ -873,6 +973,71 @@ export const enrollCourseHandler = async (req, res, courseID) => {
         success: true,
         message: "Enrolled successfully!",
         course,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occured",
+      error: error.message,
+    });
+
+    console.log(error);
+  }
+};
+
+export const generateCertificateHandler = async (req, res) => {
+  try {
+    const { username, courseID } = req.query;
+    const prisma = new PrismaClient();
+    
+    // const doc = new PDFDocument({
+      //   layout: "landscape",
+      //   size: "A4",
+      // });
+      // const stream = doc.pipe(blobStream());
+      
+      const user = await prisma.user.findUnique({
+        where: {
+          username: username,
+        },
+      });
+      
+      const course = await prisma.course.findUnique({
+        where: { 
+          id: parseInt(courseID)
+        }
+      })
+
+    const studentName = `${user.firstname.toUpperCase()} ${user.lastname.toUpperCase()}`
+    const courseName = course.title.toUpperCase()
+    const pdfDocument = await generateCertificate2(req, res, { studentName, courseName })
+    const pdfStream = fs.createReadStream(path.join(process.cwd(), 'services', 'certificate.pdf'))
+
+    // const data = fs.readFileSync(pdfPath)
+    
+    // Send the PDF as a response
+    // res.setHeader("Content-Type", "application/pdf");
+    // res.setHeader("Content-Disposition", `attachment; filename=course-certificate.pdf`);
+
+    const chunks = []
+    for await (let chunk of pdfStream) {
+      chunks.push(chunk)
+    }
+
+    const client = new S3Client({});
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET,
+      Key: `${course.s3_folder_key}certificate.pdf`,
+      Body: Buffer.concat(chunks)
+    });
+    const uploadResponse = await client.send(command);
+
+    if (uploadResponse) {
+      res.json({
+        success: true,
+        message: "Course Certificate uploaded successfully!",
+        uploadUrl: `https://${process.env.AWS_CLOUDFRONT_DOMAIN}/${course.s3_folder_key}certificate.pdf`,
       });
     }
   } catch (error) {
