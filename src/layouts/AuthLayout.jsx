@@ -7,12 +7,13 @@ import { Outlet, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AuthContext from "@/context/context";
 import { FullScreen } from "react-full-screen";
+import Certificate from "@/services/Certificate";
 
 const AuthLayout = ({ children }) => {
   const { pathname } = useLocation();
   const [theme, setTheme] = useState("light");
   const [isMobile, setIsMobile] = useState(false);
-  const { toggleSidebar, fullScreenHandle } = useContext(AuthContext);
+  const { toggleSidebar, fullScreenHandle, courseState } = useContext(AuthContext);
 
   const toggleMenuCallback = () => {
     console.log("toggleMenuCallback");
@@ -24,6 +25,9 @@ const AuthLayout = ({ children }) => {
         id="layout-wrapper"
         style={{ backgroundColor: "#f1f5f7", height: "100vh" }}
       >
+        {/* {pathname.includes('enrolled-course/') && 
+          <Certificate />
+        } */}
         <Toaster
           position="top-center"
           reverseOrder={false}

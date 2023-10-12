@@ -1,0 +1,75 @@
+.certificate-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Certificate styles */
+.certificate {
+  background-color: #fff;
+  border: 2px solid #458cf0;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  width: 400px;
+}
+
+.certificate-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.certificate-logo img {
+  width: 80px;
+  height: 80px;
+}
+
+.certificate-title h1 {
+  font-size: 36px;
+  color: #458cf0;
+  text-align: center;
+}
+
+.certificate-body {
+  margin: 20px 0;
+}
+
+.certificate-student-name,
+h2,
+h3,
+.certificate-date {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.certificate-body h2 {
+  color: #458cf0;
+  text-transform: uppercase;
+}
+
+.certificate-actions {
+  text-align: center;
+}
+
+.certificate-icon {
+  font-size: 36px;
+  color: #458cf0;
+}
+
+.certificate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.certificate-date {
+  font-size: 12px;
+}
+
+.certificate-date span {
+  color: #458cf0;
+}

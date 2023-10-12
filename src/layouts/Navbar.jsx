@@ -13,6 +13,8 @@ import {
 } from "reactstrap";
 
 import { Link, useLocation } from "react-router-dom";
+import { Progress } from 'antd';
+import CircularProgressBar from "@/components/CircularProgressBar";
 
 // Import menuDropdown
 import NotificationDropdown from "@/components/common/NotificationDropdown";
@@ -40,6 +42,8 @@ import AuthContext from "@/context/context";
 const Navbar = () => {
   const { pathname } = useLocation();
   const { courseState, toggleSidebar, setToggleSidebar, fullScreenHandle } = useContext(AuthContext);
+
+  console.log(courseState)
 
   return (
     <header id="page-topbar">
@@ -98,7 +102,9 @@ const Navbar = () => {
           </Button>
 
           {pathname.includes('enrolled-course/') ? (
-            <h4 className="m-0">{courseState?.courseTitle}</h4>
+              <>
+                <h4 className="m-0">{courseState?.courseTitle}</h4>
+              </>
           ) : (
             // <Form className="app-search d-none d-lg-block">
               <div className="position-relative">
@@ -116,7 +122,7 @@ const Navbar = () => {
           )}
         </div>
 
-        <div className="d-flex">
+        <div className="d-flex align-items-center">
           <div className="dropdown d-inline-block d-lg-none ms-2">
             <button
               type="button"
@@ -153,6 +159,10 @@ const Navbar = () => {
               </Form>
             </div>
           </div>
+
+          {pathname.includes('enrolled-course/') && (
+            <CircularProgressBar />
+          )}
 
           <div className="dropdown d-none d-lg-inline-block ms-1">
             <Button

@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import axios from "@/services/axios";
 import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
-import { Button, Dropdown, Menu, Progress, Space } from "antd";
+import { Button, Dropdown, Menu, Modal, Progress, Space } from "antd";
 import { BiTime } from "react-icons/bi";
 //Import Breadcrumb
 import { Card, CardBody, Col, Container, Row } from "reactstrap";
@@ -12,9 +12,11 @@ import { Form, Input } from "antd";
 import EditorPreview from "@/components/EditorPreview";
 import "./styles.css";
 import Quiz from "./Quiz";
+import Certificate from "@/services/Certificate";
 
 const EnrolledCourse = () => {
   const { courseState, setCourseState, auth } = useContext(AuthContext);
+  const certificateRef = useRef(null)
   const [content, setContent] = useState({});
   const [quizStarted, setQuizStarted] = useState(false);
   const [disabled, setDisabled] = useState({
@@ -46,7 +48,8 @@ const EnrolledCourse = () => {
         completed_quizzes: 0,
         total_quizzes: 0,
       },
-      content: {}
+      content: {},
+      showCertificate: true
     });
   }, []);
 
@@ -78,7 +81,6 @@ const EnrolledCourse = () => {
                 content: fetchedData.content
               }));
               // setContent(fetchedData.content);
-              if (courseState.selected?.type !== 'quiz') setQuizStarted(false);
             }
           })
           .catch((error) => {
@@ -93,6 +95,7 @@ const EnrolledCourse = () => {
       }
     };
 
+    if (courseState.selected?.type !== 'quiz') setQuizStarted(false);
     if (courseState.selected) fetchContent();
     setDisabled({
       prevButton: false,
@@ -240,12 +243,12 @@ const EnrolledCourse = () => {
             setCourseState((prev) => ({
               ...prev,
               modules: fetchedData?.modules,
-              // progress: {
-              //   ...prev.progress,
-              //   completed_lessons: fetchedData?.completedLessons,
-              //   completed_quizzes: fetchedData?.completedQuizzes,
-              //   attempted_quizzes: fetchedData?.attemptedQuizz
-              // },
+              progress: {
+                ...prev.progress,
+                completed_lessons: fetchedData?.completedLessons,
+                completed_quizzes: fetchedData?.completedQuizzes,
+                attempted_quizzes: fetchedData?.attemptedQuizz
+              },
               content: fetchedData.content
             }));
             // setContent(content);
@@ -298,11 +301,49 @@ const EnrolledCourse = () => {
 
   return (
     <div className="page-content my-0">
+      {/* <Modal
+        title="Course Title"
+        centered
+        open={true}
+        // onCancel={() => setModalOpen(false)}
+        style={{
+          zIndex: 9999
+        }}
+        footer={[
+          <Button key="back" onClick={() => setModalOpen(false) }>
+            Close
+          </Button>
+        ]}
+      >
+        <div ref={certificateRef} className="certificate-container">
+          <div className="certificate-container">
+            <div className="certificate">
+              <div className="certificate-header">
+                <div className="certificate-logo">
+                  <img src="/logo.png" alt="Certificate Logo" />
+                </div>
+                <div className="certificate-title">
+                  <h1>Certificate of Completion</h1>
+                </div>
+              </div>
+              <div className="certificate-body">
+                <p className="certificate-student-name">This is to certify that</p>
+                <h2>studentName</h2>
+                <p>has successfully completed the course</p>
+                <h2>courseName</h2>
+                <p className="certificate-date">
+                  on <span>Thursday</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal> */}
       <Container fluid>
         <div className="container h-90">
           {courseState.content && (
             <>
-              <Row className="px-8">
+              {/* <Row className="px-8">
                 <Col xs={2}>
                   <h6 className="text-secondary font-weight-bold d-flex align-items-center">
                     Course Progress
@@ -320,7 +361,7 @@ const EnrolledCourse = () => {
                   size="small"
                 />
                 </Col>
-              </Row>
+              </Row> */}
               <Row>
                 <Col xs={12}>
                   {courseState.selected?.type === "lesson" ? (
@@ -432,9 +473,9 @@ const EnrolledCourse = () => {
                               </h6>
                             </div>
                             <hr />
-                            {courseState.content?.completed ||
-                            courseState.content?.attemptedQuizz ===
-                              courseState.content?.attemptNumbers ? (
+                            {courseState.content?.attemptedQuizz !== undefined &&
+                             courseState.content?.attemptNumbers !== undefined &&
+                             courseState.content?.attemptedQuizz === courseState.content?.attemptNumbers ? (
                               <button
                                 type="button"
                                 className="btn-success-custom mt-4 px-4 w-fit align-self-center"
