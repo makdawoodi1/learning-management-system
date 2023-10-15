@@ -230,8 +230,8 @@ export const loginRouteHandler = async (req, res, email, password) => {
 
         const { key, value } =
           user.role === "ADMIN"
-            ? { key: "courses", value: user.courses }
-            : { key: "enrollments", value: user.enrollments };
+            ? { key: "courses", value: user.courses.length }
+            : { key: "enrollments", value: user.enrollments.length };
         return res.json({
           success: true,
           token_type: "Bearer",

@@ -2,6 +2,7 @@
 import { randomUUID } from "crypto";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PrismaClient } from "@prisma/client";
 
 const client = new S3Client({
   region: process.env.AWS_REGION,
@@ -35,7 +36,7 @@ export const presignURLHandler = async (
       Body: "",
     });
 
-    if (folderKey && name === 'introductory-video' || name === 'course-thumbnail') {
+    if (folderKey && name === 'introductory-video' || name === 'course-thumbnail' || name === 'course-certificate') {
       Key = await getUploadKey(name, fileName, folderKey);
       // s3Params.Key = Key;
       const command = new PutObjectCommand({
@@ -118,7 +119,10 @@ export const presignURLHandler = async (
 
 export const delteObjectHandler = async (req, res) => {
   try {
+    const prisma = new PrismaClient();
     const Key = req.query.objectKey;
+    const name = req.query.name;
+    let entry;
 
     const s3Params = {
       Bucket: process.env.AWS_BUCKET,
@@ -127,6 +131,58 @@ export const delteObjectHandler = async (req, res) => {
 
     const deleteCommand = new DeleteObjectCommand(s3Params);
     const response = await client.send(deleteCommand);
+    // if (name) {
+    //   switch(name) {
+    //     case "course-thumbnail":
+    //       entry = await prisma.course.findFirst({
+    //         where: {
+    //           thumbnail: {
+    //             contains: Key
+    //           }
+    //         }
+    //       });
+    //       if (entry) {
+    //         await prisma.course.update({
+    //           where: { id: entry.id },
+    //           data: {
+    //             thumbnail: null
+    //           }
+    //         })
+    //       }
+    //       break;
+        
+    //     case "introductory-video":
+    //       entry = await prisma.course.findFirst({
+    //         where: {
+    //           thumbnail: {
+    //             contains: Key
+    //           }
+    //         }
+    //       });
+    //       break;
+
+    //     case "lesson-files":
+    //       entry = await prisma.lessonFile.findFirst({
+    //         where: {
+    //           url: {
+    //             contains: Key
+    //           }
+    //         }
+    //       });
+    //       break;
+
+    //     case "lesson-content-files":
+    //       entry = await prisma.lessonContentFile.findFirst({
+    //         where: {
+    //           url: {
+    //             contains: Key
+    //           }
+    //         }
+    //       });
+    //       break;
+    //   }
+    // }
+
 
     console.log("Delete Success", response);
 

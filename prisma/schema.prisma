@@ -106,6 +106,7 @@ model Enrollment {
   user_id     Int
   course_id   Int
   progress    String?
+  certificate String?
   QuizAttempt QuizAttempt[]
 }
 

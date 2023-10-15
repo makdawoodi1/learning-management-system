@@ -1,6 +1,7 @@
 import express from "express";
 import { 
     getCoursesHandler,
+    getInstructorCoursesHandler,
     getCourseHandler,
     getEditCourseHandler,
     createCourseHandler,
@@ -11,7 +12,8 @@ import {
     getEnrolledCourseProgress,
     getCourseContent,
     contentHandler,
-    generateCertificateHandler
+    generateCertificateHandler,
+    getCertificateHandler
 } from "../controllers/courseController.js";
 
 import { 
@@ -37,6 +39,10 @@ router.delete("/delete-object", async (req, res, next) => {
 
 router.get("/get-courses", async (req, res, next) => {
     await getCoursesHandler(req, res);
+});
+
+router.get("/get-instructor-courses", async (req, res, next) => {
+    await getInstructorCoursesHandler(req, res);
 });
 
 router.get("/get-course", async (req, res, next) => {
@@ -90,6 +96,10 @@ router.put("/edit-course", async (req, res, next) => {
 
 router.post("/generate-certificate", async (req, res, next) => {
     await generateCertificateHandler(req, res)
+})
+
+router.get("/get-certificate", async (req, res, next) => {
+    await getCertificateHandler(req, res);
 })
 
 export default router;
