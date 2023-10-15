@@ -372,7 +372,7 @@ export const adminSidebarContent = [
   { id: 3, route: "/auth/profile", icon: <RiUser3Line size={24} />, title: "My Profile" },
   { id: 4, route: "/auth/my-courses", icon: <RiVideoAddLine size={24} />, title: "My Courses", count: 3 },
   { id: 6, route: "/auth/announcements", icon: <RiNotificationLine size={24} />, title: "Announcements" },
-  { id: 7, route: "/auth/student-quiz-attempts", icon: <RiNotificationLine size={12} className="align-middle me-1" />, title: "Student Quiz Attempts" },
+  { id: 7, route: "/auth/student-quiz-attempts", icon: <RiQuestionLine size={24} />, title: "Student Quizzes" },
   { id: 8, route: "/auth/earnings", icon: <RiExchangeDollarFill size={24} />, title: "Withdrawals" },
 ]
 

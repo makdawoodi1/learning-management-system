@@ -26,7 +26,7 @@ const InstructorCourses = () => {
     const fetchCourses = async (req, res) => {
       try {
         axios
-          .get(`${API_URL}/courses/get-courses`, {
+          .get(`${API_URL}/courses/get-instructor-courses`, {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
           })

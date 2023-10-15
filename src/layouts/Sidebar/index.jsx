@@ -10,14 +10,14 @@ import AuthContext from '@/context/context';
 const Sidebar = ({ toast }) => {
   const {  auth, toggleSidebar } = useContext(AuthContext)
   const { pathname } = useLocation();
-  const courses = auth?.username && auth.role === 'ADMIN' ? auth.courses : auth.enrollments;
+  const coursesLength = auth?.username && auth.role === 'ADMIN' ? auth.courses : auth.enrollments;
 
   if (pathname.includes('enrolled-course/')) {
     return (
       <div className={`vertical-menu ${toggleSidebar ? "vertical-menu-course-collapsed" : "vertical-menu-course-content"}`}>
           <div data-simplebar className="h-100">
               <SimpleBar style={{ maxHeight: "100%" }}>
-                  <EnrolledCourseContent toast={toast} courses={courses} />
+                  <EnrolledCourseContent toast={toast} coursesLength={coursesLength} />
               </SimpleBar>
           </div>
       </div>
@@ -27,7 +27,7 @@ const Sidebar = ({ toast }) => {
     <div className={`vertical-menu ${toggleSidebar && "vertical-menu-collapsed"}`}>
         <div data-simplebar className="h-100">
             <SimpleBar style={{ maxHeight: "100%" }}>
-                <SidebarContent toast={toast} courses={courses} />
+                <SidebarContent toast={toast} coursesLength={coursesLength} />
             </SimpleBar>
         </div>
     </div>

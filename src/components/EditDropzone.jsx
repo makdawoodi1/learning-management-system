@@ -248,7 +248,7 @@ const EditDropItemZone = ({
     try {
       axios
         .delete(
-          `${API_URL}/courses/delete-object?objectKey=${objectKey}`,
+          `${API_URL}/courses/delete-object?objectKey=${objectKey}&name=${name}`,
           {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,

@@ -7,7 +7,7 @@ import { adminSidebarContent, studentSidebarContent } from "@/data/data";
 import { USER_ROLE } from "@/config/config"
 import { Tooltip } from "antd"
 
-const Content = ({ courses }) => {
+const Content = ({ coursesLength }) => {
   // Hooks
   const logout = useLogout();
   const { toggleSidebar, auth } = useContext(AuthContext);
@@ -27,7 +27,7 @@ const Content = ({ courses }) => {
               >
                 {toggleSidebar ? <Tooltip placement="right" title={content.title}>{content.icon}</Tooltip> : content.icon}
                 {!toggleSidebar && <span className="ms-1 nav-text">{content.title}</span>}
-                {!toggleSidebar && content.count && <span className="badge rounded-pill bg-primary float-end m-0">{courses?.length}</span>}
+                {!toggleSidebar && content.count && <span className="badge rounded-pill bg-primary float-end m-0">{coursesLength}</span>}
               </Link>
             </li>
           ))}
@@ -43,7 +43,7 @@ const Content = ({ courses }) => {
               >
                 {toggleSidebar ? <Tooltip placement="right" title={content.title}>{content.icon}</Tooltip> : content.icon}
                 {!toggleSidebar && <span className="ms-1 nav-text">{content.title}</span>}
-                {!toggleSidebar && content.count && <span className="badge rounded-pill bg-primary float-end m-0">{courses?.length}</span>}
+                {!toggleSidebar && content.count && <span className="badge rounded-pill bg-primary float-end m-0">{coursesLength}</span>}
               </Link>
             </li>
           ))}

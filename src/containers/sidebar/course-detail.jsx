@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { USER_ROLE } from "@/config/config";
 import axios from "@/services/axios";
 import useLogout from "@/hooks/useLogout";
+import useAuth from "@/hooks/useAuth";
 import { API_URL } from "@/config/config";
 import toast from "react-hot-toast";
 import { useState } from "react";
@@ -10,6 +11,7 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
   const [disabled, setDisabled] = useState(false); 
   const logout = useLogout();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const modules = course.course_modules;
   const lessons = modules?.map((module) => module?.module_lessons)[0];
 
@@ -32,6 +34,14 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
         .then((response) => {
           if (response.data?.success) {
             toast.success("Successfully enrolled in the course!");
+            const { key, value } =
+              auth?.role === "ADMIN"
+                ? { key: "courses", value: auth.courses + 1 }
+                : { key: "enrollments", value: auth.enrollments + 1 };
+            setAuth({
+              ...auth,
+              [key]: value,
+            });
             navigate(`/auth/enrolled-course/${course.id}`)
           }
           
@@ -59,7 +69,8 @@ const CourseSideDetail = ({ auth, course, enrolled }) => {
           <h4 className="mb-0">Price</h4>
         </div>
         <div className="csdt-right">
-          <h4 className="mb-0">${course.price}</h4>
+          {course.price === 0 ? <h4 className="mb-0">Free</h4>
+          : <h4 className="mb-0">${course.price}</h4>}
         </div>
       </div>
       <div className="csd-content">

@@ -16,6 +16,7 @@ import { Form } from "antd";
 import { API_URL } from "@/config/config";
 import * as TYPES from "./forms/types";
 import AuthContext from "@/context/context";
+import useAuth from "@/hooks/useAuth";
 import { filterAndValidateCourse } from "@/helpers/helper";
 import toast from "react-hot-toast";
 import axios from "@/services/axios";
@@ -24,6 +25,7 @@ const titles = ['Course Details', 'Module Details', 'Lesson Details'];
 const CourseSettings = ({ mode }) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
   const { auth, courseState, setCourseState } = useContext(AuthContext);
 
   const [activeTab, setActiveTab] = useState(0);
@@ -101,6 +103,14 @@ const CourseSettings = ({ mode }) => {
             if (response.data?.success) {
 
               toast.success("Course has been created successfully");
+              const { key, value } =
+              auth?.role === "ADMIN"
+                ? { key: "courses", value: auth.courses + 1 }
+                : { key: "enrollments", value: auth.enrollments + 1 };
+              setAuth({
+                ...auth,
+                [key]: value,
+              });
               navigate('/auth/dashboard');
             } else {
               toast.error(response?.data.message);

@@ -76,7 +76,7 @@ const validateObjectProperty = (obj, prop, propName, errors) => {
 };
 
 const validateNumber = (value, propName, errors) => {
-  if (!value || typeof value !== "number") {
+  if ((!value && value !== 0) || typeof value !== "number") {
     errors[propName] = `${propName} is missing`;
     return null;
   }

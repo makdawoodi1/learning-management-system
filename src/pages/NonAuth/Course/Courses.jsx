@@ -64,7 +64,8 @@ const Course = () => {
                         />
                       </div>
                       <div className="course-content">
-                        <div className="course-price">{course.price} $</div>
+                        {course.price === 0 ? <div className="course-price">Free</div>
+                        : <div className="course-price">{course.price} $</div>}
                         <Link to={`/course/${course.id}`}>
                           <h4>{course.title}</h4>
                         </Link>

@@ -74,7 +74,6 @@ const EditCourseSettings = ({ mode }) => {
         courseDescription: form.getFieldValue("course-description"),
         price: parseFloat(form.getFieldValue("price"))
       });
-      console.log(filteredData)
       const errorKeys = Object.keys(filteredData.errors);
       if (errorKeys.length > 0) {
         return toast.error(Object.values(filteredData.errors)[0]);
@@ -90,7 +89,8 @@ const EditCourseSettings = ({ mode }) => {
                   ...filteredData,
                   courseTitle: filteredData.courseTitle,
                   courseDescription: filteredData.courseDescription,
-                  price: filteredData.price
+                  price: filteredData.price,
+                  published: courseState.published
                 },
               },
             }),

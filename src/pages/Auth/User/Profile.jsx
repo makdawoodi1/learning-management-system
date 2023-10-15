@@ -8,6 +8,7 @@ import useAuth from "@/hooks/useAuth";
 import useLogout from "@/hooks/useLogout";
 import axios from "@/services/axios";
 import { API_URL, AWS_CLOUDFRONT_DOMAIN } from "@/config/config";
+import { Spin } from "antd";
 import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
 import {
@@ -30,6 +31,7 @@ const Profile = () => {
   const [form] = Form.useForm();
   const [editState, setEditState] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState({});
 
   // Dropzone
@@ -282,15 +284,16 @@ const Profile = () => {
     if (!editState) return setEditState(!editState);
     const values = form.getFieldsValue();
 
-    setProcessing(true);
     try {
+      setProcessing(true);
+      setIsLoading(true);
       axios
         .put(
           `${API_URL}/auth/update-user?username=${auth?.username}`,
           JSON.stringify({
             data: {
               attributes: {
-                ...values
+                ...values,
               },
             },
           }),
@@ -320,6 +323,7 @@ const Profile = () => {
         })
         .finally(() => {
           setProcessing(false);
+          setIsLoading(false);
         });
     } catch (error) {
       console.error(error);
@@ -331,6 +335,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUser = async (req, res) => {
       try {
+        setIsLoading(true);
         axios
           .get(`${API_URL}/auth/fetch-user?username=${auth?.username}`, {
             headers: { "Content-Type": "application/json" },
@@ -353,7 +358,8 @@ const Profile = () => {
               return toast.error(error.response.data?.message);
             }
             console.error("Error Fetching user!:", error.message);
-          });
+          })
+          .finally(() => setIsLoading(false));
       } catch (error) {
         console.error(error);
         toast.error("Unexpected error occured!");
@@ -368,242 +374,259 @@ const Profile = () => {
       <Container fluid>
         <Breadcrumbs title="Profile" breadcrumbItems={breadcrumbItems} />
 
-        <Row>
-          <Col xs={12}>
-            <Card>
-              <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-4">
-                Profile Settings
-              </h6>
-              <hr />
-              <Form
-                form={form}
-                onFinish={updateUser}
-                name="profile-form"
-                layout="vertical"
-                className="pt-0 mt-0 px-12 gap-8"
-              >
-                {editState ? (
-                  <div className="w-50 mx-auto">
-                    <Dropzone
-                      onDrop={onDrop}
-                      validator={typeValidator}
-                      multiple={false}
-                    >
-                      {({ getRootProps, getInputProps }) => (
-                        <div className="dropzone cursor-pointer">
-                          <div
-                            className="dz-message needsclick"
-                            {...getRootProps()}
-                          >
-                            <Form.Item
-                              rules={[
-                                ({ getFieldValue }) => ({
-                                  validator(_, value) {
-                                    if (!user.profile_picture) {
-                                      return Promise.reject(
-                                        new Error(
-                                          `Please upload profile picture`
-                                        )
-                                      );
-                                    }
-                                    return Promise.resolve();
-                                  },
-                                }),
-                              ]}
-                            >
-                              <input {...getInputProps()} />
-                            </Form.Item>
-                            <div className="mb-3 d-flex align-items-center justify-content-center">
-                              <RiUploadCloudFill className="display-3 text-muted" />
-                            </div>
-                            <h4 className="text-muted">
-                              {"Drop file here or click to upload."}
-                            </h4>
-                          </div>
-                        </div>
-                      )}
-                    </Dropzone>
-                    <div className="dropzone-previews mt-3" id="file-previews">
-                      {selectedFiles.map((fileWrapper, index) => (
-                        <div key={index}>
-                          <Card className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete">
-                            <div className="p-2">
-                              <Row className="align-items-center">
-                                <Col className="col-auto">
-                                  <Link>
-                                    <img
-                                      data-dz-thumbnail=""
-                                      height="80"
-                                      className="avatar-sm rounded bg-light"
-                                      alt={
-                                        fileWrapper.file?.name ??
-                                        fileWrapper.name
-                                      }
-                                      src={fileWrapper.preview}
-                                    />
-                                  </Link>
-                                </Col>
-                                <Col className="d-flex align-items-center justify-content-between">
-                                  <div className="text-center">
-                                    <p className="text-muted fw-bold font-size-12 m-0">
-                                      {fileWrapper.file?.name ??
-                                        fileWrapper.name}
-                                    </p>
-                                    <p className="m-0 font-size-14">
-                                      <strong>
-                                        {fileWrapper.formattedSize}
-                                      </strong>
-                                    </p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      removeFile(
-                                        fileWrapper.file ?? fileWrapper
-                                      );
-                                    }}
-                                  >
-                                    <FaTimes />
-                                  </button>
-                                </Col>
-                              </Row>
-                            </div>
-                          </Card>
-                          {fileWrapper.errors?.length ? (
-                            <UploadError
-                              key={index + "-file"}
-                              fileWrapper={fileWrapper}
-                              removeFile={removeFile}
-                            />
-                          ) : (
-                            <FileUploadWithProgress
-                              key={index + "-file"}
-                              ref={uploadProgressRef}
-                              fileWrapper={fileWrapper}
-                              removeFile={removeFile}
-                              setFileUploading={setFileUploading}
-                            />
-                          )}
-                        </div>
-                      ))}
-                      {auth.profileImage && (
-                        <div className="uploaded-file-thumbnail">
-                          <img
-                            data-dz-thumbnail=""
-                            height="80"
-                            className="avatar-sm rounded bg-light"
-                            alt={auth.profileImage.name}
-                            src={auth.profileImage.objectKey}
-                          />
-                          <FaTimes
-                            size={12}
-                            className="cursor-pointer"
-                            onClick={() => onRemove(auth.profileImage)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-center mt-4 mb-2">
-                      <Button
-                        type="dashed"
-                        className={`d-flex align-items-center justify-content-center mx-auto btn-danger-custom ${
-                          fileUploading ? "pointer-events-none" : ""
-                        }`}
-                        onClick={onUpload}
-                        disabled={
-                          fileUploading ||
-                          selectedFiles.length === 0 ||
-                          selectedFiles.some((file) => file.errors.length > 0)
-                        }
-                        style={{
-                          width: "100%",
-                        }}
-                        icon={<RiUploadCloudLine />}
+        {isLoading ? (
+          <div id="backdrop">
+            <div class="text-custom-center loading">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Row>
+            <Col xs={12}>
+              <Card>
+                <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-4">
+                  Profile Settings
+                </h6>
+                <hr />
+                <Form
+                  form={form}
+                  onFinish={updateUser}
+                  name="profile-form"
+                  layout="vertical"
+                  className="pt-0 mt-0 px-12 gap-8"
+                >
+                  {editState ? (
+                    <div className="w-50 mx-auto">
+                      <Dropzone
+                        onDrop={onDrop}
+                        validator={typeValidator}
+                        multiple={false}
                       >
-                        {!fileUploading ? (
-                          <span>Upload</span>
-                        ) : (
-                          <span>Progressing...</span>
+                        {({ getRootProps, getInputProps }) => (
+                          <div className="dropzone cursor-pointer">
+                            <div
+                              className="dz-message needsclick"
+                              {...getRootProps()}
+                            >
+                              <Form.Item
+                                rules={[
+                                  ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                      if (!user.profile_picture) {
+                                        return Promise.reject(
+                                          new Error(
+                                            `Please upload profile picture`
+                                          )
+                                        );
+                                      }
+                                      return Promise.resolve();
+                                    },
+                                  }),
+                                ]}
+                              >
+                                <input {...getInputProps()} />
+                              </Form.Item>
+                              <div className="mb-3 d-flex align-items-center justify-content-center">
+                                <RiUploadCloudFill className="display-3 text-muted" />
+                              </div>
+                              <h4 className="text-muted">
+                                {"Drop file here or click to upload."}
+                              </h4>
+                            </div>
+                          </div>
                         )}
-                      </Button>
+                      </Dropzone>
+                      <div
+                        className="dropzone-previews mt-3"
+                        id="file-previews"
+                      >
+                        {selectedFiles.map((fileWrapper, index) => (
+                          <div key={index}>
+                            <Card className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete">
+                              <div className="p-2">
+                                <Row className="align-items-center">
+                                  <Col className="col-auto">
+                                    <Link>
+                                      <img
+                                        data-dz-thumbnail=""
+                                        height="80"
+                                        className="avatar-sm rounded bg-light"
+                                        alt={
+                                          fileWrapper.file?.name ??
+                                          fileWrapper.name
+                                        }
+                                        src={fileWrapper.preview}
+                                      />
+                                    </Link>
+                                  </Col>
+                                  <Col className="d-flex align-items-center justify-content-between">
+                                    <div className="text-center">
+                                      <p className="text-muted fw-bold font-size-12 m-0">
+                                        {fileWrapper.file?.name ??
+                                          fileWrapper.name}
+                                      </p>
+                                      <p className="m-0 font-size-14">
+                                        <strong>
+                                          {fileWrapper.formattedSize}
+                                        </strong>
+                                      </p>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        removeFile(
+                                          fileWrapper.file ?? fileWrapper
+                                        );
+                                      }}
+                                    >
+                                      <FaTimes />
+                                    </button>
+                                  </Col>
+                                </Row>
+                              </div>
+                            </Card>
+                            {fileWrapper.errors?.length ? (
+                              <UploadError
+                                key={index + "-file"}
+                                fileWrapper={fileWrapper}
+                                removeFile={removeFile}
+                              />
+                            ) : (
+                              <FileUploadWithProgress
+                                key={index + "-file"}
+                                ref={uploadProgressRef}
+                                fileWrapper={fileWrapper}
+                                removeFile={removeFile}
+                                setFileUploading={setFileUploading}
+                              />
+                            )}
+                          </div>
+                        ))}
+                        {auth.profileImage && (
+                          <div className="uploaded-file-thumbnail">
+                            <img
+                              data-dz-thumbnail=""
+                              height="80"
+                              className="avatar-sm rounded bg-light"
+                              alt={auth.profileImage.name}
+                              src={auth.profileImage.objectKey}
+                            />
+                            <FaTimes
+                              size={12}
+                              className="cursor-pointer"
+                              onClick={() => onRemove(auth.profileImage)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center mt-4 mb-2">
+                        <Button
+                          type="dashed"
+                          className={`d-flex align-items-center justify-content-center mx-auto btn-danger-custom ${
+                            fileUploading ? "pointer-events-none" : ""
+                          }`}
+                          onClick={onUpload}
+                          disabled={
+                            fileUploading ||
+                            selectedFiles.length === 0 ||
+                            selectedFiles.some((file) => file.errors.length > 0)
+                          }
+                          style={{
+                            width: "100%",
+                          }}
+                          icon={<RiUploadCloudLine />}
+                        >
+                          {!fileUploading ? (
+                            <span>Upload</span>
+                          ) : (
+                            <span>Progressing...</span>
+                          )}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <CardImg
-                    src={
-                      auth.profileImage
-                        ? auth.profileImage.objectKey
-                        : "/author.jpg"
-                    }
-                    alt="Profile Picture"
-                    className="rounded-circle border-8 avatar-lg profile-picture"
-                  />
-                )}
-                <CardBody className="p-6 mt-2 d-flex flex-column">
-                  <Row className="place-items-center">
-                    <Col xs={12} lg={6}>
-                      <Form.Item label="First Name" name="firstname">
-                        <Input
-                          disabled={!editState}
-                          size="large"
-                          className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
-                          placeholder="First Name"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={12} lg={6}>
-                      <Form.Item label="Last Name" name="lastname">
-                        <Input
-                          disabled={!editState}
-                          size="large"
-                          className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
-                          placeholder="Last Name"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  ) : (
+                    <CardImg
+                      src={
+                        auth.profileImage
+                          ? auth.profileImage.objectKey
+                          : "/author.jpg"
+                      }
+                      alt="Profile Picture"
+                      className="rounded-circle border-8 avatar-lg profile-picture"
+                    />
+                  )}
+                  <CardBody className="p-6 mt-2 d-flex flex-column">
+                    <Row className="place-items-center">
+                      <Col xs={12} lg={6}>
+                        <Form.Item label="First Name" name="firstname">
+                          <Input
+                            disabled={!editState}
+                            size="large"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
+                            placeholder="First Name"
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={12} lg={6}>
+                        <Form.Item label="Last Name" name="lastname">
+                          <Input
+                            disabled={!editState}
+                            size="large"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
+                            placeholder="Last Name"
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
 
-                  <Row className="place-items-center">
-                    <Col xs={12}>
-                      <Form.Item label="Email" name="email">
-                        <Input
-                          disabled={!editState}
-                          size="large"
-                          className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
-                          placeholder="Email"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <div className="d-flex align-items-center justify-content-center gap-8">
-                    <button
-                      type="button"
-                      className="btn-primary-custom mt-4 px-4 w-fit align-self-center"
-                      onClick={updateUser}
-                      disabled={processing}
-                    >
-                      {processing ? "Processing..." : editState ? "Submit" : "Edit User Details"}
-                    </button>
-                    {editState && (
+                    <Row className="place-items-center">
+                      <Col xs={12}>
+                        <Form.Item label="Email" name="email">
+                          <Input
+                            disabled={!editState}
+                            size="large"
+                            className="w-full rounded placeholder:text-sm placeholder:text-gray-500 py-2 border-gray-500 "
+                            placeholder="Email"
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <div className="d-flex align-items-center justify-content-center gap-8">
                       <button
                         type="button"
-                        className="btn btn-secondary mt-4 px-4 w-fit align-self-center"
+                        className="btn-primary-custom mt-4 px-4 w-fit align-self-center"
+                        onClick={updateUser}
                         disabled={processing}
-                        onClick={() => setEditState(!editState)}
                       >
-                        Revert
+                        {processing
+                          ? "Processing..."
+                          : editState
+                          ? "Submit"
+                          : "Edit User Details"}
                       </button>
-                    )}
-                  </div>
-                </CardBody>
-              </Form>
-              <hr />
-              <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-2 mb-4">
-                Payment Settings
-              </h6>
-            </Card>
-          </Col>
-        </Row>
+                      {editState && (
+                        <button
+                          type="button"
+                          className="btn btn-secondary mt-4 px-4 w-fit align-self-center"
+                          disabled={processing}
+                          onClick={() => setEditState(!editState)}
+                        >
+                          Revert
+                        </button>
+                      )}
+                    </div>
+                  </CardBody>
+                </Form>
+                <hr />
+                <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-2 mb-4">
+                  Payment Settings
+                </h6>
+              </Card>
+            </Col>
+          </Row>
+        )}
       </Container>
     </div>
   );

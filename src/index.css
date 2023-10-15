@@ -163,7 +163,7 @@
 }
 
 .navbar-brand-box-collapsed {
-  width: 3.50vw;
+  width: 3.5vw;
   display: none;
 }
 
@@ -172,7 +172,7 @@
 }
 
 .vertical-menu-collapsed {
-  width: 3.50vw;
+  width: 3.5vw;
 }
 
 .vertical-menu-course-collapsed {
@@ -184,7 +184,7 @@
 }
 
 .main-content-collapsed {
-  margin-left: 3.50vw !important;
+  margin-left: 3.5vw !important;
 }
 
 .main-content-enrolled {
@@ -194,7 +194,7 @@
 }
 
 .main-content-enrolled-collapsed {
-  margin-left: 2.50vw;
+  margin-left: 2.5vw;
 }
 
 .uploaded-file-thumbnail {
@@ -309,7 +309,7 @@
 .banner-section .section-wrapper .banner-content form button {
   background: #3f7bcf !important;
 }
- 
+
 .lab-btn-text i {
   color: #458cf0 !important;
 }
@@ -340,7 +340,9 @@
   color: #458cf0 !important;
 }
 
-.course-content h4:hover, .course-content .ca-name:hover, .course-content .lab-btn-text:hover {
+.course-content h4:hover,
+.course-content .ca-name:hover,
+.course-content .lab-btn-text:hover {
   color: #458cf0 !important;
 }
 
@@ -522,6 +524,28 @@ h3,
 
 .custom-progress-bar {
   width: 75% !important;
+}
+
+.text-custom-center {
+  width: 100%;
+  position: relative;
+  height: 100%;
+}
+
+.spinner-border {
+  display: block;
+  position: fixed;
+  top: calc(50% - (58px / 2));
+  right: calc(50% - (58px / 2));
+  color: #458cf0;
+}
+
+#backdrop {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
 }
 
 @keyframes dotShadow {

@@ -7,7 +7,7 @@ import { BiTime } from "react-icons/bi";
 //Import Breadcrumb
 import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import AuthContext from "@/context/context";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { Form, Input } from "antd";
 import EditorPreview from "@/components/EditorPreview";
 import "./styles.css";
@@ -16,9 +16,10 @@ import Certificate from "@/services/Certificate";
 
 const EnrolledCourse = () => {
   const { courseState, setCourseState, auth } = useContext(AuthContext);
-  const certificateRef = useRef(null)
+  const certificateRef = useRef(null);
   const [content, setContent] = useState({});
   const [quizStarted, setQuizStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [disabled, setDisabled] = useState({
     prevButton: false,
     nextButton: false,
@@ -49,16 +50,19 @@ const EnrolledCourse = () => {
         total_quizzes: 0,
       },
       content: {},
-      showCertificate: true
+      showCertificate: true,
     });
   }, []);
 
   useEffect(() => {
     const fetchContent = async (req, res) => {
       try {
+        setIsLoading(true);
         axios
           .get(
-            `${API_URL}/courses/get-content?contentObject=${JSON.stringify(courseState.selected)}&username=${auth.username}&courseID=${courseID}`,
+            `${API_URL}/courses/get-content?contentObject=${JSON.stringify(
+              courseState.selected
+            )}&username=${auth.username}&courseID=${courseID}`,
             {
               headers: { "Content-Type": "application/json" },
               withCredentials: true,
@@ -76,9 +80,9 @@ const EnrolledCourse = () => {
                   total_lessons: fetchedData?.totalLessons,
                   completed_quizzes: fetchedData?.completedQuizzes,
                   total_quizzes: fetchedData?.totalQuizzes,
-                  attempted_quizzes: fetchedData?.attemptedQuizz
+                  attempted_quizzes: fetchedData?.attemptedQuizz,
                 },
-                content: fetchedData.content
+                content: fetchedData.content,
               }));
               // setContent(fetchedData.content);
             }
@@ -88,14 +92,15 @@ const EnrolledCourse = () => {
               return toast.error(error.response.data?.message);
             }
             console.error("Error Fetching course content!:", error.message);
-          });
+          }).finally(() => setIsLoading(false));
       } catch (error) {
         console.error(error);
+        setIsLoading(false);
         toast.error("Unexpected error occured!");
       }
     };
 
-    if (courseState.selected?.type !== 'quiz') setQuizStarted(false);
+    if (courseState.selected?.type !== "quiz") setQuizStarted(false);
     if (courseState.selected) fetchContent();
     setDisabled({
       prevButton: false,
@@ -220,15 +225,18 @@ const EnrolledCourse = () => {
   // Handle Lesson Completion
   const handleLessonComplete = () => {
     try {
+      setIsLoading(true);
       axios
         .put(
-          `${API_URL}/courses/mark-complete?username=${auth.username}&courseID=${courseID}&contentObject=${JSON.stringify(
+          `${API_URL}/courses/mark-complete?username=${
+            auth.username
+          }&courseID=${courseID}&contentObject=${JSON.stringify(
             courseState.selected
           )}`,
           JSON.stringify({
             data: {
               attributes: {
-                modules: courseState.modules  
+                modules: courseState.modules,
               },
             },
           }),
@@ -247,9 +255,9 @@ const EnrolledCourse = () => {
                 ...prev.progress,
                 completed_lessons: fetchedData?.completedLessons,
                 completed_quizzes: fetchedData?.completedQuizzes,
-                attempted_quizzes: fetchedData?.attemptedQuizz
+                attempted_quizzes: fetchedData?.attemptedQuizz,
               },
-              content: fetchedData.content
+              content: fetchedData.content,
             }));
             // setContent(content);
           }
@@ -259,9 +267,10 @@ const EnrolledCourse = () => {
             return toast.error(error.response.data?.message);
           }
           console.error("Unexpected error occured!:", error.message);
-        })
+        }).finally(() => setIsLoading(false));
     } catch (error) {
       console.error(error);
+      setIsLoading(false);
       toast.error("Unexpected error occured!");
     }
   };
@@ -278,7 +287,6 @@ const EnrolledCourse = () => {
         )
         .then(async (response) => {
           if (response.data?.success) {
-
             setQuizStarted(false);
             setQuizProgressReset(true);
             toast.success("Quiz progress has been reset successfully");
@@ -292,7 +300,7 @@ const EnrolledCourse = () => {
           }
           console.error("Error resetting Quiz progress!:", error.message);
           toast.error(error.message);
-        })
+        });
     } catch (error) {
       console.error(error);
       toast.error("Unexpected error occured!");
@@ -343,34 +351,24 @@ const EnrolledCourse = () => {
         <div className="container h-90">
           {courseState.content && (
             <>
-              {/* <Row className="px-8">
-                <Col xs={2}>
-                  <h6 className="text-secondary font-weight-bold d-flex align-items-center">
-                    Course Progress
-                  </h6>
-                </Col>
-                <Col xs={10}>
-                <Progress
-                  percent={Math.floor(
-                    ((courseState?.progress.completed_lessons +
-                      courseState?.progress.completed_quizzes) /
-                      (courseState?.progress.total_lessons +
-                        courseState?.progress.total_quizzes)) *
-                      100
-                  )}
-                  size="small"
-                />
-                </Col>
-              </Row> */}
-              <Row>
-                <Col xs={12}>
-                  {courseState.selected?.type === "lesson" ? (
-                    <Card>
-                      <CardBody className="p-2 mt-2 d-flex align-items-center justify-content-between">
-                        <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-4">
-                          {courseState.content?.title}
-                        </h6>
-                        {/* {content.lessonFiles.length && <Dropdown
+              {isLoading ? (
+                <div id="backdrop">
+                  <div class="text-custom-center loading">
+                    <div class="spinner-border" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Row>
+                  <Col xs={12}>
+                    {courseState.selected?.type === "lesson" ? (
+                      <Card>
+                        <CardBody className="p-2 mt-2 d-flex align-items-center justify-content-between">
+                          <h6 className="text-secondary font-weight-bold d-flex align-items-center pl-8 mt-4">
+                            {courseState.content?.title}
+                          </h6>
+                          {/* {content.lessonFiles.length && <Dropdown
                         trigger={["click"]}
                         onOpenChange={() => setOpen(!open)}
                         menu={{
@@ -389,11 +387,11 @@ const EnrolledCourse = () => {
                           </Space>
                         </a>
                       </Dropdown>} */}
-                      </CardBody>
-                      <hr />
-                      <CardBody className="p-6 mt-2 d-flex flex-column">
-                        <EditorPreview value={courseState.content?.content} />
-                        {/* {content.completed && (
+                        </CardBody>
+                        <hr />
+                        <CardBody className="p-6 mt-2 d-flex flex-column">
+                          <EditorPreview value={courseState.content?.content} />
+                          {/* {content.completed && (
                           <div className="d-flex align-items-center justify-content-between">
                             <button
                               type="button"
@@ -413,92 +411,99 @@ const EnrolledCourse = () => {
                             </button>
                           </div>
                         )  */}
-                        {!courseState.content?.completed ? (
-                          <button
-                            type="button"
-                            className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
-                            onClick={handleLessonComplete}
-                          >
-                            Mark as Completed
-                          </button>
+                          {!courseState.content?.completed ? (
+                            <button
+                              type="button"
+                              className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
+                              onClick={handleLessonComplete}
+                            >
+                              Mark as Completed
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
+                            >
+                              Lesson Completed
+                            </button>
+                          )}
+                        </CardBody>
+                      </Card>
+                    ) : courseState.selected?.type === "quiz" ? (
+                      <>
+                        {quizStarted ? (
+                          <Quiz
+                            quizData={courseState.content}
+                            setQuizStarted={setQuizStarted}
+                            modules={courseState.modules}
+                          />
                         ) : (
-                          <button
-                            type="button"
-                            className="btn-primary-custom mt-4 px-4 w-fit align-self-end"
-                          >
-                            Lesson Completed
-                          </button>
-                        )}
-                      </CardBody>
-                    </Card>
-                  ) : courseState.selected?.type === "quiz" ? (
-                    <>
-                      {quizStarted ? (
-                        <Quiz
-                          quizData={courseState.content}
-                          setQuizStarted={setQuizStarted}
-                          modules={courseState.modules}
-                        />
-                      ) : (
-                        <Card className="mt-4 py-4 px-4">
-                          <div className="quiz-header d-flex flex-column">
-                            <div className="d-flex align-items-center justify-content-end gap-4">
-                              <p className="fw-bold m-0">
-                                Passing Marks:
-                                <span className="fw-normal">
-                                  {courseState.content?.passingMarks}%
-                                </span>
-                              </p>
-                              <p className="fw-bold m-0">
-                                Quiz Attempts:
-                                <span className="fw-normal">
-                                  {courseState.content?.attemptedQuizz} /
-                                  {courseState.content?.attemptNumbers}
-                                </span>
-                              </p>
-                              <div className="d-flex align-items-center gap-2">
-                                <BiTime size={24} />
-                                <span>
-                                  {courseState.content?.timer} {courseState.content?.timerOptions}
-                                </span>
+                          <Card className="mt-4 py-4 px-4">
+                            <div className="quiz-header d-flex flex-column">
+                              <div className="d-flex align-items-center justify-content-end gap-4">
+                                <p className="fw-bold m-0">
+                                  Passing Marks:
+                                  <span className="fw-normal">
+                                    {courseState.content?.passingMarks}%
+                                  </span>
+                                </p>
+                                <p className="fw-bold m-0">
+                                  Quiz Attempts:
+                                  <span className="fw-normal">
+                                    {courseState.content?.attemptedQuizz} /
+                                    {courseState.content?.attemptNumbers}
+                                  </span>
+                                </p>
+                                <div className="d-flex align-items-center gap-2">
+                                  <BiTime size={24} />
+                                  <span>
+                                    {courseState.content?.timer}{" "}
+                                    {courseState.content?.timerOptions}
+                                  </span>
+                                </div>
                               </div>
+                              <hr />
+                              <div className="quiz-description">
+                                <h6 className="text-secondary fw-bold text-center font-size-24 my-4">
+                                  {courseState.content?.title}
+                                </h6>
+                                <h6 className="fw-normal text-secondary text-center">
+                                  {courseState.content?.description}
+                                </h6>
+                              </div>
+                              <hr />
+                              {courseState.content?.attemptedQuizz !==
+                                undefined &&
+                              courseState.content?.attemptNumbers !==
+                                undefined &&
+                              courseState.content?.attemptedQuizz ===
+                                courseState.content?.attemptNumbers ? (
+                                <button
+                                  type="button"
+                                  className="btn-success-custom mt-4 px-4 w-fit align-self-center"
+                                  onClick={restartQuizProgress}
+                                >
+                                  Reset Quiz Progress
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-primary-custom mt-4 px-4 w-fit align-self-center"
+                                  onClick={() => setQuizStarted(true)}
+                                >
+                                  Start Quiz
+                                </button>
+                              )}
                             </div>
-                            <hr />
-                            <div className="quiz-description">
-                              <h6 className="text-secondary fw-bold text-center font-size-24 my-4">
-                                {courseState.content?.title}
-                              </h6>
-                              <h6 className="fw-normal text-secondary text-center">
-                                {courseState.content?.description}
-                              </h6>
-                            </div>
-                            <hr />
-                            {courseState.content?.attemptedQuizz !== undefined &&
-                             courseState.content?.attemptNumbers !== undefined &&
-                             courseState.content?.attemptedQuizz === courseState.content?.attemptNumbers ? (
-                              <button
-                                type="button"
-                                className="btn-success-custom mt-4 px-4 w-fit align-self-center"
-                                onClick={restartQuizProgress}
-                              >
-                                Reset Quiz Progress
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="btn-primary-custom mt-4 px-4 w-fit align-self-center"
-                                onClick={() => setQuizStarted(true)}
-                              >
-                                Start Quiz
-                              </button>
-                            )}
-                          </div>
-                        </Card>
-                      )}
-                    </>
-                  ) : ""}
-                </Col>
-              </Row>
+                          </Card>
+                        )}
+                      </>
+                    ) : (
+                      ""
+                    )}
+                  </Col>
+                </Row>
+              )}
             </>
           )}
         </div>

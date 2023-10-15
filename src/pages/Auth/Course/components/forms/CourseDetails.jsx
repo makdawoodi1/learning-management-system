@@ -113,8 +113,8 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
           </Popconfirm> */}
           <Form.Item>
             <Popconfirm
-              title="Publish Course"
-              description="Are you sure to publish this course?"
+              title="Add Course"
+              description="Are you sure to add this course?"
               okButtonProps={{
                 danger: true,
               }}
@@ -122,7 +122,7 @@ const CourseDetails = ({ Form, form, handleSubmit }) => {
               onConfirm={handleSubmit}
             >
               <button type="submit" className="w-full btn btn-primary mb-4">
-                Publish
+                Add Course
               </button>
             </Popconfirm>
           </Form.Item>

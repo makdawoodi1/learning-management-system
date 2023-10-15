@@ -82,6 +82,9 @@ const EditCourseDetails = ({ Form, form, handleSubmit }) => {
           </Row>
         </Col>
         <Col xs={12} lg={4}>
+          <h6 className="text-secondary font-weight-normal mt-4 text-center">
+            Course Settings
+          </h6>
           <Form.Item
             label="Price"
             name="price"
@@ -103,9 +106,6 @@ const EditCourseDetails = ({ Form, form, handleSubmit }) => {
               placeholder="Course Price"
             />
           </Form.Item>
-          <h6 className="text-secondary font-weight-normal mt-4 text-center">
-            Course Settings
-          </h6>
           {/* <Popconfirm
             title="Archive Course"
             description="Are you sure to archive this course?"
@@ -121,21 +121,42 @@ const EditCourseDetails = ({ Form, form, handleSubmit }) => {
               Archive
             </button>
           </Popconfirm> */}
-          <Form.Item>
-            <Popconfirm
-              title="Edit Course"
-              description="Are you sure to publish this course?"
-              okButtonProps={{
-                danger: true,
-              }}
-              icon={<QuestionCircleOutlined className="text-danger" />}
-              onConfirm={handleSubmit}
-            >
-              <button type="submit" className="w-full btn btn-primary mb-4">
-                Edit Course
-              </button>
-            </Popconfirm>
-          </Form.Item>
+          <Row>
+            <Col xs={6}>
+              <Form.Item>
+              <Popconfirm
+                title="Edit Course"
+                description="Are you sure to edit this course?"
+                okButtonProps={{
+                  danger: true,
+                }}
+                icon={<QuestionCircleOutlined className="text-danger" />}
+                onConfirm={handleSubmit}
+              >
+                <button type="submit" className="w-full btn btn-warning mb-4">
+                  Edit Course
+                </button>
+              </Popconfirm>
+            </Form.Item>
+            </Col>
+            <Col xs={6}>
+            <Form.Item>
+              <Popconfirm
+                title={`${courseState.published ? "Archive" : "Publish"} Course`}
+                description={`Are you sure to ${courseState.published ? "archive" : "publish"} this course?`}
+                okButtonProps={{
+                  danger: true,
+                }}
+                icon={<QuestionCircleOutlined className="text-danger" />}
+                onConfirm={() => setCourseState((prev) => ({ ...prev, published: courseState.published ? false : true }))}
+              >
+                <button type="submit" className="w-full btn btn-primary mb-4">
+                  {`${courseState.published ? "Archive" : "Publish"} Course`}
+                </button>
+              </Popconfirm>
+            </Form.Item>
+            </Col>
+          </Row>
           <hr />
           <h6 className="text-secondary text-center font-weight-normal">
             Upload Course Thumbnail
